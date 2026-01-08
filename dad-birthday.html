@@ -419,6 +419,47 @@
       -webkit-tap-highlight-color: transparent;
     }
     .hud button:hover{background: rgba(255,255,255,.10)}
+
+  /* ===== Mobile HUD compact ===== */
+  @media (max-width: 900px){
+    .hud{
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      gap: 8px;
+      flex-wrap: wrap;          /* 允许两行显示 */
+      align-items: flex-start;
+    }
+
+    .hud .pill{
+      padding: 6px 8px;         /* 更薄 */
+      gap: 6px;
+      border-radius: 14px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.18);
+    }
+
+    .hud b{ font-size: 13px; }
+    .hud small{
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .hud button{
+      padding: 6px 8px;         /* 按钮变小 */
+      font-size: 12px;
+      border-radius: 12px;
+    }
+
+    /* 右侧按钮组更紧凑，必要时自动换行 */
+    .hud .pill:last-child{
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    /* 给主体内容留出顶部空间，避免被 HUD 压住 */
+    .screen{ padding-top: 74px; }
+  }
   </style>
 </head>
 <body>
