@@ -460,6 +460,66 @@
     /* 给主体内容留出顶部空间，避免被 HUD 压住 */
     .screen{ padding-top: 74px; }
   }
+
+  /* ===== Stronger mobile portrait HUD fix ===== */
+
+  /* 通用手机：先缩小 HUD */
+  @media (max-width: 900px){
+    .hud{
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .hud .pill{
+      padding: 6px 8px;
+      gap: 6px;
+      border-radius: 14px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.18);
+    }
+
+    .hud b{ font-size: 12.5px; }
+    .hud small{ font-size: 10.5px; line-height: 1.2; }
+
+    .hud button{
+      padding: 6px 8px;
+      font-size: 11.5px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    .hud .pill:last-child{
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+  }
+
+  /* 竖屏：更激进——HUD 两行占用更少，并给内容更大顶部空间 */
+  @media (max-width: 900px) and (orientation: portrait){
+    /* 让左侧提示 pill 单独占一行，右侧按钮 pill 也单独一行 */
+    .hud .pill{
+      width: 100%;
+    }
+
+    /* 右侧按钮组横向滚动/换行都行：这里用换行 */
+    .hud .pill:last-child{
+      justify-content: flex-start;
+    }
+
+    /* 关键：给主体更大的顶部 padding，避免被 HUD 遮挡 */
+    .screen{
+      padding-top: 118px;   /* 你如果还挡，改成 130~150 */
+    }
+  }
+
+  /* 横屏：HUD 占用更少空间，主体不用让太多 */
+  @media (max-width: 900px) and (orientation: landscape){
+    .screen{ padding-top: 78px; }
+  }
   </style>
 </head>
 <body>
@@ -778,7 +838,7 @@
       const unlockFallback = setTimeout(()=>{
         enableAdvance(true);
         if(onDone) onDone();
-      }, 3500);
+      }, 1000);
 
       typingTimer = setInterval(()=>{
         k++;
