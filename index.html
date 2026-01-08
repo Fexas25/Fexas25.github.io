@@ -143,6 +143,7 @@
         <a href="#blog">Blog</a>
         <a href="#projects">Projects</a>
         <a href="#contact">Contact</a>
+        <a href="#" id="gift-link" target="_blank">For Dad</a>
       </div>
     </div>
   </header>
@@ -217,6 +218,15 @@
             为学校 Estates 团队设计能源数据可视化平台，支持多维度查看能耗情况，帮助优化能源管理。
           </div>
         </li>
+        <li class="project-item">
+          <a href="#" id="gift-project-link" target="_blank" style="text-decoration: none; color: inherit;">
+            <div class="project-title">For Dad · 给父亲的礼物网站</div>
+          </a>
+          <div class="project-meta">Web · Personal · Gift</div>
+          <div class="project-desc">
+            为父亲特别制作的网站，作为一份特别的礼物。点击上方标题访问网站。
+          </div>
+        </li>
       </ul>
     </section>
 
@@ -261,6 +271,11 @@
   <script>
     // 自动填充年份
     document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+  
+    // ✅ For Dad 链接指向礼物页面（同仓库根目录）
+    const dadUrl = "dad-birthday.html";
+    document.getElementById("gift-link").href = dadUrl;
+    document.getElementById("gift-project-link").href = dadUrl;
+  </script>  
 </body>
 </html>

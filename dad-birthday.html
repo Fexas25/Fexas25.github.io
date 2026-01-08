@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>祝爸爸58岁生日快乐！</title>
+  <style>
+    :root{
+      --bg0:#050713;
+      --bg1:#071a34;
+      --text: rgba(255,255,255,.94);
+      --muted: rgba(255,255,255,.76);
+      --accent: #FFD166;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "PingFang SC","Hiragino Sans GB","Microsoft YaHei", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 70% -20%, rgba(239,71,111,.28), transparent 55%),
+        radial-gradient(1000px 700px at 10% 0%, rgba(6,214,160,.24), transparent 55%),
+        radial-gradient(1000px 900px at 80% 110%, rgba(255,209,102,.20), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow:hidden;
+    }
+
+    #fx{
+      position:fixed;
+      inset:0;
+      width:100vw;
+      height:100vh;
+      display:block;
+      z-index:0;
+      pointer-events:none;
+      filter: brightness(1.25) contrast(1.10) saturate(1.15);
+    }
+    #dust{
+      position:fixed;
+      inset:0;
+      z-index:1;
+      pointer-events:none;
+      mix-blend-mode: screen;
+      opacity:.65;
+    }
+
+    .screen{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:5;
+      padding:22px;
+      background: radial-gradient(900px 700px at 50% 30%, rgba(255,255,255,.09), rgba(0,0,0,.62));
+      backdrop-filter: blur(10px);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .screen.hidden{
+      opacity:0;
+      pointer-events:none;
+      transform: translateY(10px);
+    }
+
+    .card{
+      width:min(1040px, 100%);
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .content{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:0;
+    }
+    @media (max-width: 900px){
+      .content{grid-template-columns:1fr}
+      body{overflow:auto}
+      #fx{position:fixed}
+    }
+
+    .hero{
+      padding:26px 26px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      position:relative;
+      z-index:2;
+    }
+
+    .headline{
+      margin:0;
+      font-weight:1000;
+      font-size: clamp(30px, 4.2vw, 58px);
+      line-height:1.06;
+      letter-spacing:.6px;
+    }
+    .headline .shine{
+      background: linear-gradient(90deg, rgba(255,255,255,.70), rgba(255,209,102,1), rgba(255,255,255,.70));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      background-size: 220% 100%;
+      animation: shimmer 2.4s ease-in-out infinite;
+      text-shadow: 0 0 22px rgba(255,209,102,.14);
+      display:inline-block;
+    }
+    @keyframes shimmer{
+      0%{background-position:0% 0%}
+      50%{background-position:100% 0%}
+      100%{background-position:0% 0%}
+    }
+
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size: 15px;
+      line-height:1.75;
+    }
+
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+    .btn{
+      border:0;
+      cursor:pointer;
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:950;
+      letter-spacing:.2px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn.primary{
+      color:rgba(10,10,18,.95);
+      background: linear-gradient(180deg, #ffe29a, #ffd166);
+      box-shadow: 0 14px 30px rgba(255,209,102,.18);
+    }
+    .btn.ghost{
+      color:rgba(255,255,255,.88);
+      background: rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .btn:active{transform:translateY(1px)}
+
+    .side{
+      padding:20px;
+      border-left:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow:hidden;
+    }
+    @media (max-width: 900px){
+      .side{border-left:0;border-top:1px solid rgba(255,255,255,.12)}
+    }
+
+    .portraitWrap{
+      width:min(340px, 76vw);
+      aspect-ratio:1/1;
+      border-radius:26px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.05);
+      box-shadow: 0 22px 70px rgba(0,0,0,.55);
+      position:relative;
+      transform: translateZ(0);
+    }
+    .portraitWrap::after{
+      content:"";
+      position:absolute;
+      inset:-45%;
+      background: conic-gradient(from 90deg,
+        rgba(255,209,102,.34),
+        rgba(239,71,111,.28),
+        rgba(6,214,160,.24),
+        rgba(255,209,102,.34));
+      filter: blur(26px);
+      opacity:.9;
+      animation: spin 7.5s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .portrait{
+      position:absolute;
+      inset:8px;
+      border-radius:18px;
+      overflow:hidden;
+      background: rgba(0,0,0,.25);
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .portrait img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      animation: floaty 3.8s ease-in-out infinite;
+    }
+    @keyframes floaty{
+      0%,100%{transform: translateY(0)}
+      50%{transform: translateY(-8px)}
+    }
+
+    /* ======= SLIDESHOW ======= */
+    #show{
+      z-index:4;
+      background: radial-gradient(900px 700px at 50% 30%, rgba(255,255,255,.07), rgba(0,0,0,.66));
+    }
+    .showWrap{
+      width:min(1120px, 100%);
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:14px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){
+      .showWrap{grid-template-columns:1fr}
+    }
+
+    .frame{
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.20);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      min-height: clamp(260px, 52vh, 560px);
+    }
+    .frame img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      background: rgba(0,0,0,.22);
+    }
+    .frame::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(600px 420px at 20% 15%, rgba(255,209,102,.12), transparent 55%),
+                  radial-gradient(700px 520px at 80% 10%, rgba(6,214,160,.10), transparent 55%);
+      pointer-events:none;
+    }
+
+    .captionPanel{
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .capTop{
+      padding:18px 18px 12px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .capTop .idx{
+      font-weight:1000;
+      letter-spacing:.4px;
+    }
+    .capTop .hint{
+      color:var(--muted);
+      font-size:12.5px;
+      line-height:1.45;
+      text-align:right;
+    }
+
+    .capBody{
+      padding:16px 18px 10px;
+      min-height: clamp(170px, 24vh, 280px);
+      position:relative;
+    }
+
+    .typeLine{
+      font-size: clamp(18px, 2.2vw, 26px);
+      font-weight:950;
+      letter-spacing:.6px;
+      line-height:1.35;
+      margin:0;
+      position:relative;
+      display:inline-block;
+      padding-bottom:8px;
+    }
+    .typeLine::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:2px;
+      background: linear-gradient(90deg, rgba(255,255,255,.22), rgba(255,209,102,.92), rgba(255,255,255,.22));
+      opacity:.70;
+    }
+
+    .glowText{
+      background: linear-gradient(90deg,
+        rgba(255,255,255,.60),
+        rgba(255,209,102,1),
+        rgba(255,255,255,.60));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      background-size: 240% 100%;
+      animation: shimmer 2.6s ease-in-out infinite;
+      text-shadow: 0 0 18px rgba(255,209,102,.12);
+    }
+
+    .subCaption{
+      margin:12px 0 0;
+      color: rgba(255,255,255,.78);
+      font-size: 13.5px;
+      line-height: 1.85;
+    }
+
+    .capFooter{
+      padding:12px 14px;
+      border-top:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .mini{
+      color:var(--muted);
+      font-size:12.5px;
+    }
+
+    /* ======= ENDING ======= */
+    #ending .card{max-width: 1040px}
+    .endActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+    /* ======= FINAL WHITE ======= */
+    #final{
+      background: white;
+      color:#111;
+      z-index:12;
+      backdrop-filter:none;
+    }
+    #final.hidden{opacity:0; pointer-events:none}
+    .finalText{
+      text-align:center;
+      padding:28px 18px;
+      width:min(900px, 100%);
+    }
+    .finalText h1{
+      margin:0 0 10px;
+      font-size: clamp(34px, 5vw, 64px);
+      font-weight:1000;
+      letter-spacing:.6px;
+      color:#111;
+    }
+    .finalText p{
+      margin:0;
+      font-size: clamp(16px, 2vw, 22px);
+      color:#222;
+      line-height:1.7;
+    }
+    .fadeIn{
+      opacity:0;
+      transform: translateY(10px);
+      animation: fadeInUp .9s ease forwards;
+    }
+    @keyframes fadeInUp{
+      to{opacity:1; transform: translateY(0)}
+    }
+
+    /* HUD */
+    .hud{
+      position:fixed;
+      top:14px;
+      left:14px;
+      right:14px;
+      z-index:6;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      pointer-events:none;
+    }
+    .hud .pill{
+      pointer-events:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border-radius:999px;
+      box-shadow: 0 10px 28px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+    }
+    .hud small{color:var(--muted)}
+    .hud button{
+      pointer-events:auto;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.07);
+      color: rgba(255,255,255,.92);
+      padding:9px 12px;
+      border-radius:999px;
+      font-weight:950;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hud button:hover{background: rgba(255,255,255,.10)}
+  </style>
+</head>
+<body>
+  <canvas id="fx"></canvas>
+  <canvas id="dust"></canvas>
+
+  <audio id="bgm" preload="auto" loop>
+    <source src="./audio/happy-birthday.mp3" type="audio/mpeg" />
+  </audio>
+  
+
+  <div class="hud">
+    <div class="pill"><b>🎂 爸爸生日快乐</b> <small id="hudHint">点“开始”进入回忆</small></div>
+    <div class="pill" style="gap:8px;">
+      <button id="btnBgm">播放音乐 ♪</button>
+      <button id="btnSkip">跳到尾声 ✨</button>
+      <button id="btnRestart">重新开始</button>
+    </div>
+  </div>
+
+  <!-- 1) Intro -->
+  <section id="intro" class="screen">
+    <div class="card">
+      <div class="content">
+        <div class="hero">
+          <h1 class="headline"><span class="shine">祝爸爸58岁生日快乐！</span></h1>
+          <p class="sub">
+            点击“开始”，我们一张一张回忆过去的温暖时刻。<br>
+            （轻点屏幕有烟花；文字播完后再点一下可继续）
+          </p>
+          <div class="actions">
+            <button class="btn primary" id="btnStart">开始 🎞️</button>
+            <button class="btn ghost" id="btnWarm">先放一朵烟花 🎆</button>
+          </div>
+          <p class="sub" style="margin-top:6px">
+            爸爸，愿你身体健康、天天开心、少一点焦虑，多一点轻松。
+          </p>
+        </div>
+
+        <div class="side">
+          <div class="portraitWrap" title="二次元爸爸形象">
+            <div class="portrait">
+              <img src="./image/ChatGPT Image 2026年1月8日 14_23_02.png" alt="二次元爸爸形象">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2) Slideshow -->
+  <section id="show" class="screen hidden">
+    <div class="showWrap">
+      <div class="frame">
+        <img id="slideImg" src="" alt="回忆照片">
+      </div>
+
+      <div class="captionPanel">
+        <div class="capTop">
+          <div class="idx" id="slideIdx">1 / 1</div>
+          <div class="hint" id="slideHint">
+            文字播完后，轻点屏幕继续 · 随时可放烟花 🎆
+          </div>
+        </div>
+
+        <div class="capBody">
+          <p class="typeLine">
+            <span id="captionText" class="glowText"></span><span id="cursor" style="opacity:.9">▍</span>
+          </p>
+          <p class="subCaption" id="subCaption"></p>
+        </div>
+
+        <div class="capFooter">
+          <div class="mini" id="readyHint">文字播放中…</div>
+          <div class="mini" style="opacity:.85;">（不用找按钮：点屏幕就行）</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3) Ending -->
+  <section id="ending" class="screen hidden">
+    <div class="card">
+      <div class="content">
+        <div class="hero">
+          <h1 class="headline"><span class="shine">尾声：把祝福交给烟花 ✨</span></h1>
+          <p class="sub">
+            爸爸，愿你：<b>健康常伴，开心常在，心里少焦虑</b>。<br>
+            未来的每一年，我们都一起过得更轻松、更热闹。
+          </p>
+          <div class="endActions">
+            <button class="btn primary" id="btnAgain">再来一次（回忆重播）</button>
+            <button class="btn ghost" id="btnToFinal">结束（进入最后一句）</button>
+          </div>
+          <p class="sub" style="margin-top:6px;">
+            （尾声会自动放烟花，你也可以点屏幕加烟花。）
+          </p>
+        </div>
+        <div class="side">
+          <div class="portraitWrap">
+            <div class="portrait">
+              <img src="./image/ChatGPT Image 2026年1月8日 14_23_02.png" alt="二次元爸爸形象（尾声）">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4) Final white -->
+  <section id="final" class="screen hidden">
+    <div class="finalText">
+      <h1 class="fadeIn" style="animation-delay:.12s"> 刘兵，爸爸，老公，兵哥...</h1>
+      <p class="fadeIn" style="animation-delay:.32s">生日快乐 🎂</p>
+      <p class="fadeIn" style="animation-delay:.52s; margin-top:14px; color:#333;">
+        —— 爱你的宝贝女儿😗
+      </p>
+    </div>
+  </section>
+
+  <script>
+    /* ===== 0) Data ===== */
+    const IMAGES = [
+      "./image/微信图片_20260108141359_21_58.jpg",
+      "./image/微信图片_20260108141400_22_58.jpg",
+      "./image/微信图片_20260108141401_23_58.jpg",
+      "./image/微信图片_20260108141402_24_58.jpg",
+      "./image/微信图片_20260108141934_25_58.jpg",
+      "./image/微信图片_20260108141934_26_58.jpg",
+      "./image/微信图片_20260108141935_27_58.jpg",
+      "./image/微信图片_20260108141936_28_58.jpg",
+      "./image/微信图片_20260108141937_29_58.jpg",
+      "./image/微信图片_20260108141938_30_58.jpg",
+      "./image/微信图片_20260108141938_31_58.jpg",
+      "./image/微信图片_20260108141939_32_58.jpg",
+      "./image/微信图片_20260108141947_33_58.jpg"
+    ];
+
+    const MAIN_CAPTIONS = [
+      "枝叶比着茂盛，您与南山比苗条",
+      "掌风推走病痛，脚步丈量长寿道",
+      "时光偷黑头发，偷不走挺拔微笑",
+      "脚下青山正青春，人生半百才开篇",
+      "水流带走烦忧，枝叶静享慢时光",
+      "影子越拉越长，路越走越轻省",
+      "相册翻动岁月，皱痕化作勋章纹",
+      "杯中岁月醇香，桌上福气冒热浪",
+      "步步踏平崎岖，笑揽山河入寿囊",
+      "心事慢慢放下，晴天日日住心房",
+      "好梦常来作伴，醒来依旧是安康",
+      "把焦虑交给风，笑意留在眉眼旁",
+      "岁月轻敲门扉，健康欢喜都进场"
+    ];
+
+    const SUB_CAPTIONS = [
+      "愿爸爸吃得香、睡得稳、每天都轻松一点。",
+      "愿身体像春天一样有劲，日子像阳光一样暖。",
+      "愿烦恼少一半，笑容多一倍，心里常亮堂。",
+      "愿走到哪儿都顺风顺水，脚步永远有力量。",
+      "愿你放慢也不慌，放下也不遗憾，平安就好。",
+      "愿每一次出门都开心，每一次回家都安心。",
+      "愿岁月带来经验，不带走健康；带来沉稳，不带来焦虑。",
+      "愿家里永远有热饭、有笑声、有你在的踏实。",
+      "愿你常有小确幸：一杯茶、一阵风、一段好心情。",
+      "愿你心宽一点，睡好一点，身体越来越棒。",
+      "愿你把压力都交给时间，把快乐都留给今天。",
+      "愿你天天开心，少操心，多享受生活的甜。",
+      "愿往后每一年，都比这一年更健康、更快乐。"
+    ];
+
+    const SLIDES = IMAGES.map((img, i) => ({
+      img,
+      main: MAIN_CAPTIONS[i] || "",
+      sub:  SUB_CAPTIONS[i]  || ""
+    }));
+
+    /* ===== 1) Elements ===== */
+    const intro  = document.getElementById("intro");
+    const show   = document.getElementById("show");
+    const ending = document.getElementById("ending");
+    const final  = document.getElementById("final");
+
+    const hudHint = document.getElementById("hudHint");
+    const btnSkip = document.getElementById("btnSkip");
+    const btnRestart = document.getElementById("btnRestart");
+
+    const slideImg = document.getElementById("slideImg");
+    const slideIdx = document.getElementById("slideIdx");
+    const captionText = document.getElementById("captionText");
+    const subCaption = document.getElementById("subCaption");
+    const cursor = document.getElementById("cursor");
+    const readyHint = document.getElementById("readyHint");
+
+    const bgm = document.getElementById("bgm");
+    const btnBgm = document.getElementById("btnBgm");
+    let bgmOn = false;
+
+    async function tryPlayBgm(){
+      if(!bgm) return;
+      try{
+        bgm.volume = 0.45; // 默认音量，可改 0~1
+        await bgm.play();
+        bgmOn = true;
+        btnBgm.textContent = "静音 🔇";
+      }catch(e){
+        // 有些浏览器必须再次点击才能播放，这里不报错
+        bgmOn = false;
+        btnBgm.textContent = "播放音乐 ♪";
+      }
+    }
+
+    function pauseBgm(){
+      if(!bgm) return;
+      bgm.pause();
+      bgmOn = false;
+      btnBgm.textContent = "播放音乐 ♪";
+    }
+
+    btnBgm.addEventListener("click", async ()=>{
+      if(!bgmOn) await tryPlayBgm();
+      else pauseBgm();
+    });
+
+    /* ===== 2) State ===== */
+    let idx = 0;
+    let typingTimer = null;
+    let cursorBlink = null;
+    let canAdvance = false;
+
+    function hideAll(){
+      intro.classList.add("hidden");
+      show.classList.add("hidden");
+      ending.classList.add("hidden");
+      final.classList.add("hidden");
+    }
+
+    function goIntro(){
+      hideAll();
+      intro.classList.remove("hidden");
+      hudHint.textContent = "点“开始”进入回忆";
+      stopEndingFireworks();
+      canAdvance = false;
+      readyHint.textContent = "文字播放中…";
+    }
+
+    function goShow(){
+      hideAll();
+      show.classList.remove("hidden");
+      hudHint.textContent = "文字播完后点屏幕继续 · 点屏幕有烟花";
+      stopEndingFireworks();
+    }
+
+    function goEnding(){
+      hideAll();
+      ending.classList.remove("hidden");
+      hudHint.textContent = "尾声烟花中…（点屏幕加烟花）";
+      startEndingFireworks();
+    }
+
+    function goFinal(){
+      hideAll();
+      final.classList.remove("hidden");
+      hudHint.textContent = "谢谢爸爸";
+      stopEndingFireworks();
+      clearAllParticles();
+    }
+
+    btnSkip.addEventListener("click", ()=> goEnding());
+    btnRestart.addEventListener("click", ()=> { idx=0; goIntro(); });
+
+    /* ===== 3) Intro buttons ===== */
+    document.getElementById("btnStart").addEventListener("click", ()=>{
+      tryPlayBgm();
+      idx = 0;
+      renderSlide(idx, true);
+      goShow();
+      spawnFirework(innerWidth*0.35, innerHeight*0.22, true);
+      spawnFirework(innerWidth*0.65, innerHeight*0.18, true);
+    });
+    document.getElementById("btnWarm").addEventListener("click", ()=>{
+      spawnFirework(innerWidth*0.5, innerHeight*0.22, true);
+    });
+
+    /* ===== 4) Typewriter & slideshow ===== */
+    function setCursorBlink(on){
+      if(cursorBlink) clearInterval(cursorBlink);
+      cursor.style.opacity = on ? "1" : "0";
+      if(on){
+        cursorBlink = setInterval(()=>{
+          cursor.style.opacity = (cursor.style.opacity === "1") ? "0" : "1";
+        }, 520);
+      }
+    }
+
+    function enableAdvance(ok){
+      canAdvance = ok;
+      readyHint.textContent = ok ? "文字看完啦：轻点屏幕继续 👉" : "文字播放中…";
+    }
+
+    function typeCaption(text, onDone){
+      if(typingTimer) clearInterval(typingTimer);
+      captionText.textContent = "";
+      setCursorBlink(true);
+      enableAdvance(false);
+
+      const clean = (text || "").trim();
+      if(clean.length === 0){
+        enableAdvance(true);
+        if(onDone) onDone();
+        return;
+      }
+
+      let k = 0;
+
+      // 兜底：防止意外导致永远无法继续
+      const unlockFallback = setTimeout(()=>{
+        enableAdvance(true);
+        if(onDone) onDone();
+      }, 3500);
+
+      typingTimer = setInterval(()=>{
+        k++;
+        captionText.textContent = clean.slice(0, k);
+        if(k >= clean.length){
+          clearInterval(typingTimer);
+          typingTimer = null;
+          clearTimeout(unlockFallback);
+          enableAdvance(true);
+          if(onDone) onDone();
+        }
+      }, 55);
+    }
+
+    function renderSlide(i, withTypewriter){
+      const s = SLIDES[i];
+      slideImg.src = s.img;
+      slideIdx.textContent = `${i+1} / ${SLIDES.length}`;
+      subCaption.textContent = s.sub || "";
+
+      if(withTypewriter) typeCaption(s.main, ()=>{});
+      else{
+        captionText.textContent = s.main || "";
+        enableAdvance(true);
+      }
+
+      // 每张图放一个亮烟花（靠上）
+      spawnFirework(innerWidth*(0.25 + Math.random()*0.5), innerHeight*(0.14 + Math.random()*0.30), true);
+    }
+
+    function nextSlide(){
+      if(!canAdvance) return;
+      idx++;
+      if(idx >= SLIDES.length){
+        goEnding();
+        return;
+      }
+      renderSlide(idx, true);
+    }
+
+    /* ===== 5) Ending buttons ===== */
+    document.getElementById("btnAgain").addEventListener("click", ()=>{
+      idx = 0;
+      renderSlide(idx, true);
+      goShow();
+    });
+
+    document.getElementById("btnToFinal").addEventListener("click", ()=>{
+      for(let t=0;t<8;t++){
+        setTimeout(()=>spawnFirework(Math.random()*innerWidth, (0.10+Math.random()*0.45)*innerHeight, true), t*140);
+      }
+      setTimeout(goFinal, 900);
+    });
+
+    /* ===== 6) Tap screen: fireworks always; advance only when allowed ===== */
+    function isOnButton(target){
+      return target && target.closest && target.closest("button, a, input, textarea, select, label");
+    }
+
+    window.addEventListener("pointerdown", (e)=>{
+      if(!final.classList.contains("hidden")) return;
+      if(isOnButton(e.target)) return;
+
+      const x = e.clientX;
+      const y = Math.min(e.clientY, innerHeight * 0.55);
+
+      // always fireworks
+      spawnFirework(x, y, true);
+
+      // only in slideshow and allowed: go next
+      if(!show.classList.contains("hidden") && canAdvance){
+        nextSlide();
+      }
+    });
+
+    /* ===== 7) Dust background ===== */
+    const dust = document.getElementById("dust");
+    const dtx = dust.getContext("2d", {alpha:true});
+    let dustDots = [];
+
+    function dustResize(){
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio||1));
+      dust.width = Math.floor(innerWidth * dpr);
+      dust.height = Math.floor(innerHeight * dpr);
+      dust.style.width = innerWidth+"px";
+      dust.style.height = innerHeight+"px";
+      dtx.setTransform(dpr,0,0,dpr,0,0);
+
+      dustDots = Array.from({length: 90}, ()=>({
+        x: Math.random()*innerWidth,
+        y: Math.random()*innerHeight,
+        r: 0.7 + Math.random()*1.8,
+        vx: (-0.15 + Math.random()*0.3),
+        vy: (-0.08 + Math.random()*0.16),
+        a: 0.08 + Math.random()*0.12
+      }));
+    }
+
+    function dustTick(){
+      dtx.clearRect(0,0,innerWidth,innerHeight);
+      for(const p of dustDots){
+        p.x += p.vx; p.y += p.vy;
+        if(p.x<-30) p.x=innerWidth+30;
+        if(p.x>innerWidth+30) p.x=-30;
+        if(p.y<-30) p.y=innerHeight+30;
+        if(p.y>innerHeight+30) p.y=-30;
+
+        dtx.globalAlpha = p.a;
+        dtx.fillStyle = "white";
+        dtx.beginPath();
+        dtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        dtx.fill();
+      }
+      dtx.globalAlpha = 1;
+      requestAnimationFrame(dustTick);
+    }
+
+    /* ===== 8) Fireworks engine ===== */
+    const canvas = document.getElementById('fx');
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    function resizeFx(){
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      canvas.width = Math.floor(innerWidth * dpr);
+      canvas.height = Math.floor(innerHeight * dpr);
+      canvas.style.width = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+
+    const particles = [];
+    const rockets = [];
+
+    function rand(a,b){ return a + Math.random()*(b-a); }
+
+    function spawnFirework(x,y,withTrail){
+      const tx = x;
+      const ty = Math.min(y, innerHeight*0.55);
+      const startX = tx + rand(-18,18);
+      const startY = innerHeight + rand(40,140);
+      rockets.push({
+        x:startX, y:startY,
+        vx:(tx-startX)/rand(20,28),
+        vy:(ty-startY)/rand(20,28),
+        tx, ty,
+        life: 0,
+        trail: withTrail ? [] : null
+      });
+    }
+
+    function burst(x,y){
+      const count = Math.floor(rand(58, 88));
+      const base = rand(0, Math.PI*2);
+
+      for(let i=0;i<count;i++){
+        const a = base + (Math.PI*2) * (i / count) + rand(-0.06,0.06);
+        const sp = rand(2.6, 6.8);
+        const hue = rand(0, 360);
+        particles.push({
+          x, y,
+          vx: Math.cos(a)*sp,
+          vy: Math.sin(a)*sp,
+          g: rand(0.025, 0.055),
+          drag: rand(0.986, 0.993),
+          life: 0,
+          ttl: rand(60, 105),
+          hue,
+          alpha: 1,
+          r: rand(2.2, 3.6)
+        });
+      }
+      for(let i=0;i<22;i++){
+        const a = rand(0, Math.PI*2);
+        const sp = rand(1.2, 2.6);
+        particles.push({
+          x, y,
+          vx: Math.cos(a)*sp,
+          vy: Math.sin(a)*sp,
+          g: rand(0.02, 0.05),
+          drag: rand(0.975, 0.990),
+          life: 0,
+          ttl: rand(40, 65),
+          hue: rand(40, 70),
+          alpha: 0.95,
+          r: rand(1.8, 3.0)
+        });
+      }
+    }
+
+    function clearAllParticles(){
+      particles.length = 0;
+      rockets.length = 0;
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+    }
+
+    function tickFx(){
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+      ctx.globalCompositeOperation = "lighter";
+
+      for(let i=rockets.length-1;i>=0;i--){
+        const r = rockets[i];
+        r.life++;
+        r.x += r.vx;
+        r.y += r.vy;
+
+        if(r.trail){
+          r.trail.push({x:r.x, y:r.y});
+          if(r.trail.length > 12) r.trail.shift();
+          for(let t=0;t<r.trail.length;t++){
+            const p = r.trail[t];
+            const a = (t+1)/r.trail.length;
+            ctx.globalAlpha = 0.22 * a;
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 2.6*a, 0, Math.PI*2);
+            ctx.fill();
+          }
+        }
+
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 3.2, 0, Math.PI*2);
+        ctx.fill();
+
+        const dx = r.x - r.tx, dy = r.y - r.ty;
+        if((dx*dx + dy*dy) < 140 || r.life > 60){
+          burst(r.x, r.y);
+          rockets.splice(i,1);
+        }
+      }
+
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.life++;
+        p.vx *= p.drag;
+        p.vy = p.vy * p.drag + p.g;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        p.alpha = Math.max(0, 1 - p.life / p.ttl);
+
+        ctx.globalAlpha = 0.92 * p.alpha;
+        ctx.fillStyle = `hsla(${p.hue}, 98%, 64%, 1)`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.globalAlpha = 0.18 * p.alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r*3.6, 0, Math.PI*2);
+        ctx.fill();
+
+        if(p.life >= p.ttl || p.y > innerHeight + 60) particles.splice(i,1);
+      }
+
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "source-over";
+      requestAnimationFrame(tickFx);
+    }
+
+    /* ===== 9) Ending fireworks loop ===== */
+    let endingTimer = null;
+
+    function startEndingFireworks(){
+      if(endingTimer) clearInterval(endingTimer);
+      endingTimer = setInterval(()=>{
+        spawnFirework(Math.random()*innerWidth, (0.10+Math.random()*0.45)*innerHeight, true);
+      }, 460);
+      spawnFirework(innerWidth*0.35, innerHeight*0.18, true);
+      spawnFirework(innerWidth*0.65, innerHeight*0.16, true);
+    }
+
+    function stopEndingFireworks(){
+      if(endingTimer) clearInterval(endingTimer);
+      endingTimer = null;
+    }
+
+    /* ===== Init ===== */
+    window.addEventListener("resize", ()=>{ resizeFx(); dustResize(); });
+    resizeFx();
+    dustResize();
+    dustTick();
+    tickFx();
+
+    // initial state
+    goIntro();
+  </script>
+</body>
+</html>
