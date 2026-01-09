@@ -101,15 +101,28 @@
       letter-spacing:.6px;
     }
     .headline .shine{
-      background: linear-gradient(90deg, rgba(255,255,255,.70), rgba(255,209,102,1), rgba(255,255,255,.70));
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-      background-size: 220% 100%;
-      animation: shimmer 2.4s ease-in-out infinite;
-      text-shadow: 0 0 22px rgba(255,209,102,.14);
-      display:inline-block;
-    }
+    background: linear-gradient(
+      90deg,
+      #fff1b8,
+      #ffd166,
+      #ff4d4f,
+      #ffd166,
+      #fff1b8
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 260% 100%;
+    animation: shimmer 2.2s ease-in-out infinite;
+
+    /* 更明显、更喜庆的发光 */
+    text-shadow:
+      0 0 6px rgba(255,77,79,.45),
+      0 0 18px rgba(255,209,102,.45),
+      0 6px 28px rgba(0,0,0,.45);
+
+    display: inline-block;
+  }
     @keyframes shimmer{
       0%{background-position:0% 0%}
       50%{background-position:100% 0%}
