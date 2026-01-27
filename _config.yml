@@ -1,0 +1,80 @@
+# Site settings
+title: "Wanting Liu"
+description: "Personal website of Wanting Liu"
+url: "https://fexas25.github.io"
+baseurl: ""
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Collections
+collections:
+  posts:
+    output: true
+    permalink: /blog/:name/
+  cp:
+    output: true
+    permalink: /competitive-programming/:name/
+  gamejam:
+    output: true
+    permalink: /game-jam/:name/
+  projects:
+    output: true
+    permalink: /projects/:name/
+  art:
+    output: true
+    permalink: /art/:name/
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+  - .bundle/
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - .vscode/
+  - .cursor/
+
+# Include
+include:
+  - _pages
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: cp
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: gamejam
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: projects
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: art
+    values:
+      layout: post
+  - scope:
+      path: "_pages"
+    values:
+      layout: page

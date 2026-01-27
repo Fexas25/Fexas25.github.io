@@ -1,0 +1,109 @@
+---
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Blog · Wanting Liu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+    section {
+      margin-bottom: 40px;
+      padding: 24px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+    .post-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .post-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .post-item:last-child {
+      border-bottom: none;
+    }
+    .post-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .post-meta {
+      font-size: 12px;
+      color: #777;
+      margin-bottom: 4px;
+    }
+    .post-desc {
+      font-size: 14px;
+      color: #444;
+    }
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      padding: 16px 0 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+    <!-- 栏目介绍 -->
+    <section id="intro">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <a href="../index.html" style="padding: 8px 16px; background: #6b7280; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">← 返回首页</a>
+          <h1 style="margin: 0;">Blog</h1>
+        </div>
+        <a href="../editor.html?category=blog" style="padding: 8px 16px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">发布新文章</a>
+      </div>
+      <p>
+        这里是我记录学习、生活和技术分享的地方。包括技术教程、项目经验、思考感悟等。
+        写作不仅是知识的整理，更是我对技术的理解和成长的见证。
+      </p>
+    </section>
+
+    <!-- 博客目录 -->
+    <section id="posts">
+      <h2>最新文章</h2>
+      {% if site.posts.size == 0 %}
+      <p style="color: #777; text-align: center;">暂无文章，快去发布第一篇吧！</p>
+      {% endif %}
+
+      <ul class="post-list">
+        {% for post in site.posts %}
+        <li class="post-item">
+          <a href="{{ post.url | relative_url }}" class="post-title">{{ post.title }}</a>
+          <div class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</div>
+          <div class="post-desc">{{ post.excerpt | strip_html | truncate: 120 }}</div>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <p style="font-size: 13px; color: #777; margin-top: 16px;">
+        📝 <strong>提示：</strong>点击文章标题可以查看完整内容。
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    © {{ site.time | date: "%Y" }} Wanting Liu · Built with GitHub Pages
+  </footer>
+</body>
+</html>

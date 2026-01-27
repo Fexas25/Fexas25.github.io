@@ -11,34 +11,6 @@
       background: #f5f5f5;
       color: #222;
     }
-    header {
-      position: sticky;
-      top: 0;
-      background: #ffffffcc;
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid #ddd;
-      z-index: 10;
-    }
-    .nav {
-      max-width: 960px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 16px;
-    }
-    .nav-title {
-      font-weight: 700;
-    }
-    .nav a {
-      margin-left: 12px;
-      text-decoration: none;
-      color: #333;
-      font-size: 14px;
-    }
-    .nav a:hover {
-      text-decoration: underline;
-    }
     main {
       max-width: 960px;
       margin: 0 auto;
@@ -54,213 +26,55 @@
     h1, h2, h3 {
       margin-top: 0;
     }
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid #ddd;
-      font-size: 12px;
-      margin-right: 4px;
-      margin-bottom: 4px;
-    }
-    .project-list, .blog-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .project-item, .blog-item {
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .project-item:last-child,
-    .blog-item:last-child {
-      border-bottom: none;
-    }
-    .project-title, .blog-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .project-meta, .blog-meta {
-      font-size: 12px;
-      color: #777;
-      margin-bottom: 4px;
-    }
-    .project-desc, .blog-desc {
-      font-size: 14px;
-      color: #444;
-    }
-    form {
-      display: grid;
-      gap: 10px;
-      max-width: 420px;
-    }
-    label {
-      font-size: 14px;
-      font-weight: 600;
-    }
-    input, textarea {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      font-family: inherit;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-    button {
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      background: #2563eb;
-      color: #fff;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
     footer {
       text-align: center;
       font-size: 12px;
       color: #777;
       padding: 16px 0 24px;
     }
-    .chips {
-      margin-top: 8px;
-    }
   </style>
 </head>
 <body>
-  <!-- 顶部导航：A 个人主页 + 跳转到其他板块 -->
-  <header>
-    <div class="nav">
-      <div class="nav-title">Wanting Liu</div>
-      <div>
-        <a href="#about">About</a>
-        <a href="#blog">Blog</a>
-        <a href="#projects">Projects</a>
-        <a href="#contact">Contact</a>
-        <a href="#" id="gift-link" target="_blank">For Dad</a>
-      </div>
-    </div>
-  </header>
 
   <main>
-    <!-- A: 个人主页 / 自我介绍 -->
+    <!-- 自我介绍 -->
     <section id="about">
       <h1>Hi, I'm Wanting 👋</h1>
       <p>
         我是一个对算法、竞赛和游戏开发非常上头的 CS 学生，目前在做
         ICPC、GUDEV Game Jam 等各种项目。这是我的个人网站，用来集中展示我的项目、博客和联系信息。
       </p>
-      <div class="chips">
-        <span class="tag">Algorithms</span>
-        <span class="tag">Competitive Programming</span>
-        <span class="tag">Game Dev</span>
-        <span class="tag">Web Dev</span>
+    </section>
+
+    <!-- 模块导航 -->
+    <section id="modules">
+      <h2>探索我的世界</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 24px;">
+        <a href="blog/index.html" style="display: block; padding: 24px; background: #fff; border-radius: 12px; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <h3 style="margin: 0 0 8px 0; color: #2563eb;">📝 Blog</h3>
+          <p style="margin: 0; color: #666; font-size: 14px;">技术分享、学习笔记、生活感悟</p>
+        </a>
+
+        <a href="competitive-programming/index.html" style="display: block; padding: 24px; background: #fff; border-radius: 12px; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <h3 style="margin: 0 0 8px 0; color: #dc2626;">💻 Competitive Programming</h3>
+          <p style="margin: 0; color: #666; font-size: 14px;">算法竞赛、ICPC训练心得</p>
+        </a>
+
+        <a href="game-jam/index.html" style="display: block; padding: 24px; background: #fff; border-radius: 12px; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <h3 style="margin: 0 0 8px 0; color: #16a34a;">🎮 Game Jam</h3>
+          <p style="margin: 0; color: #666; font-size: 14px;">游戏开发作品和经验分享</p>
+        </a>
+
+        <a href="projects/index.html" style="display: block; padding: 24px; background: #fff; border-radius: 12px; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <h3 style="margin: 0 0 8px 0; color: #ca8a04;">🚀 Projects</h3>
+          <p style="margin: 0; color: #666; font-size: 14px;">技术项目和作品展示</p>
+        </a>
+
+        <a href="art/index.html" style="display: block; padding: 24px; background: #fff; border-radius: 12px; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <h3 style="margin: 0 0 8px 0; color: #9333ea;">🎨 Art</h3>
+          <p style="margin: 0; color: #666; font-size: 14px;">数字艺术、插画和设计作品</p>
+        </a>
       </div>
-    </section>
-
-    <!-- B: 博客区（先静态列出几篇，后面可以拆成单独页面） -->
-    <section id="blog">
-      <h2>Blog</h2>
-      <ul class="blog-list">
-        <li class="blog-item">
-          <a href="blog/icpc-training.html" class="blog-title">ICPC 训练心得：如何高效刷题</a>
-          <div class="blog-meta">2025-01-01 · Algorithms · Competitive Programming</div>
-          <div class="blog-desc">关于我的训练方法、复盘流程和题单整理方式。</div>
-        </li>
-        <li class="blog-item">
-          <div class="blog-title">48 小时 GUDEV Game Jam 复盘</div>
-          <div class="blog-meta">2024-12-20 · Game Jam · Unity</div>
-          <div class="blog-desc">
-            从零到一做完一个完整的游戏，有哪些坑，怎么在短时间内分工、定 scope，避免爆炸。
-          </div>
-        </li>
-        <li class="blog-item">
-          <div class="blog-title">搭建个人网站的第一天</div>
-          <div class="blog-meta">2025-01-xx · Web · Personal</div>
-          <div class="blog-desc">
-            你现在看到的这个网站就是通过 GitHub Pages 搭建的，这里记录一下整个过程。
-          </div>
-        </li>
-      </ul>
-      <p style="font-size: 13px; color: #777; margin-top: 8px;">
-        （后续可以把每篇文章拆成单独页面，比如 <code>blog/icpc-training.html</code>）
-      </p>
-    </section>
-
-    <!-- C: 项目 / 作品集 -->
-    <section id="projects">
-      <h2>Projects & Competitions</h2>
-      <ul class="project-list">
-        <li class="project-item">
-          <div class="project-title">ICPC Team · Honourable Mention</div>
-          <div class="project-meta">Algorithms · C++ · Teamwork</div>
-          <div class="project-desc">
-            带领团队参加 ICPC，主要负责图论、数据结构和数论相关题目，实现多题目的最优解与优化代码结构。
-          </div>
-        </li>
-        <li class="project-item">
-          <div class="project-title">GUDEV Game Jam · Rhythm Game</div>
-          <div class="project-meta">Unity · C# · Game Design</div>
-          <div class="project-desc">
-            在 48 小时内完成一款音乐节奏类游戏，从玩法设计、美术风格到音乐节奏同步系统开发。
-          </div>
-        </li>
-        <li class="project-item">
-          <div class="project-title">Energy Estates Dashboard</div>
-          <div class="project-meta">Web · Data Visualisation · MySQL</div>
-          <div class="project-desc">
-            为学校 Estates 团队设计能源数据可视化平台，支持多维度查看能耗情况，帮助优化能源管理。
-          </div>
-        </li>
-        <li class="project-item">
-          <a href="#" id="gift-project-link" target="_blank" style="text-decoration: none; color: inherit;">
-            <div class="project-title">For Dad · 给父亲的礼物网站</div>
-          </a>
-          <div class="project-meta">Web · Personal · Gift</div>
-          <div class="project-desc">
-            为父亲特别制作的网站，作为一份特别的礼物。点击上方标题访问网站。
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <!-- D: 联系表单（前端 + 表单，后续可以接第三方做真正后端） -->
-    <section id="contact">
-      <h2>Contact</h2>
-      <p>
-        如果你想和我聊 ICPC、游戏开发、实习机会或者合作项目，可以通过下面表单给我留言。
-      </p>
-
-      <!-- 现在先只是前端表单：action 后续可以换成 Formspree / 自己的后端地址 -->
-      <form
-        method="post"
-        action="#"
-        onsubmit="alert('当前是演示表单，还没有真正连接后端 😊'); return false;"
-      >
-        <div>
-          <label for="name">名字 / Name</label>
-          <input id="name" name="name" type="text" placeholder="Your name" required />
-        </div>
-        <div>
-          <label for="email">邮箱 / Email</label>
-          <input id="email" name="email" type="email" placeholder="you@example.com" required />
-        </div>
-        <div>
-          <label for="message">留言 / Message</label>
-          <textarea id="message" name="message" placeholder="Write something..."></textarea>
-        </div>
-        <button type="submit">Send Message</button>
-      </form>
-
-      <p style="font-size: 13px; color: #777; margin-top: 8px;">
-        这里就是 D：带“后台功能”的入口。现在是前端表单，之后可以接入真正的后端或第三方服务（比如 Formspree、Firebase 等）。
-      </p>
     </section>
   </main>
 
@@ -271,11 +85,6 @@
   <script>
     // 自动填充年份
     document.getElementById("year").textContent = new Date().getFullYear();
-  
-    // ✅ For Dad 链接指向礼物页面（同仓库根目录）
-    const dadUrl = "dad-birthday.html";
-    document.getElementById("gift-link").href = dadUrl;
-    document.getElementById("gift-project-link").href = dadUrl;
   </script>  
 </body>
 </html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Markdown Editor · Wanting Liu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .toolbar {
+      margin-bottom: 20px;
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 5px;
+    }
+    .btn:hover {
+      background: #f5f5f5;
+    }
+    .btn.primary {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+    .btn.primary:hover {
+      background: #1d4ed8;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .form-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .editor-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      height: calc(100vh - 250px);
+    }
+    .editor-panel, .preview-panel {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    textarea {
+      flex: 1;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 0;
+    }
+    .preview-content {
+      flex: 1;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+    .preview-content h1,
+    .preview-content h2,
+    .preview-content h3,
+    .preview-content h4 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    .preview-content h1 { font-size: 2em; }
+    .preview-content h2 { font-size: 1.5em; }
+    .preview-content h3 { font-size: 1.2em; }
+    .preview-content p { margin: 1em 0; }
+    .preview-content code {
+      background: #f4f4f4;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Consolas', monospace;
+    }
+    .preview-content pre {
+      background: #f4f4f4;
+      padding: 16px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    .preview-content pre code {
+      background: none;
+      padding: 0;
+    }
+    .preview-content blockquote {
+      border-left: 4px solid #ddd;
+      padding-left: 16px;
+      margin: 1em 0;
+      color: #666;
+    }
+    @media (max-width: 768px) {
+      .editor-container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .editor-panel, .preview-panel {
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 表单区域 -->
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">标题</label>
+        <input type="text" id="post-title" class="form-input" placeholder="输入文章标题">
+      </div>
+      <div class="form-group">
+        <label class="form-label">栏目</label>
+        <select id="post-category" class="form-select">
+          <option value="blog">Blog</option>
+          <option value="competitive-programming">Competitive Programming</option>
+          <option value="game-jam">Game Jam</option>
+          <option value="projects">Projects</option>
+          <option value="art">Art</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+      <button class="btn" onclick="insertMarkdown('**', '**')">粗体</button>
+      <button class="btn" onclick="insertMarkdown('*', '*')">斜体</button>
+      <button class="btn" onclick="insertMarkdown('# ', '')">标题</button>
+      <button class="btn" onclick="insertMarkdown('- ', '')">列表</button>
+      <button class="btn" onclick="insertMarkdown('```\n', '\n```')">代码块</button>
+      <button class="btn" onclick="insertMarkdown('[', '](url)')">链接</button>
+      <button class="btn" onclick="insertMarkdown('![', '](image-url)')">图片</button>
+      <button class="btn primary" onclick="generateMarkdown()">生成Markdown</button>
+      <button class="btn" onclick="loadDraft()">加载草稿</button>
+      <button class="btn" onclick="clearEditor()">清空</button>
+    </div>
+
+    <!-- 编辑器和预览 -->
+    <div class="editor-container">
+      <div class="editor-panel">
+        <div class="panel-title">Markdown 编辑器</div>
+        <textarea id="markdown-input" placeholder="在这里输入 Markdown 内容...
+
+# 标题示例
+
+这是**粗体**文本，这是*斜体*文本。
+
+## 列表
+
+- 项目1
+- 项目2
+- 项目3
+
+## 代码块
+
+```javascript
+console.log('Hello World!');
+```
+
+## 链接和图片
+
+[链接文本](https://example.com)
+![图片描述](image-url.jpg)"></textarea>
+      </div>
+
+      <div class="preview-panel">
+        <div class="panel-title">实时预览</div>
+        <div id="preview-content" class="preview-content">
+          <p style="color: #999; font-style: italic;">预览将在这里显示...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align: center; padding: 20px; color: #666;">
+    © <span id="year"></span> Wanting Liu · Built with GitHub Pages
+  </footer>
+
+  <script>
+    function slugify(text) {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    function insertMarkdown(before, after) {
+      const input = document.getElementById('markdown-input');
+      if (!input) return;
+
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const selectedText = input.value.substring(start, end);
+      const replacement = before + selectedText + after;
+
+      input.value = input.value.substring(0, start) + replacement + input.value.substring(end);
+      input.focus();
+
+      const newPos = start + before.length + selectedText.length;
+      input.selectionStart = newPos;
+      input.selectionEnd = newPos;
+
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const input = document.getElementById('markdown-input');
+      const output = document.getElementById('preview-content');
+
+      if (!input || !output) return;
+      const markdown = input.value.trim();
+
+      if (!markdown) {
+        output.innerHTML = '<p style="color: #999; font-style: italic;">预览将在这里显示...</p>';
+        return;
+      }
+
+      if (typeof marked !== 'undefined' && marked.parse) {
+        output.innerHTML = marked.parse(markdown);
+      } else {
+        output.innerHTML = markdown.replace(/\n/g, '<br>');
+      }
+    }
+
+    function generateMarkdown() {
+      const title = document.getElementById('post-title').value.trim();
+      const category = document.getElementById('post-category').value;
+      const content = document.getElementById('markdown-input').value.trim();
+
+      if (!title || !content) {
+        alert('请填写标题和内容');
+        return;
+      }
+
+      const now = new Date();
+      const dateStr = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0');
+
+      let folderName = '_posts';
+      let fileName = `${dateStr}-${slugify(title)}.md`;
+
+      if (category !== 'blog') {
+        const folderMap = {
+          'competitive-programming': '_cp',
+          'game-jam': '_gamejam',
+          'projects': '_projects',
+          'art': '_art'
+        };
+        folderName = folderMap[category] || category;
+        fileName = `${slugify(title)}.md`;
+      }
+
+      const frontMatter = `---\ntitle: "${title}"\ndate: ${dateStr}\ncategory: ${category}\n---\n\n`;
+      const markdownContent = frontMatter + content + '\n';
+
+      const blob = new Blob([markdownContent], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      alert(`Markdown文章已生成：${fileName}\n请将文件保存到 ${folderName}/ 文件夹中。`);
+    }
+
+    function loadDraft() {
+      const draft = localStorage.getItem('markdown-draft');
+      if (draft) {
+        document.getElementById('markdown-input').value = draft;
+        updatePreview();
+        alert('草稿已加载');
+      } else {
+        alert('没有找到草稿');
+      }
+    }
+
+    function clearEditor() {
+      if (!confirm('确定要清空所有内容吗？')) return;
+      document.getElementById('post-title').value = '';
+      document.getElementById('markdown-input').value = '';
+      updatePreview();
+      localStorage.removeItem('markdown-draft');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      const input = document.getElementById('markdown-input');
+      if (input) {
+        input.addEventListener('input', function() {
+          updatePreview();
+          localStorage.setItem('markdown-draft', input.value);
+        });
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get('category');
+      if (category) {
+        document.getElementById('post-category').value = category;
+      }
+
+      updatePreview();
+    });
+  </script>
+</body>
+</html>
