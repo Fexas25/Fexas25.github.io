@@ -4,7 +4,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Game Jam · Wanting Liu</title>
+  <title>Game Jam · MX</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -60,8 +60,9 @@
       padding: 16px 0 24px;
     }
   </style>
+  <link rel="stylesheet" href="../theme.css" />
 </head>
-<body>
+<body class="page-gamejam">
   <main>
     <!-- 栏目介绍 -->
     <section id="intro">
@@ -73,16 +74,15 @@
         <a href="../editor.html?category=game-jam" style="padding: 8px 16px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">发布新内容</a>
       </div>
       <p>
-        游戏创作是我的另一个重要领域。在这里分享我在各种Game Jam中的作品、开发经验和技术心得。
-        从48小时的极限挑战到长期项目的迭代，每一次创作都是对创意和技术的探索。
+        这做的是什么？
       </p>
     </section>
 
     <!-- 栏目目录 -->
     <section id="posts">
-      <h2>游戏项目</h2>
+      <h2>OvO（？）</h2>
       {% if site.gamejam.size == 0 %}
-      <p style="color: #777; text-align: center;">暂无内容，快去发布第一篇吧！</p>
+      <p style="color: #777; text-align: center;">偷懒中…… </p>
       {% endif %}
 
       <ul class="post-list">
@@ -90,19 +90,15 @@
         <li class="post-item">
           <a href="{{ post.url | relative_url }}" class="post-title">{{ post.title }}</a>
           <div class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</div>
-          <div class="post-desc">{{ post.excerpt | strip_html | truncate: 120 }}</div>
         </li>
         {% endfor %}
       </ul>
-
-      <p style="font-size: 13px; color: #777; margin-top: 16px;">
-        🎮 <strong>提示：</strong>点击游戏名称可以查看详细介绍、截图和下载链接。后续会支持Markdown格式记录开发过程。
-      </p>
     </section>
   </main>
 
   <footer>
     © {{ site.time | date: "%Y" }} Wanting Liu · Built with GitHub Pages
   </footer>
+  <script src="../theme.js"></script>
 </body>
 </html>

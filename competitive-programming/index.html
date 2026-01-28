@@ -4,7 +4,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Competitive Programming · Wanting Liu</title>
+  <title>Competitive Programming · MX</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -60,8 +60,9 @@
       padding: 16px 0 24px;
     }
   </style>
+  <link rel="stylesheet" href="../theme.css" />
 </head>
-<body>
+<body class="page-cp">
 
   <main>
     <!-- 栏目介绍 -->
@@ -74,16 +75,15 @@
         <a href="../editor.html?category=competitive-programming" style="padding: 8px 16px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">发布新内容</a>
       </div>
       <p>
-        这里是我在算法竞赛领域的学习记录和心得分享。包括ICPC训练、算法题解、比赛复盘等内容。
-        我相信算法思维不仅能锻炼编程能力，更能培养解决复杂问题的思维方式。
+        艰难打比赛中，肖飞舞倒头就睡
       </p>
     </section>
 
     <!-- 栏目目录 -->
     <section id="posts">
-      <h2>文章目录</h2>
+      <h2>Orz</h2>
       {% if site.cp.size == 0 %}
-      <p style="color: #777; text-align: center;">暂无文章，快去发布第一篇吧！</p>
+      <p style="color: #777; text-align: center;">偷懒中…… </p>
       {% endif %}
 
       <ul class="post-list">
@@ -91,19 +91,15 @@
         <li class="post-item">
           <a href="{{ post.url | relative_url }}" class="post-title">{{ post.title }}</a>
           <div class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</div>
-          <div class="post-desc">{{ post.excerpt | strip_html | truncate: 120 }}</div>
         </li>
         {% endfor %}
       </ul>
-
-      <p style="font-size: 13px; color: #777; margin-top: 16px;">
-        💡 <strong>提示：</strong>点击文章标题可以查看完整内容。
-      </p>
     </section>
   </main>
 
   <footer>
     © {{ site.time | date: "%Y" }} Wanting Liu · Built with GitHub Pages
   </footer>
+  <script src="../theme.js"></script>
 </body>
 </html>

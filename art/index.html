@@ -4,7 +4,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Art · Wanting Liu</title>
+  <title>Art · MX</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -76,21 +76,21 @@
       padding: 16px 0 24px;
     }
   </style>
+  <link rel="stylesheet" href="../theme.css" />
 </head>
-<body>
+<body class="page-art">
   <main>
     <!-- 栏目介绍 -->
     <section id="intro">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
         <div style="display: flex; align-items: center; gap: 16px;">
           <a href="../index.html" style="padding: 8px 16px; background: #6b7280; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">← 返回首页</a>
-          <h1 style="margin: 0;">My Art</h1>
+          <h1 style="margin: 0;">OMO（？）</h1>
         </div>
         <a href="../editor.html?category=art" style="padding: 8px 16px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">发布新作品</a>
       </div>
       <p>
-        艺术创作是我放松和表达的方式。这里收集了我的一些数字艺术作品、插画和设计。
-        从游戏原画到概念设计，每一幅作品都承载着我的创意和灵感。
+        摸鱼画画中
       </p>
     </section>
 
@@ -98,7 +98,7 @@
     <section id="gallery">
       <h2>作品集</h2>
       {% if site.art.size == 0 %}
-      <p style="color: #777; text-align: center;">暂无作品，快去发布第一篇吧！</p>
+      <p style="color: #777; text-align: center;">偷懒中…… </p>
       {% endif %}
 
       <ul class="art-grid">
@@ -110,20 +110,16 @@
           <div class="art-info">
             <div class="art-title"><a href="{{ post.url | relative_url }}" style="text-decoration: none; color: inherit;">{{ post.title }}</a></div>
             <div class="art-meta">{{ post.date | date: "%Y-%m-%d" }}</div>
-            <div class="art-desc">{{ post.excerpt | strip_html | truncate: 100 }}</div>
           </div>
         </li>
         {% endfor %}
       </ul>
-
-      <p style="font-size: 13px; color: #777; margin-top: 16px;">
-        🎨 <strong>提示：</strong>点击作品可以查看大图和创作过程。后续会支持上传新作品和Markdown格式的创作记录。
-      </p>
     </section>
   </main>
 
   <footer>
     © {{ site.time | date: "%Y" }} Wanting Liu · Built with GitHub Pages
   </footer>
+  <script src="../theme.js"></script>
 </body>
 </html>

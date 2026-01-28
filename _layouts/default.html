@@ -48,13 +48,15 @@
       padding: 16px 0 24px;
     }
   </style>
+  <link rel="stylesheet" href="{{ '/theme.css' | relative_url }}" />
 </head>
-<body>
+<body class="{% if page.layout == 'post' %}page-post{% elsif page.layout == 'page' %}page-page{% else %}page-default{% endif %}{% if page.collection %} collection-{{ page.collection }}{% endif %}">
   <main>
     {{ content }}
   </main>
   <footer>
     © {{ site.time | date: "%Y" }} {{ site.title }} · Built with GitHub Pages
   </footer>
+  <script src="{{ '/theme.js' | relative_url }}"></script>
 </body>
 </html>

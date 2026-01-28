@@ -1,0 +1,302 @@
+ :root {
+  --ink: #1f2937;
+  --ink-soft: rgba(31, 41, 55, 0.78);
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-strong: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --accent: #7c3aed;
+  --accent-2: #f472b6;
+  --shadow-soft: 0 8px 20px rgba(7, 10, 20, 0.14);
+  --shadow-strong: 0 18px 40px rgba(7, 10, 20, 0.2);
+  --bg-img-1: url("./picture/微信图片_20260128002706_37_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002707_38_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002708_39_58.jpg");
+}
+
+ * {
+  box-sizing: border-box;
+ }
+
+ html,
+ body {
+  min-height: 100%;
+ }
+
+ body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background-color: #0b1020;
+  background-image:
+    radial-gradient(1200px 800px at 10% -10%, rgba(124, 58, 237, 0.18), transparent 55%),
+    radial-gradient(1000px 700px at 90% 0%, rgba(244, 114, 182, 0.22), transparent 60%),
+    var(--bg-img-1),
+    var(--bg-img-2),
+    var(--bg-img-3);
+  background-size:
+    140% 140%,
+    130% 130%,
+    var(--bg-size-1, cover),
+    var(--bg-size-2, cover),
+    var(--bg-size-3, cover);
+  background-position:
+    50% 0%,
+    50% 100%,
+    var(--bg-pos-1, 50% 20%),
+    var(--bg-pos-2, 50% 80%),
+    var(--bg-pos-3, 50% 50%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  animation: bgShift 28s ease-in-out infinite;
+  overflow-x: hidden;
+ }
+
+ body.has-rotator {
+  --bg-img-1: none;
+  --bg-img-2: none;
+  --bg-img-3: none;
+ }
+
+ .bg-rotator {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+ }
+
+ .bg-rotator__layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.8s ease;
+  background-size:
+    var(--bg-size-1, cover),
+    var(--bg-size-2, cover),
+    var(--bg-size-3, cover);
+  background-position:
+    var(--bg-pos-1, 50% 20%),
+    var(--bg-pos-2, 50% 80%),
+    var(--bg-pos-3, 50% 50%);
+  background-repeat: no-repeat;
+  filter: saturate(1.03);
+ }
+
+ .bg-rotator__layer.is-active {
+  opacity: 0.85;
+ }
+
+ body.page-home {
+  --bg-img-1: url("./picture/微信图片_20260128002706_37_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002707_38_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002708_39_58.jpg");
+ }
+
+ body.page-blog {
+  --bg-img-1: url("./picture/微信图片_20260128002710_40_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002712_41_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002713_42_58.jpg");
+ }
+
+ body.page-cp {
+  --bg-img-1: url("./picture/微信图片_20260128002716_44_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002718_45_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002722_48_58.jpg");
+ }
+
+ body.page-gamejam {
+  --bg-img-1: url("./picture/微信图片_20260128002724_49_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002725_50_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002727_51_58.jpg");
+ }
+
+ body.page-projects {
+  --bg-img-1: url("./picture/微信图片_20260128002728_52_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002731_54_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002731_55_58.jpg");
+ }
+
+ body.page-art {
+  --bg-img-1: url("./picture/微信图片_20260128002733_56_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002735_57_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002736_58_58.jpg");
+ }
+
+ body.page-editor {
+  --bg-img-1: url("./picture/微信图片_20260128002738_59_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002740_60_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002730_53_58.jpg");
+ }
+
+ body.page-post {
+  --bg-img-1: url("./picture/微信图片_20260128002715_43_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002719_46_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002721_47_58.jpg");
+ }
+
+ body.page-page {
+  --bg-img-1: url("./picture/微信图片_20260128002706_37_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002712_41_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002735_57_58.jpg");
+ }
+
+ body.collection-posts {
+  --bg-img-1: url("./picture/微信图片_20260128002710_40_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002712_41_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002713_42_58.jpg");
+ }
+
+ body.collection-cp {
+  --bg-img-1: url("./picture/微信图片_20260128002716_44_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002718_45_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002722_48_58.jpg");
+ }
+
+ body.collection-gamejam {
+  --bg-img-1: url("./picture/微信图片_20260128002724_49_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002725_50_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002727_51_58.jpg");
+ }
+
+ body.collection-projects {
+  --bg-img-1: url("./picture/微信图片_20260128002728_52_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002731_54_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002731_55_58.jpg");
+ }
+
+ body.collection-art {
+  --bg-img-1: url("./picture/微信图片_20260128002733_56_58.jpg");
+  --bg-img-2: url("./picture/微信图片_20260128002735_57_58.jpg");
+  --bg-img-3: url("./picture/微信图片_20260128002736_58_58.jpg");
+ }
+
+ body::after {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  background:
+    radial-gradient(420px 320px at 15% 20%, rgba(255, 255, 255, 0.22), transparent 60%),
+    radial-gradient(380px 280px at 85% 15%, rgba(255, 255, 255, 0.18), transparent 60%),
+    radial-gradient(520px 360px at 70% 80%, rgba(124, 58, 237, 0.15), transparent 65%);
+  mix-blend-mode: screen;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 1;
+  animation: glowDrift 18s ease-in-out infinite;
+ }
+
+ body::before,
+ main::before,
+ main::after,
+ .container::before,
+ .container::after {
+  content: "";
+  position: fixed;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25), 0 0 18px rgba(255, 255, 255, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  filter: saturate(1.05);
+  pointer-events: none;
+  z-index: 2;
+  animation: avatarFloat 6.5s ease-in-out infinite;
+ }
+
+ body::before {
+  background-image: url("./picture/微信图片_20260128002715_43_58.jpg");
+  top: 110px;
+  left: 6%;
+ }
+
+ main::before,
+ .container::before {
+  background-image: url("./picture/微信图片_20260128002719_46_58.jpg");
+  top: 220px;
+  right: 8%;
+  animation-duration: 7.2s;
+ }
+
+ main::after,
+ .container::after {
+  background-image: url("./picture/微信图片_20260128002721_47_58.jpg");
+  bottom: 120px;
+  left: 10%;
+  animation-duration: 8s;
+ }
+
+ main,
+ .container {
+  position: relative;
+  z-index: 2;
+ }
+
+ section,
+ article,
+ .toolbar,
+ .form-row,
+ .editor-panel,
+ .preview-panel {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(12px);
+ }
+
+ a {
+  color: var(--accent);
+ }
+
+ a:hover {
+  color: var(--accent-2);
+ }
+
+ footer {
+  color: rgba(31, 41, 55, 0.7);
+ }
+
+ @keyframes bgShift {
+  0% {
+    background-position: 50% 0%, 50% 100%, 10% 10%, 90% 90%, 50% 50%;
+  }
+  50% {
+    background-position: 50% 20%, 50% 80%, 30% 20%, 70% 70%, 60% 40%;
+  }
+  100% {
+    background-position: 50% 0%, 50% 100%, 10% 10%, 90% 90%, 50% 50%;
+  }
+ }
+
+ @keyframes glowDrift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-2%, 2%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+ }
+
+ @keyframes avatarFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.02);
+  }
+ }
+
+ @media (max-width: 768px) {
+  body::before,
+  main::before,
+  main::after,
+  .container::before,
+  .container::after {
+    width: 68px;
+    height: 68px;
+  }
+ }

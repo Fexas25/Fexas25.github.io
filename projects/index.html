@@ -4,7 +4,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Projects · Wanting Liu</title>
+  <title>Projects · MX</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -60,8 +60,9 @@
       padding: 16px 0 24px;
     }
   </style>
+  <link rel="stylesheet" href="../theme.css" />
 </head>
-<body>
+<body class="page-projects">
   <main>
     <!-- 栏目介绍 -->
     <section id="intro">
@@ -73,16 +74,15 @@
         <a href="../editor.html?category=projects" style="padding: 8px 16px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">发布新项目</a>
       </div>
       <p>
-        这里展示了我参与的各类项目，包括学术项目、个人作品、团队协作等。
-        每个项目都代表着一次学习和成长的机会，从概念到实现的全过程。
+        这里展示了一些乱七八糟的想法
       </p>
     </section>
 
     <!-- 项目目录 -->
     <section id="projects">
-      <h2>项目作品集</h2>
+      <h2>O3O</h2>
       {% if site.projects.size == 0 %}
-      <p style="color: #777; text-align: center;">暂无项目，快去发布第一个吧！</p>
+      <p style="color: #777; text-align: center;">偷懒中…… </p>
       {% endif %}
 
       <ul class="project-list">
@@ -90,19 +90,15 @@
         <li class="project-item">
           <a href="{{ post.url | relative_url }}" class="project-title">{{ post.title }}</a>
           <div class="project-meta">{{ post.date | date: "%Y-%m-%d" }}</div>
-          <div class="project-desc">{{ post.excerpt | strip_html | truncate: 150 }}</div>
         </li>
         {% endfor %}
       </ul>
-
-      <p style="font-size: 13px; color: #777; margin-top: 16px;">
-        🚀 <strong>提示：</strong>点击项目名称可以查看详细介绍、技术栈、源码链接和演示。后续会支持Markdown格式的项目文档。
-      </p>
     </section>
   </main>
 
   <footer>
     © {{ site.time | date: "%Y" }} Wanting Liu · Built with GitHub Pages
   </footer>
+  <script src="../theme.js"></script>
 </body>
 </html>
