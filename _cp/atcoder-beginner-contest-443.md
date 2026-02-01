@@ -6,9 +6,9 @@ category: competitive-programming
 
 每周例行Atcode，感谢学校的club，个人组织起这个团队真的很厉害，给厉害的朋友们点赞。没有这我的高中oi生涯就荒废了。有生之年还能在icpc打到下一轮，队友太有实力了，泪目了，我终于是被带的那个了。
 
-题目链接：[https://atcoder.jp/contests/abc443](url)
+题目链接：[abc443](https://atcoder.jp/contests/abc443)
 
-个人主页：[https://atcoder.jp/users/Fexas_01](url)
+个人主页：[蒟蒻丑陋爬行](https://atcoder.jp/users/Fexas_01)
 
 依旧只完成了ABCD，E题目太长还是讨厌的图论直接跳过，F感觉能做想到了BFS没想到DP，G不会优化。
 
