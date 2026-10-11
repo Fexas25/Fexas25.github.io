@@ -285,6 +285,7 @@ test('开屏圆形入口与自主跃鱼落水波纹', async ({ page }) => {
   expect(Math.abs(entry.width - entry.height)).toBeLessThan(1);
   await expect(page.locator('.pond-droplets')).toHaveCount(1, { timeout: 10000 });
   await expect(page.locator('.pond-resonance')).toHaveCount(1);
+  await expect(page.locator('.pond-surface-effects .pond-water-wave').first()).toBeVisible();
   await noOverflow(page);
   await page.locator('#intro-enter').click();
   await expect(page.locator('#studio-intro')).not.toBeVisible();

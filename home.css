@@ -28,14 +28,20 @@ html:has(dialog[open]){overflow:hidden}
 @media(max-width:380px){.site-header nav a{padding-left:3px;padding-right:3px}.header-inner{padding-left:14px;padding-right:14px}}
 /* A small interactive pond around the entrance. */
 .studio-intro[open]{overflow-x:hidden;background:radial-gradient(ellipse at 50% 48%,#f1f5ed 0%,#fff0e5 38%,#fffaf6 72%)}
-.studio-intro .intro-card{width:min(100%,580px);padding:20px 0;position:relative;z-index:1}
-.intro-card .intro-brand{font-size:12px;letter-spacing:3px;margin:0 0 24px}
+.studio-intro .intro-card{width:min(100%,580px);padding:8px 0;position:relative;z-index:1}
+.intro-card .intro-brand{font-size:12px;letter-spacing:3px;margin:0 0 18px}
 .studio-intro .intro-card h2{font-size:clamp(25px,6vw,34px);font-weight:600;letter-spacing:1px;margin:12px 0}
 .intro-card #intro-description{letter-spacing:1px;font-size:13px;line-height:1.8;margin:0}
-.intro-pond{width:min(100%,460px,max(180px,calc(100svh - 260px)));aspect-ratio:1;height:auto;position:relative;margin:16px auto 0;isolation:isolate}
-.intro-card .pond-water{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:radial-gradient(circle closest-side,#ffffff08 0%,#e4f4ee28 23%,#b3ded048 45%,#95c7c12e 58%,#c6e1dc12 70%,transparent 82%);cursor:crosshair;touch-action:manipulation}
+.intro-pond{width:min(calc(100% + 16px),520px,max(180px,calc(100svh - 230px)));aspect-ratio:1;height:auto;position:relative;left:50%;translate:-50% 0;margin:16px 0 0;isolation:isolate}
+.intro-card .pond-water{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:radial-gradient(circle closest-side,#f7fffd14 0%,#d5f1ea45 22%,#9ed7ca70 44%,#92cfc255 60%,#b7dfd82b 74%,#d7e8e310 83%,transparent 91%);cursor:crosshair;touch-action:manipulation}
 .pond-orbit{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle closest-side,transparent 65%,#8eada71c calc(65% + 1px),transparent calc(65% + 2px),transparent 76%,#8eada736 calc(76% + 1px),transparent calc(76% + 2px),transparent 87%,#8eada750 calc(87% + 1px),transparent calc(87% + 2px),transparent 98%,#8eada728 calc(98% + 1px),transparent calc(98% + 2px))}
-.intro-card .pond-water::before{content:"";position:absolute;inset:14%;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse at 32% 28%,#ffffff90 0%,transparent 38%),radial-gradient(ellipse at 68% 66%,#acd7cd35 0%,transparent 52%);mask-image:radial-gradient(circle closest-side,#0009 30%,transparent 95%);animation:water-light 12s ease-in-out infinite alternate}
+.intro-card .pond-water::before{content:"";position:absolute;inset:7%;border-radius:50%;pointer-events:none;background:repeating-radial-gradient(ellipse at 32% 40%,transparent 0 16px,#ffffff75 17px,transparent 19px 38px),repeating-radial-gradient(ellipse at 68% 62%,transparent 0 25px,#bcece54d 26px,transparent 29px 53px);mask-image:radial-gradient(circle closest-side,transparent 12%,#0008 38%,#0006 65%,transparent 94%);animation:water-light 14s ease-in-out infinite alternate}
+.intro-card .pond-water::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle at var(--water-x,50%) var(--water-y,20%),#f4fffc80 0, #a9ded32b 12%,transparent 31%);mask-image:radial-gradient(circle closest-side,#000 50%,transparent 90%)}
+.pond-surface-effects{position:absolute;inset:0;overflow:hidden;border-radius:50%;pointer-events:none;mask-image:radial-gradient(circle closest-side,#000 52%,#000b 72%,transparent 92%)}
+.pond-current-wake,.pond-water-wave{width:44px;height:44px;border:1px solid #f1fffaab;border-radius:50%;background:radial-gradient(circle,transparent 52%,#88c7bc26 64%,#ecfff53d 68%,transparent 74%);box-shadow:0 0 5px #c6ede95c,inset 0 0 7px #7bb8ae20;animation:water-spread 2s ease-out both}
+.pond-water-wave{width:50px;height:50px;animation-name:water-impact}
+.pond-water-wave::after{content:"";position:absolute;inset:-12px;border:1px solid #eafff88a;border-radius:50%;box-shadow:0 0 4px #b4e7db55}
+
 
 .pond-effects{position:absolute;inset:0;pointer-events:none;z-index:1}
 .intro-card .intro-swimmer{position:absolute;left:0;top:0;width:48px;height:48px;min-height:48px;padding:0;border:0;border-radius:50%;background:transparent;z-index:3;cursor:pointer;touch-action:manipulation;animation:fish-appear .75s ease-out both;--fish-color:#eeac99}
@@ -81,7 +87,7 @@ html:has(dialog[open]){overflow:hidden}
 .pond-droplets i:nth-child(4){--dx:22px;--dy:-40px;animation-delay:.03s}
 .pond-droplets i:nth-child(5){--dx:33px;--dy:-20px;animation-delay:.09s}
 .pond-resonance{width:80px;height:80px;border:1px solid #94bbb887;border-radius:50%;box-shadow:0 0 0 12px #a7bcd91c;animation:pond-resonate 1.8s ease-out both}
-.intro-leaving .pond-effects{opacity:0;transition:opacity .35s ease-out}
+.intro-leaving .pond-effects,.intro-leaving .pond-surface-effects{opacity:0;transition:opacity .35s ease-out}
 .site-header{border-image:linear-gradient(90deg,transparent,#e9c7bf,#a5c8c350,transparent) 1}
 .site-header nav a{transition:color .25s ease,background-color .25s ease}
 .section-heading .section-symbol{color:#88aaa8}
@@ -95,4 +101,6 @@ html:has(dialog[open]){overflow:hidden}
 @media(max-height:560px){.intro-card .pond-hint{margin-top:0}}
 @media(prefers-reduced-motion:reduce){.studio-intro::before,.studio-intro::after,.studio-intro *::before,.studio-intro *::after{animation:none!important;transition:none!important}.pond-droplets{display:none}.site-header nav a{transition:none}}
 
-@keyframes water-light{from{opacity:.4;transform:rotate(-8deg) scale(.97)}to{opacity:.85;transform:rotate(8deg) scale(1.03)}}
+@keyframes water-light{from{opacity:.5;transform:translate(-1%,-1%) rotate(-6deg) scale(.98)}to{opacity:.9;transform:translate(1%,1%) rotate(6deg) scale(1.04)}}
+@keyframes water-spread{0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}18%{opacity:.7}100%{opacity:0;transform:translate(-50%,-50%) scale(2.9)}}
+@keyframes water-impact{0%{opacity:0;transform:translate(-50%,-50%) scale(.35)}15%{opacity:.85}100%{opacity:0;transform:translate(-50%,-50%) scale(6)}}

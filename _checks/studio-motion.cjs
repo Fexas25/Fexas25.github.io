@@ -10,6 +10,7 @@ const pond=pondPage.w.document.querySelector('.intro-pond');
 assert.equal(pond.querySelectorAll('.intro-swimmer').length,1);
 pond.querySelector('.intro-swimmer').click();
 assert.ok(pond.querySelector('.pond-droplets'),'jump creates water droplets');
+assert.ok(pond.querySelector('.pond-surface-effects .pond-water-wave'),'jump disturbs the water surface');
 await new Promise(r=>setTimeout(r,730));
 assert.ok(pond.querySelector('.pond-resonance'),'landing sends a wave across the pond');
 for(let t=16;t<41000;t+=64){const callbacks=[...queued.values()];queued.clear();callbacks.forEach(fn=>fn(t));}

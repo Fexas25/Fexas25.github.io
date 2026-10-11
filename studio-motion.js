@@ -32,13 +32,14 @@
   function startPond() {
     const pond = intro.querySelector('.intro-pond');
     const effects = pond.querySelector('.pond-effects');
+    const surfaceEffects = pond.querySelector('.pond-surface-effects');
     const water = pond.querySelector('.pond-water');
     const swimmers = [pond.querySelector('.intro-swimmer')];
     const lifetime = new Map();
     const jumpTimers = new Map();
     const lapDuration = 8000;
     let nextJump = 4600;
-    let frame = 0, last = 0, elapsed = 0, lastWake = 0, pauseUntil = 0, stopped = false;
+    let frame = 0, last = 0, elapsed = 0, lastWake = 0, lastCurrent = 0, pauseUntil = 0, stopped = false;
     let width = pond.clientWidth, height = pond.clientHeight;
     const removeEffect = node => { clearTimeout(lifetime.get(node)); lifetime.delete(node); node.remove(); };
     function effect(kind, x, y) {
@@ -50,8 +51,9 @@
         node.innerHTML = '<svg viewBox="0 0 48 52" aria-hidden="true"><path d="M24 25q8 13-2 24" fill="none" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><path d="M24 25C5 24 4 11 12 10C18 9 23 14 24 25Z"/><path d="M24 25C23 6 36 1 39 9C41 15 35 22 24 25Z"/><path d="M24 25C43 24 48 37 40 40C34 42 27 36 24 25Z"/><path d="M24 25C25 44 12 49 9 41C7 35 13 28 24 25Z"/></g></svg>';
       }
       if (kind === 'pond-droplets') node.innerHTML = '<i></i><i></i><i></i><i></i><i></i>';
-      effects.append(node);
-      lifetime.set(node, setTimeout(() => removeEffect(node), kind === 'pond-resonance' ? 1800 : kind === 'pond-clover' ? 1500 : 1200));
+      const isWater = kind === 'pond-current-wake' || kind === 'pond-water-wave';
+      (isWater ? surfaceEffects : effects).append(node);
+      lifetime.set(node, setTimeout(() => removeEffect(node), isWater ? 2000 : kind === 'pond-resonance' ? 1800 : kind === 'pond-clover' ? 1500 : 1200));
     }
     function place() {
       swimmers.forEach((fish, index) => {
@@ -64,6 +66,8 @@
         fish.style.setProperty('--fish-heading', `${heading}deg`);
         fish.pondPosition = { x, y };
       });
+      water.style.setProperty('--water-x', `${swimmers[0].pondPosition.x}px`);
+      water.style.setProperty('--water-y', `${swimmers[0].pondPosition.y}px`);
     }
     function jumpFish(fish, now = performance.now()) {
       if (fish.classList.contains('is-jumping')) return;
@@ -71,12 +75,18 @@
       fish.classList.add('is-jumping');
       const { x, y } = fish.pondPosition;
       effect('pond-splash', x, y);
-      if (!reduced.matches) effect('pond-droplets', x, y);
+      if (!reduced.matches) {
+        effect('pond-droplets', x, y);
+        effect('pond-water-wave', x, y);
+      }
       const timer = setTimeout(() => {
         fish.classList.remove('is-jumping'); jumpTimers.delete(fish);
         if (!stopped && !document.hidden) {
           effect('pond-splash', fish.pondPosition.x, fish.pondPosition.y);
-          if (!reduced.matches) effect('pond-resonance', width / 2, height / 2);
+          if (!reduced.matches) {
+            effect('pond-water-wave', fish.pondPosition.x, fish.pondPosition.y);
+            effect('pond-resonance', width / 2, height / 2);
+          }
         }
       }, 700);
       jumpTimers.set(fish, timer);
@@ -103,9 +113,13 @@
         jumpFish(swimmers[Math.floor(Math.random() * swimmers.length)], now);
         nextJump = elapsed + 5200 + Math.random() * 3600;
       }
-      if (elapsed - lastWake > 260) {
+      if (elapsed - lastWake > 440) {
         swimmers.forEach(fish => effect('pond-wake', fish.pondPosition.x, fish.pondPosition.y));
         lastWake = elapsed;
+      }
+      if (elapsed - lastCurrent > 760) {
+        swimmers.filter(fish => !fish.classList.contains('is-jumping')).forEach(fish => effect('pond-current-wake', fish.pondPosition.x, fish.pondPosition.y));
+        lastCurrent = elapsed;
       }
       frame = requestAnimationFrame(tick);
     }
@@ -119,6 +133,7 @@
       const y = event.detail ? event.clientY - rect.top : height * .78;
       effect('pond-splash', x, y);
       effect('pond-clover', x, y);
+      if (!reduced.matches) effect('pond-water-wave', x, y);
     };
     const resize = () => { width = pond.clientWidth; height = pond.clientHeight; place(); };
     water.addEventListener('click', splash);
@@ -130,7 +145,7 @@
       stopped = true; cancelAnimationFrame(frame);
       for (const timer of lifetime.values()) clearTimeout(timer);
       lifetime.clear();
-      if (clear) effects.replaceChildren();
+      if (clear) { effects.replaceChildren(); surfaceEffects.replaceChildren(); }
       for (const timer of jumpTimers.values()) clearTimeout(timer);
       jumpTimers.clear();
       water.removeEventListener('click', splash);
