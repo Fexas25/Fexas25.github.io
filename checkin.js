@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const date = getToday();
     if (date !== renderedDate) { renderedDate = date; render(); }
   };
-  setInterval(refreshDate, 1000);
+  setInterval(() => { if (!document.hidden) refreshDate(); }, 60000);
   document.addEventListener('visibilitychange', refreshDate);
   render();
 });

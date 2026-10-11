@@ -30,7 +30,18 @@
     if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
   });
   dialog.addEventListener('close', () => opener?.focus());
-  if (window.MXFortune?.hasDrawnToday()) document.querySelector('[data-draw-label]').textContent = '今日已抽 · 点击查看';
+  const refreshDrawStatus = () => {
+    document.querySelector('[data-draw-label]').textContent = window.MXFortune?.hasDrawnToday() ? '今日已抽 · 点击查看' : '看看今天的小惊喜';
+  };
+  refreshDrawStatus();
+  window.addEventListener('pageshow', refreshDrawStatus);
+  window.addEventListener('storage', event => { if (event.key === 'daily-checkin' || event.key === null) refreshDrawStatus(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshDrawStatus(); });
+  setInterval(() => { if (!document.hidden) refreshDrawStatus(); }, 60000);
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => entries.forEach(entry => entry.target.classList.toggle('is-out-of-view', !entry.isIntersecting)));
+    observer.observe(document.querySelector('.hero'));
+  }
   const filters = document.querySelectorAll('[data-filter]');
   const cards = document.querySelectorAll('[data-kind]');
   filters.forEach(button => button.addEventListener('click', () => {

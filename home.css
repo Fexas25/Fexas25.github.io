@@ -15,3 +15,8 @@ dialog{width:min(440px,calc(100% - 32px));max-height:calc(100dvh - 40px);overflo
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
 
 .new-work-cover{background:#fff1eb;color:#bd9295;display:flex;align-items:center;justify-content:center}.new-work-cover>span{font-size:58px}.new-work-game{background:#fff2de;color:#b58c62}.new-work-ai{background:#f0ecfa;color:#9989bd}.new-work-cover img{width:100%;height:100%;object-fit:cover}
+
+/* Mobile touch targets and off-screen motion. */
+html:has(dialog[open]){overflow:hidden}
+.hero.is-out-of-view .character{animation-play-state:paused}
+@media(max-width:700px){.site-header nav,.inner-page .site-header nav{gap:0;justify-content:space-between;width:100%}.site-header nav a{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:10px 8px}html{scroll-padding-top:125px}.work-filters button{min-height:44px}.quiet-link,.blog-categories a,.site-footer a{display:inline-flex;align-items:center;min-height:44px}.work-info h3,.moment h3{overflow-wrap:anywhere}}

@@ -5,6 +5,7 @@
 {% if page.stylesheet %}<link rel="stylesheet" href="{{ page.stylesheet | relative_url }}" />{% endif %}
 {% for dependency in page.scripts %}<script src="{{ dependency | relative_url }}" defer></script>{% endfor %}
 {% if page.script %}<script src="{{ page.script | relative_url }}" defer></script>{% endif %}
+<link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
 </head><body class="inner-page">
 {% include studio-header.html %}
 <main id="main" class="inner-main">{{ content }}</main>

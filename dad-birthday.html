@@ -533,19 +533,28 @@
   @media (max-width: 900px) and (orientation: landscape){
     .screen{ padding-top: 78px; }
   }
+  /* Keep tall cards reachable on short phones and landscape screens. */
+  .screen{overflow-y:auto;overscroll-behavior:contain;align-items:flex-start}
+  .screen>div{flex-shrink:0;margin-block:auto}
+  .screen.hidden{visibility:hidden}
+  .hud a{color:inherit;text-decoration:none}
+  @media(max-width:900px){.hud button{min-height:44px}.frame{min-height:0;height:clamp(220px,44dvh,420px)}.screen{padding-bottom:max(22px,env(safe-area-inset-bottom))}}
+  @media(max-width:900px) and (orientation:portrait){.screen{padding-top:130px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.fadeIn{opacity:1;transform:none}}
   </style>
+<link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
 </head>
 <body>
   <canvas id="fx"></canvas>
   <canvas id="dust"></canvas>
 
-  <audio id="bgm" preload="auto" loop>
+  <audio id="bgm" preload="none" loop>
     <source src="./audio/happy-birthday.mp3" type="audio/mpeg" />
   </audio>
   
 
   <div class="hud">
-    <div class="pill"><b>🎂 爸爸生日快乐</b> <small id="hudHint">点“开始”进入回忆</small></div>
+    <div class="pill"><a href="./" aria-label="返回 MX 工作室">← 工作室</a> <b>🎂 爸爸生日快乐</b> <small id="hudHint">点“开始”进入回忆</small></div>
     <div class="pill" style="gap:8px;">
       <button id="btnBgm">播放音乐 ♪</button>
       <button id="btnSkip">跳到尾声 ✨</button>
@@ -575,7 +584,7 @@
         <div class="side">
           <div class="portraitWrap" title="二次元爸爸形象">
             <div class="portrait">
-              <img src="./image/ChatGPT Image 2026年1月8日 14_23_02.png" alt="二次元爸爸形象">
+              <img src="./assets/optimized/birthday-portrait.webp" alt="二次元爸爸形象" width="960" height="640" decoding="async">
             </div>
           </div>
         </div>
@@ -587,7 +596,7 @@
   <section id="show" class="screen hidden">
     <div class="showWrap">
       <div class="frame">
-        <img id="slideImg" src="" alt="回忆照片">
+        <img id="slideImg" decoding="async" alt="回忆照片">
       </div>
 
       <div class="captionPanel">
@@ -634,7 +643,7 @@
         <div class="side">
           <div class="portraitWrap">
             <div class="portrait">
-              <img src="./image/ChatGPT Image 2026年1月8日 14_23_02.png" alt="二次元爸爸形象（尾声）">
+              <img src="./assets/optimized/birthday-portrait.webp" alt="二次元爸爸形象（尾声）" width="960" height="640" decoding="async" loading="lazy">
             </div>
           </div>
         </div>
@@ -655,20 +664,21 @@
 
   <script>
     /* ===== 0) Data ===== */
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const IMAGES = [
-      "./image/微信图片_20260108141359_21_58.jpg",
-      "./image/微信图片_20260108141400_22_58.jpg",
-      "./image/微信图片_20260108141401_23_58.jpg",
-      "./image/微信图片_20260108141402_24_58.jpg",
-      "./image/微信图片_20260108141934_25_58.jpg",
-      "./image/微信图片_20260108141934_26_58.jpg",
-      "./image/微信图片_20260108141935_27_58.jpg",
-      "./image/微信图片_20260108141936_28_58.jpg",
-      "./image/微信图片_20260108141937_29_58.jpg",
-      "./image/微信图片_20260108141938_30_58.jpg",
-      "./image/微信图片_20260108141938_31_58.jpg",
-      "./image/微信图片_20260108141939_32_58.jpg",
-      "./image/微信图片_20260108141947_33_58.jpg"
+      "./assets/optimized/birthday-01.webp",
+      "./assets/optimized/birthday-02.webp",
+      "./assets/optimized/birthday-03.webp",
+      "./assets/optimized/birthday-04.webp",
+      "./assets/optimized/birthday-05.webp",
+      "./assets/optimized/birthday-06.webp",
+      "./assets/optimized/birthday-07.webp",
+      "./assets/optimized/birthday-08.webp",
+      "./assets/optimized/birthday-09.webp",
+      "./assets/optimized/birthday-10.webp",
+      "./assets/optimized/birthday-11.webp",
+      "./assets/optimized/birthday-12.webp",
+      "./assets/optimized/birthday-13.webp"
     ];
 
     const MAIN_CAPTIONS = [
@@ -911,20 +921,16 @@
       return target && target.closest && target.closest("button, a, input, textarea, select, label");
     }
 
-    window.addEventListener("pointerdown", (e)=>{
-      if(!final.classList.contains("hidden")) return;
-      if(isOnButton(e.target)) return;
-
-      const x = e.clientX;
-      const y = Math.min(e.clientY, innerHeight * 0.55);
-
-      // always fireworks
-      spawnFirework(x, y, true);
-
-      // only in slideshow and allowed: go next
-      if(!show.classList.contains("hidden") && canAdvance){
-        nextSlide();
-      }
+    let touchStart = null;
+    window.addEventListener('pointerdown', e => {
+      touchStart = isOnButton(e.target) ? null : {x:e.clientX,y:e.clientY,id:e.pointerId};
+    });
+    window.addEventListener('pointercancel', () => { touchStart = null; });
+    window.addEventListener('pointerup', e => {
+      const start = touchStart; touchStart = null;
+      if (!start || start.id !== e.pointerId || Math.hypot(e.clientX-start.x,e.clientY-start.y)>12 || isOnButton(e.target) || !final.classList.contains('hidden')) return;
+      spawnFirework(e.clientX,Math.min(e.clientY,innerHeight*.55),true);
+      if (!show.classList.contains('hidden') && canAdvance) nextSlide();
     });
 
     /* ===== 7) Dust background ===== */
@@ -940,7 +946,7 @@
       dust.style.height = innerHeight+"px";
       dtx.setTransform(dpr,0,0,dpr,0,0);
 
-      dustDots = Array.from({length: 90}, ()=>({
+      dustDots = Array.from({length: innerWidth < 700 ? 40 : 90}, ()=>({
         x: Math.random()*innerWidth,
         y: Math.random()*innerHeight,
         r: 0.7 + Math.random()*1.8,
@@ -966,7 +972,7 @@
         dtx.fill();
       }
       dtx.globalAlpha = 1;
-      requestAnimationFrame(dustTick);
+      if (!reducedMotion) requestAnimationFrame(dustTick);
     }
 
     /* ===== 8) Fireworks engine ===== */
@@ -988,6 +994,7 @@
     function rand(a,b){ return a + Math.random()*(b-a); }
 
     function spawnFirework(x,y,withTrail){
+      if (document.hidden || reducedMotion) return;
       const tx = x;
       const ty = Math.min(y, innerHeight*0.55);
       const startX = tx + rand(-18,18);
@@ -1003,7 +1010,7 @@
     }
 
     function burst(x,y){
-      const count = Math.floor(rand(58, 88));
+      const count = Math.floor(innerWidth < 700 ? rand(36, 56) : rand(58, 88));
       const base = rand(0, Math.PI*2);
 
       for(let i=0;i<count;i++){
@@ -1048,6 +1055,7 @@
     }
 
     function tickFx(){
+      if (reducedMotion) return;
       ctx.clearRect(0,0,innerWidth,innerHeight);
       ctx.globalCompositeOperation = "lighter";
 
