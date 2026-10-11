@@ -29,22 +29,38 @@
   };
   const intro = document.getElementById('studio-intro');
   if (!intro) return;
+  const introKey = 'mx-studio-intro-seen-v2';
   let firstVisit = false;
-  try {
-    firstVisit = !sessionStorage.getItem('mx-studio-intro-seen');
-    sessionStorage.setItem('mx-studio-intro-seen','1');
-  } catch { /* Skip the intro when session storage is unavailable. */ }
-  if (firstVisit && !reduced.matches && !location.hash && !document.hidden && typeof intro.showModal === 'function') {
+  try { firstVisit = !sessionStorage.getItem(introKey); }
+  catch { /* Keep the site accessible when session storage is unavailable. */ }
+  if (firstVisit && !location.hash && typeof intro.showModal === 'function') {
+    const enter = document.getElementById('intro-enter');
+    const previousOverflow = document.body.style.overflow;
+    let leaving = false, exitTimer;
     intro.showModal();
-    const close = () => { if (intro.open) intro.close(); };
-    const timer = setTimeout(close,1100);
-    document.getElementById('intro-skip').addEventListener('click',close);
-    reduced.addEventListener('change',close);
-    intro.addEventListener('close',() => {
-      clearTimeout(timer);
-      reduced.removeEventListener('change',close);
+    document.body.style.overflow = 'hidden';
+    const finish = () => { if (intro.open) intro.close(); };
+    const enterStudio = () => {
+      if (leaving) return;
+      leaving = true;
+      enter.disabled = true;
+      enter.setAttribute('aria-busy', 'true');
+      intro.classList.add('intro-leaving');
+      if (reduced.matches) finish();
+      else exitTimer = setTimeout(finish, 380);
+    };
+    const motionChange = () => { if (reduced.matches && leaving) finish(); };
+    enter.addEventListener('click', enterStudio);
+    reduced.addEventListener('change', motionChange);
+    intro.addEventListener('close', () => {
+      clearTimeout(exitTimer);
+      reduced.removeEventListener('change', motionChange);
+      enter.removeEventListener('click', enterStudio);
+      document.body.style.overflow = previousOverflow;
+      try { sessionStorage.setItem(introKey, '1'); } catch { /* Optional session memory. */ }
       document.querySelector('.hero').classList.add('scene-enter');
-    },{once:true});
+      document.getElementById('hero-title').focus({ preventScroll: true });
+    }, { once: true });
   }
   const hero = document.querySelector('.hero');
   let frame = 0;

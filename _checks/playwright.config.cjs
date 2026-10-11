@@ -31,7 +31,7 @@ module.exports = defineConfig({
     { name: 'webkit-390', use: { browserName: 'webkit', viewport: { width: 390, height: 844 } } },
   ],
   webServer: {
-    command: `python -m http.server 4173 --bind 127.0.0.1 --directory "${site}"`,
+    command: `python "${path.join(__dirname, 'serve.py')}" --directory "${site}"`,
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false,
     stdout: 'ignore',

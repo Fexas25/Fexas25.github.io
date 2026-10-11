@@ -15,6 +15,10 @@ if (!routes.length) throw Error('正式构建没有 HTML 页面，无法进行�
 test.beforeEach(async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
+  page.on('requestfailed', request => {
+    const reason = request.failure()?.errorText || '';
+    if (request.url().startsWith('http://127.0.0.1:4173/') && !/aborted|cancelled/i.test(reason)) errors.push(`${reason} ${request.url()}`);
+  });
   page.on('response', response => {
     if (response.url().startsWith('http://127.0.0.1:4173/') && response.status() >= 400)
       errors.push(`${response.status()} ${response.url()}`);
@@ -63,6 +67,7 @@ async function reachable(locator) {
 for (const route of routes) {
   test(`页面布局和按钮 ${route}`, async ({ page }) => {
     await page.goto(route);
+    if (await page.locator('#studio-intro').isVisible()) await page.locator('#intro-enter').click();
     await expect(page.locator('#studio-intro')).not.toBeVisible();
     await page.evaluate(async () => {
       await document.fonts.ready;
@@ -114,7 +119,7 @@ test('检测器能识别横向溢出和按钮遮挡', async ({ page }) => {
 
 test('首页抽签弹窗和签到记录保持一致', async ({ page }) => {
   await page.goto('/');
-  await page.locator('#intro-skip').click();
+  await page.locator('#intro-enter').click();
   await page.locator('.draw-box[data-draw]').click();
   const dialog = page.locator('#fortune-dialog');
   await expect(dialog).toBeVisible();
@@ -222,4 +227,32 @@ test('多篇草稿筛选、继续写、刷新和备份恢复', async ({ page, br
     if (fresh) await test.info().attach('恢复草稿时的页面', { body: await fresh.screenshot(), contentType: 'image/png' });
     throw error;
   } finally { await context.close(); }
+});
+
+
+test('开屏等待点击、进入后不重复打断', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#studio-intro')).toBeVisible();
+  await page.waitForTimeout(1400); // Exceed the old automatic dismissal time.
+  await expect(page.getByRole('button', { name: '进入摸鱼时间' })).toBeVisible();
+  await noOverflow(page);
+  const screenshot = test.info().outputPath('intro-mobile.png');
+  await page.screenshot({ path: screenshot });
+  await test.info().attach('摸鱼时间开屏', { path: screenshot, contentType: 'image/png' });
+  await page.getByRole('button', { name: '进入摸鱼时间' }).click();
+  await expect(page.locator('#studio-intro')).not.toBeVisible();
+  await expect(page.locator('#hero-title')).toBeFocused();
+  await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+  await page.reload();
+  await expect(page.locator('#studio-intro')).not.toBeVisible();
+});
+
+test('减少动态效果下静态开屏和键盘进入', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.locator('#studio-intro')).toBeVisible();
+  await expect(page.locator('.intro-swimmer')).toHaveCSS('animation-name', 'none');
+  await page.locator('#intro-enter').press('Enter');
+  await expect(page.locator('#studio-intro')).not.toBeVisible();
+  await expect(page.locator('#hero-title')).toBeFocused();
 });
