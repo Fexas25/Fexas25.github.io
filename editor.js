@@ -40,18 +40,36 @@
     $('draft-status').textContent = message;
     $('draft-library-status').textContent = message;
   }
-  function refreshLibrary() {
+  const categoryNames = {blog:'碎碎念','competitive-programming':'博客',projects:'作品 · 项目 / AI 工作流','game-jam':'作品 · 游戏开发',art:'作品 · 绘画创作'};
+  const timeFormatter = new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  const editTime = item => typeof item.updatedAt === 'string' && Number.isFinite(Date.parse(item.updatedAt)) ? Date.parse(item.updatedAt) : 0;
+  const timeLabel = item => editTime(item) ? timeFormatter.format(new Date(item.updatedAt)) : '暂无编辑时间';
+  function selectionInfo() {
+    const item = drafts.state().items.find(item => item.id === $('draft-select').value);
+    $('draft-selection-info').textContent = item ? `${item.meta['post-title'] || '未命名草稿'} · ${categoryNames[item.meta['post-category']] || '碎碎念'} · 最近编辑：${timeLabel(item)}${item.id === activeDraft ? ' · 正在写' : ''}` : '';
+  }
+  function refreshLibrary(preferActive = false) {
     const select = $('draft-select');
+    const selected = select.value;
+    const normalize = value => String(value).normalize('NFKC').toLocaleLowerCase();
+    const query = normalize($('draft-search').value.trim());
+    const category = $('draft-category-filter').value;
+    const all = drafts.state().items;
+    const items = all.filter(item => (!category || (item.meta['post-category'] || 'blog') === category) && normalize(item.meta['post-title'] || '未命名草稿').includes(query)).slice().sort((a,b) => editTime(b) - editTime(a));
     select.replaceChildren();
-    for (const item of drafts.state().items) {
+    for (const item of items) {
       const option = document.createElement('option');
       option.value = item.id;
-      option.textContent = `${item.meta['post-title'] || '未命名草稿'}${item.restoredCopy ? '（恢复副本）' : ''} · ${item.meta['post-date'] || ''}${item.id === activeDraft ? '（正在写）' : ''}`;
+      option.textContent = `${item.meta['post-title'] || '未命名草稿'}${item.restoredCopy ? '（恢复副本）' : ''} · ${timeLabel(item)}${item.id === activeDraft ? '（正在写）' : ''}`;
       select.append(option);
     }
-    if (!select.options.length) select.append(new Option('还没有草稿',''));
-    select.value = activeDraft || select.options[0]?.value || '';
-    $('draft-open').disabled = !drafts.state().items.length;
+    if (!items.length) select.append(new Option(all.length ? '没有符合条件的草稿' : '还没有草稿',''));
+    const candidates = preferActive ? [activeDraft,selected] : [selected,activeDraft];
+    select.value = candidates.find(id => items.some(item => item.id === id)) || items[0]?.id || '';
+    select.disabled = !items.length;
+    $('draft-open').disabled = !items.length;
+    $('draft-filter-status').textContent = `显示 ${items.length} / ${all.length} 篇草稿。${all.length && !items.length ? '换个标题或清除筛选试试。' : ''}${activeDraft && !items.some(item => item.id === activeDraft) ? '正在编辑的草稿不在当前筛选结果中，内容仍保留在下方。' : ''}`;
+    selectionInfo();
     window.dispatchEvent(new Event('mx-editor-change'));
   }
   function saveDraft() {
@@ -79,7 +97,7 @@
     if (!$('work-type').value) $('work-type').value = 'creative';
     $('markdown-input').value = item.body;
     activeDraft = item.id; dirty = false;
-    invalidatePublish(); updateFields(); preview(); refreshLibrary();
+    invalidatePublish(); updateFields(); preview(); refreshLibrary(true);
   }
   function restoreDraft() {
     const item = drafts.state().items.find(x=>x.id === activeDraft || (!activeDraft && x.id === drafts.state().active)) || drafts.state().items[0];
@@ -176,6 +194,15 @@
     } catch (error) { draftStatus(error.message); }
   });
   $('draft-new').addEventListener('click', () => window.MXEditor.newDocument());
+  let draftComposing = false;
+  $('draft-search').addEventListener('compositionstart', () => { draftComposing = true; });
+  $('draft-search').addEventListener('compositionend', () => { draftComposing = false; refreshLibrary(); });
+  $('draft-search').addEventListener('input', event => { if (!draftComposing && !event.isComposing) refreshLibrary(); });
+  $('draft-category-filter').addEventListener('change', () => refreshLibrary());
+  $('draft-select').addEventListener('change', selectionInfo);
+  $('draft-filter-clear').addEventListener('click', () => {
+    $('draft-search').value = ''; $('draft-category-filter').value = ''; refreshLibrary(); $('draft-search').focus();
+  });
   $('draft-backup-export').addEventListener('click', () => {
     try {
       const saved = preserveCurrent();

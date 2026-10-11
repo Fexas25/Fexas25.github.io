@@ -23,7 +23,10 @@ script: /editor-github.js
 <section class="archive draft-library" aria-labelledby="draft-heading">
 <h2 id="draft-heading">我的草稿本</h2>
 <p>自动保存到当前浏览器。切换、新建或导入前，会先保存正在写的内容。</p>
+<div class="draft-filters"><label for="draft-search">按标题查找<input id="draft-search" type="search" placeholder="输入草稿标题…" autocomplete="off" /></label><label for="draft-category-filter">筛选栏目<select id="draft-category-filter"><option value="">全部栏目</option><option value="blog">碎碎念</option><option value="competitive-programming">博客</option><option value="projects">作品 · 项目 / AI 工作流</option><option value="game-jam">作品 · 游戏开发</option><option value="art">作品 · 绘画创作</option></select></label><button type="button" id="draft-filter-clear">清除筛选</button></div>
+<p id="draft-filter-status" role="status" aria-live="polite"></p>
 <div class="draft-controls"><label for="draft-select">选择草稿</label><select id="draft-select"><option value="">还没有草稿</option></select><button type="button" id="draft-open">继续写</button><button type="button" id="draft-new">新建草稿</button><button type="button" id="markdown-import">导入 Markdown ↑</button><input id="markdown-file" type="file" accept=".md,.markdown,.mdown,text/markdown,text/plain" hidden /></div>
+<p id="draft-selection-info"></p><p class="publish-note">按最近编辑排序，时间以当前设备时区显示。筛选不会切换正在编辑的草稿。</p>
 <p id="draft-library-status" role="status" aria-live="polite">支持普通 Markdown 和含 YAML 文章信息的文件；每个文件导入为一篇新草稿。</p>
 <div class="draft-controls draft-backup-controls"><button type="button" id="draft-backup-export">备份全部草稿 ↓</button><button type="button" id="draft-backup-import">恢复草稿备份 ↑</button><input id="draft-backup-file" type="file" accept=".json,application/json" hidden /></div>
 <p>换设备时：备份全部草稿，保存 JSON 文件，再到新设备恢复。相同内容会跳过；同一草稿有不同内容时另存副本，保留两份。文件仅在本机处理，不包含图片文件或登录凭据。</p>

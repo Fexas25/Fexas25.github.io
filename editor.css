@@ -11,3 +11,5 @@
 .draft-backup-controls{padding-top:18px;margin-top:18px;border-top:1px dashed var(--line)}.draft-library #draft-backup-status{color:var(--purple)}
 
 .tag-field{margin-top:20px;grid-template-columns:1fr}
+
+.draft-filters{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin:18px 0 12px}.draft-filters label{display:flex;flex-direction:column;gap:8px;flex:1 1 180px;min-width:0;font-size:13px;color:var(--muted)}.draft-filters input,.draft-filters select{width:100%;min-width:0;min-height:44px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fffefd;color:var(--ink);font:inherit;font-size:16px}.draft-filters button{min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:18px;background:#fff9f4;font-size:13px}.draft-library #draft-selection-info{color:var(--ink);margin-bottom:4px}.draft-controls select{width:0;min-width:0}.draft-library #draft-filter-status{margin:10px 0 14px}@media(max-width:600px){.draft-filters label{flex-basis:100%}.draft-controls select{width:100%}.draft-controls{gap:10px}}
