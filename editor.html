@@ -15,10 +15,17 @@ scripts:
   - /vendor-js/js-yaml.js
   - /editor-config.js
   - /editor-content.js
+  - /editor-drafts.js
   - /editor.js
 script: /editor-github.js
 ---
 {% include section-intro.html %}
+<section class="archive draft-library" aria-labelledby="draft-heading">
+<h2 id="draft-heading">我的草稿本</h2>
+<p>自动保存到当前浏览器。切换、新建或导入前，会先保存正在写的内容。</p>
+<div class="draft-controls"><label for="draft-select">选择草稿</label><select id="draft-select"><option value="">还没有草稿</option></select><button type="button" id="draft-open">继续写</button><button type="button" id="draft-new">新建草稿</button><button type="button" id="markdown-import">导入 Markdown ↑</button><input id="markdown-file" type="file" accept=".md,.markdown,.mdown,text/markdown,text/plain" hidden /></div>
+<p id="draft-library-status" role="status" aria-live="polite">支持普通 Markdown 和含 YAML 文章信息的文件；每个文件导入为一篇新草稿。</p>
+</section>
 <section class="github-panel archive" aria-labelledby="github-heading">
 <div class="github-heading"><div><h2 id="github-heading">我的内容</h2><p id="github-status" role="status" aria-live="polite">登录 GitHub 后，可以直接发布或修改文章。</p></div><div class="publish-links"><button type="button" id="github-login" class="primary-link">登录 GitHub</button><button type="button" id="github-logout" hidden>退出登录</button></div></div>
 <p id="github-setup" hidden>首次使用需要站主完成 GitHub App 与登录服务配置。<a href="{{ '/publishing-setup.html' | relative_url }}">查看一次性配置步骤 →</a></p>
@@ -29,7 +36,7 @@ script: /editor-github.js
 <section class="archive editor-settings" aria-label="文章信息"><div class="editor-fields"><label>标题<input id="post-title" placeholder="给这段记录起个名字" required /></label><label>栏目<select id="post-category"><option value="blog">碎碎念</option><option value="competitive-programming">博客 · 算法与竞赛</option><option value="projects">作品 · 项目 / AI 工作流</option><option value="game-jam">作品 · 游戏开发</option><option value="art">作品 · 绘画创作</option></select></label><label>日期<input id="post-date" type="date" required /></label></div>
 <div id="work-fields" class="editor-fields work-fields" hidden><label>作品分类<select id="work-type"><option value="creative">创作</option><option value="game">小游戏 / 互动</option><option value="ai">AI 工作流</option></select></label><label>作品链接<input id="work-url" placeholder="https://… 或 /games/…" /></label><label>一句话介绍<input id="work-description" placeholder="作品做了什么，有什么有趣的地方" /></label><label>封面地址（可选）<input id="work-cover" placeholder="/picture/… 或 https://…" /></label></div></section>
 <section class="editor-workspace" aria-label="写作与预览"><div class="editor-toolbar" role="group" aria-label="Markdown 工具"><button type="button" data-format="bold">粗体</button><button type="button" data-format="italic">斜体</button><button type="button" data-format="heading">标题</button><button type="button" data-format="list">列表</button><button type="button" data-format="code">代码</button><button type="button" data-format="link">链接</button><button type="button" data-format="image">图片</button></div><div class="editor-columns"><div class="editor-panel"><label for="markdown-input" class="editor-panel-title">写下灵感 <span id="word-count">0 字</span></label><textarea id="markdown-input" placeholder="在这里写 Markdown…&#10;&#10;# 今天的小事&#10;&#10;把想说的话留在这里。"></textarea></div><div class="editor-preview"><h2 class="editor-panel-title">看看效果</h2><div id="preview-content" class="prose"></div></div></div></section>
-<div class="editor-actions"><div><button class="primary-link" type="button" id="github-publish" disabled>登录后发布</button><button type="button" id="prepare-publish">复制发布内容</button><button type="submit">导出 Markdown ↓</button><button type="button" id="restore-draft">恢复草稿</button><button type="button" id="clear-editor">清空</button></div><p id="draft-status" role="status" aria-live="polite">草稿保存在当前浏览器。</p></div>
+<div class="editor-actions"><div><button class="primary-link" type="button" id="github-publish" disabled>登录后发布</button><button type="button" id="prepare-publish">复制发布内容</button><button type="submit">导出 Markdown ↓</button><button type="button" id="restore-draft">恢复已保存内容</button><button type="button" id="clear-editor">删除当前草稿</button></div><p id="draft-status" role="status" aria-live="polite">草稿保存在当前浏览器。</p></div>
 <p id="github-result" class="export-status" role="status" aria-live="polite" hidden></p>
 <p id="export-status" class="export-status" role="status" aria-live="polite" hidden></p>
 <section id="publish-panel" class="publish-panel" aria-labelledby="publish-heading" hidden>
@@ -42,6 +49,7 @@ script: /editor-github.js
 <p class="publish-note">这里准备的是新内容。若 GitHub 提示文件已存在，请从下方“管理当前栏目”打开原文件修改，避免重复发布。</p>
 </section>
 <details class="publish-help"><summary>发布、修改和配图操作指南</summary>
+<p><strong>导入与草稿：</strong>在“我的草稿本”点击“导入 Markdown”，选择小于 2 MB 的 .md、.markdown 或 .mdown 文件。含 YAML 的文件会自动填入文章信息；普通 Markdown 会使用当前栏目，并从一级标题或文件名提取标题。导入文件会另存为新草稿。选择草稿后点击“继续写”，也可以“新建草稿”；删除只影响当前这篇本地草稿，不会删除网站文章。多标签页同时编辑发生冲突时，请先导出当前内容，再刷新。</p>
 <p><strong>直接发布：</strong>登录 GitHub，填写内容后点击“发布到网站”。要修改旧文章，先在“我的内容”选择文章并点“打开修改”，完成后点“保存修改”。提交成功后等待网站部署即可。登录只保留在当前页面内存中，刷新或关闭后需要重新登录；草稿和当前编辑的文章信息会保留。</p>
 <p><strong>备用发布：</strong>填写标题、栏目、日期和正文，点击“复制并准备发布”，再按上方提示粘贴到 GitHub。也可以“导出 Markdown”，点击出现的上传入口，拖入下载的文件，等上传完成后提交。保留生成的文件名和开头两行 <code>---</code> 之间的文章信息。</p>
 <p><strong>更新作品：</strong>选择作品栏目，填写分类、作品链接和介绍；正文可以写使用说明，也可以只填链接。发布后，作品卡片会自动显示在对应分类与首页最近作品中。</p>

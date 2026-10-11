@@ -22,5 +22,26 @@
     }
     return {...file, filename:record.path.slice(file.folder.length + 1), text:'---\n' + window.jsyaml.dump(metadata,{schema:window.jsyaml.JSON_SCHEMA,lineWidth:-1,noRefs:true}) + '---\n\n' + next.body};
   }
-  window.MXContent = {parse,update,folders};
+  function importMarkdown(text, filename, fallbackCategory) {
+    text = text.replace(/^\uFEFF/, '').replace(/\r\n/g,'\n');
+    let metadata = {}, body = text;
+    if (/^---\s*\n/.test(text)) {
+      const match = text.match(/^---[ \t]*\n([\s\S]*?)\n---[ \t]*(?:\n|$)([\s\S]*)$/);
+      if (!match) throw Error('文章信息缺少结束的 ---，请检查 Markdown 文件。');
+      try { metadata = window.jsyaml.load(match[1],{schema:window.jsyaml.JSON_SCHEMA}) || {}; }
+      catch { throw Error('YAML 文章信息格式不正确，请检查缩进和引号。'); }
+      if (typeof metadata !== 'object' || Array.isArray(metadata)) throw Error('文章信息应为标题、日期等字段。');
+      body = match[2].replace(/^\n/,'');
+    }
+    const category = metadata.category || fallbackCategory;
+    if (!folders[category]) throw Error('无法识别栏目，请将 category 改为 blog、competitive-programming、projects、game-jam 或 art。');
+    for (const field of ['title','date','type','external_url','description','cover']) {
+      if (metadata[field] !== undefined && typeof metadata[field] !== 'string') throw Error(`文章信息 ${field} 必须是文本。`);
+    }
+    const date = (metadata.date || filename.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || '').slice(0,10);
+    if (date && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0,10) !== date)) throw Error('文章日期不正确，请使用 YYYY-MM-DD。');
+    const title = metadata.title || body.match(/^#\s+(.+)$/m)?.[1] || filename.replace(/\.md(?:own)?$|\.markdown$/i,'').replace(/^\d{4}-\d{2}-\d{2}-/,'');
+    return {metadata,body,category,title,date};
+  }
+  window.MXContent = {parse,update,folders,importMarkdown};
 })();

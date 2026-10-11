@@ -20,6 +20,7 @@
     $('github-publish').textContent = busy ? '处理中…' : token ? (window.MXEditor.record() ? '保存修改' : '发布到网站') : '登录后发布';
     ['github-load','github-new','github-refresh','github-article'].forEach(id => $(id).disabled = busy);
     $('writing-form').inert = busy;
+    document.querySelector('.draft-library').inert = busy;
   }
   function result(message) { $('github-result').hidden = false; $('github-result').textContent = message; }
   async function api(path, options = {}) {
@@ -51,7 +52,7 @@
       if (select.options.length === 1) select.options[0].textContent = '还没有文章，可以新建内容';
     } catch (error) { result(error.message); }
   }
-  function canSwitch() { return !window.MXEditor.hasContent() || window.confirm('打开另一篇内容会替换当前编辑区和草稿。需要保留的内容请先导出。继续吗？'); }
+  function canSwitch() { return true; } // The editor preserves the current draft before switching.
   $('github-refresh').addEventListener('click',listArticles);
   $('github-load').addEventListener('click',async () => {
     const path = $('github-article').value;
@@ -67,6 +68,7 @@
     finally { busy = false; controls(); }
   });
   $('github-new').addEventListener('click',() => { if (canSwitch()) { window.MXEditor.newDocument(); $('github-result').hidden = true; controls(); } });
+  window.addEventListener('mx-editor-change',controls);
   $('clear-editor').addEventListener('click',controls);
   $('restore-draft').addEventListener('click',controls);
   $('github-login').addEventListener('click',() => {

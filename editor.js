@@ -31,35 +31,68 @@
     if (window.marked?.parse && window.DOMPurify?.sanitize) output.innerHTML = window.DOMPurify.sanitize(window.marked.parse(value), {FORBID_TAGS:['form','input','button','style'],FORBID_ATTR:['style']});
     else output.textContent = value;
   }
+  let activeDraft = null;
+  let importedMetadata = null;
+  let dirty = false;
+  const drafts = window.MXDrafts;
+  function draftStatus(message) {
+    $('draft-status').textContent = message;
+    $('draft-library-status').textContent = message;
+  }
+  function refreshLibrary() {
+    const select = $('draft-select');
+    select.replaceChildren();
+    for (const item of drafts.state().items) {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = `${item.meta['post-title'] || '未命名草稿'} · ${item.meta['post-date'] || ''}${item.id === activeDraft ? '（正在写）' : ''}`;
+      select.append(option);
+    }
+    if (!select.options.length) select.append(new Option('还没有草稿',''));
+    select.value = activeDraft || select.options[0]?.value || '';
+    $('draft-open').disabled = !drafts.state().items.length;
+    window.dispatchEvent(new Event('mx-editor-change'));
+  }
   function saveDraft() {
     $('export-status').hidden = true;
     invalidatePublish();
+    const id = activeDraft || drafts.id();
     try {
-      localStorage.setItem('markdown-draft', $('markdown-input').value);
-      localStorage.setItem('mx-writing-meta', JSON.stringify({...Object.fromEntries(ids.map(id => [id,$(id).value])),__record:currentRecord}));
-      $('draft-status').textContent = '草稿已保存到当前浏览器。';
-    } catch { $('draft-status').textContent = '浏览器无法保存草稿，请及时导出 Markdown。'; }
+      drafts.save({id,body:$('markdown-input').value,meta:{...Object.fromEntries(ids.map(id => [id,$(id).value])),__record:currentRecord,__imported:importedMetadata}});
+      activeDraft = id; dirty = false;
+      refreshLibrary();
+      draftStatus('当前草稿已自动保存到此浏览器。');
+      return true;
+    } catch (error) { dirty = true; draftStatus(error.message); return false; }
+  }
+  function showDraft(item) {
+    const meta = item.meta;
+    currentRecord = meta.__record && typeof meta.__record.path === 'string' && typeof meta.__record.sha === 'string' && meta.__record.metadata ? meta.__record : null;
+    importedMetadata = meta.__imported || null;
+    ids.forEach(id => $(id).value = typeof meta[id] === 'string' ? meta[id] : '');
+    if (currentRecord) $('post-category').value = currentRecord.category;
+    if (!folders[$('post-category').value]) $('post-category').value = 'blog';
+    if (!$('post-date').value) $('post-date').value = today();
+    if (!$('work-type').value) $('work-type').value = 'creative';
+    $('markdown-input').value = item.body;
+    activeDraft = item.id; dirty = false;
+    invalidatePublish(); updateFields(); preview(); refreshLibrary();
   }
   function restoreDraft() {
-    invalidatePublish();
-    $('export-status').hidden = true;
-    try {
-      const body = localStorage.getItem('markdown-draft');
-      if (body === null) { $('draft-status').textContent = '还没有保存的草稿。'; return; }
-      $('markdown-input').value = body;
-      try {
-        const meta = JSON.parse(localStorage.getItem('mx-writing-meta'));
-        if (meta && typeof meta === 'object') {
-          currentRecord = meta.__record && typeof meta.__record.path === 'string' && typeof meta.__record.sha === 'string' && meta.__record.metadata ? meta.__record : null;
-          ids.forEach(id => { if(typeof meta[id] === 'string') $(id).value = meta[id]; });
-          if (currentRecord) $('post-category').value = currentRecord.category;
-        }
-      } catch { /* Legacy text-only drafts can still be restored. */ }
-      if (!folders[$('post-category').value]) $('post-category').value = 'blog';
-      if (!$('post-date').value) $('post-date').value = today();
-      updateFields(); preview();
-      $('draft-status').textContent = '已恢复草稿。';
-    } catch { $('draft-status').textContent = '浏览器无法读取草稿。'; }
+    const item = drafts.state().items.find(x=>x.id === activeDraft || (!activeDraft && x.id === drafts.state().active)) || drafts.state().items[0];
+    if (item) showDraft(item);
+    else refreshLibrary();
+    draftStatus(drafts.error() || (item ? '已恢复上次编辑的草稿。' : '开始写作后，会自动保存草稿。'));
+  }
+  function preserveCurrent() {
+    return !(activeDraft || ids.some(id=>!['post-category','post-date','work-type'].includes(id) && $(id).value) || $('markdown-input').value) || saveDraft();
+  }
+  function blankDocument() {
+    dirty = false;
+    activeDraft = null; currentRecord = null; importedMetadata = null;
+    ['post-title','markdown-input','work-url','work-description','work-cover'].forEach(id => $(id).value = '');
+    $('post-date').value = today(); $('work-type').value = 'creative';
+    invalidatePublish(); updateFields(); preview(); refreshLibrary();
   }
   function slugify(title) { return title.toLowerCase().trim().replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'') || 'note'; }
   function validAddress(value) {
@@ -79,7 +112,9 @@
       for (const [key,value] of [['external_url',link],['description',$('work-description').value.trim()],['cover',cover]]) if(value) lines.push(`${key}: ${JSON.stringify(value)}`);
     }
     lines.push('---','',body,'');
-    return window.MXContent.update({folder:folders[category],filename:`${category === 'blog' ? date+'-' : ''}${slugify(title)}.md`,text:lines.join('\n')},currentRecord);
+    const file = {folder:folders[category],filename:`${category === 'blog' ? date+'-' : ''}${slugify(title)}.md`,text:lines.join('\n')};
+    const record = currentRecord || (importedMetadata ? {path:`${file.folder}/${file.filename}`,category,metadata:importedMetadata,sha:''} : null);
+    return window.MXContent.update(file,record);
   }
   function showPublish(file, message) {
     $('publish-panel').hidden = false;
@@ -119,21 +154,50 @@
   $('post-date').value = today();
   restoreDraft();
   const category = new URLSearchParams(window.location.search).get('category');
-  if (!currentRecord && folders[category]) $('post-category').value = category;
+  if (!activeDraft && folders[category]) $('post-category').value = category;
   updateFields(); preview();
   ids.forEach(id => $(id).addEventListener('input', () => { updateFields(); saveDraft(); }));
   $('markdown-input').addEventListener('input', () => { preview(); saveDraft(); });
   document.querySelectorAll('[data-format]').forEach(button => button.addEventListener('click', () => format(button.dataset.format)));
   $('restore-draft').addEventListener('click', restoreDraft);
+  $('draft-open').addEventListener('click', () => {
+    const id = $('draft-select').value;
+    if (!id || id === activeDraft || !preserveCurrent()) return;
+    try {
+      drafts.select(id);
+      showDraft(drafts.state().items.find(x=>x.id === id));
+      draftStatus('已切换草稿，可以继续写。');
+    } catch (error) { draftStatus(error.message); }
+  });
+  $('draft-new').addEventListener('click', () => window.MXEditor.newDocument());
+  $('markdown-import').addEventListener('click', () => $('markdown-file').click());
+  $('markdown-file').addEventListener('change', async () => {
+    const file = $('markdown-file').files[0];
+    if (!file) return;
+    $('markdown-import').disabled = true;
+    try {
+      if (file.size > 2 * 1024 * 1024) throw Error('请选择小于 2 MB 的 Markdown 文件。');
+      if (!/\.(md|markdown|mdown)$/i.test(file.name)) throw Error('请选择 .md、.markdown 或 .mdown 文件。');
+      const parsed = window.MXContent.importMarkdown(await file.text(),file.name,$('post-category').value);
+      if (!preserveCurrent()) throw Error('当前内容尚未保存，请先导出备份，再导入。');
+      const meta = {'post-title':parsed.title,'post-category':parsed.category,'post-date':parsed.date || today(),'work-type':parsed.metadata.type || 'creative','work-url':parsed.metadata.external_url || '','work-description':parsed.metadata.description || '','work-cover':parsed.metadata.cover || '',__imported:parsed.metadata};
+      const item = {id:drafts.id(),body:parsed.body,meta};
+      drafts.save(item);
+      showDraft(item);
+      draftStatus(`已将 ${file.name} 导入为新草稿，原草稿已保留。`);
+    } catch (error) { $('draft-library-status').textContent = error.message; }
+    finally { $('markdown-import').disabled = false; $('markdown-file').value = ''; }
+  });
   $('clear-editor').addEventListener('click', () => {
-    if (!window.confirm('清空当前内容及保存的草稿？')) return;
-    invalidatePublish();
-    $('post-title').value = ''; $('markdown-input').value = '';
-    ['work-url','work-description','work-cover'].forEach(id => $(id).value = '');
-    currentRecord = null; updateFields();
-    $('post-date').value = today(); preview(); $('export-status').hidden = true;
-    try { localStorage.removeItem('markdown-draft');localStorage.removeItem('mx-writing-meta');$('draft-status').textContent = '草稿已清空，可以开始新的记录。'; }
-    catch { $('draft-status').textContent = '当前内容已清空，浏览器中的旧草稿未能删除。'; }
+    if (!window.confirm('删除当前这一篇草稿？其他草稿和网站文章不受影响。')) return;
+    try {
+      if (activeDraft) drafts.remove(activeDraft);
+      blankDocument();
+      draftStatus('当前草稿已删除，其他草稿已保留。');
+    } catch (error) { draftStatus(error.message); }
+  });
+  window.addEventListener('beforeunload', event => {
+    if (dirty) { event.preventDefault(); event.returnValue = ''; }
   });
   $('writing-form').addEventListener('submit', event => {
     event.preventDefault();
@@ -154,6 +218,8 @@
     record: () => currentRecord,
     hasContent: () => Boolean($('post-title').value.trim() || $('markdown-input').value.trim() || $('work-url').value.trim()),
     load(record) {
+      if (!preserveCurrent()) throw Error('当前草稿未保存，请先导出备份。');
+      activeDraft = null; importedMetadata = null;
       const meta = record.metadata;
       currentRecord = record;
       $('post-category').value = record.category;
@@ -165,10 +231,10 @@
       updateFields(); preview(); saveDraft();
     },
     newDocument() {
-      currentRecord = null;
-      ['post-title','markdown-input','work-url','work-description','work-cover'].forEach(id => $(id).value = '');
-      $('post-date').value = today(); $('work-type').value = 'creative';
-      updateFields(); preview(); saveDraft();
+      if (!preserveCurrent()) return;
+      const item = {id:drafts.id(),body:'',meta:{'post-category':$('post-category').value,'post-date':today(),'work-type':'creative'}};
+      try { drafts.save(item); showDraft(item); draftStatus('已新建草稿，上一篇已保留。'); }
+      catch (error) { draftStatus(error.message); }
     },
     committed(file, sha) {
       currentRecord = window.MXContent.parse(file.text, `${file.folder}/${file.filename}`, sha);
