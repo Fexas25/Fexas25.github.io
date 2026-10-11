@@ -2,7 +2,19 @@
   <p class="buddy-message" role="status" aria-live="polite">{{ page.bubble | default: '摸鱼搭子已就位。碰一下，打个招呼？' }}</p>
   <div class="buddy-floor">
     <span class="buddy-trail" aria-hidden="true"></span>
-    <button class="studio-buddy buddy-blue" type="button" data-buddy="blue" aria-label="蓝蓝：打招呼，可用左右方向键移动" aria-describedby="buddy-help"><img src="{{ '/assets/optimized/character-blue-cutout.webp' | relative_url }}" width="640" height="486" alt="" draggable="false" decoding="async" /><span class="buddy-shadow" aria-hidden="true"></span></button>
+    {% assign buddy_cast = 'orange,pink,blue' | split: ',' %}
+    {% if include.compact %}
+      {% assign buddy_cast = 'blue' | split: ',' %}
+      {% if page.portrait contains 'orange' %}{% assign buddy_cast = 'orange' | split: ',' %}{% elsif page.portrait contains 'pink' %}{% assign buddy_cast = 'pink' | split: ',' %}{% endif %}
+    {% endif %}
+    {% for buddy in buddy_cast %}
+      {% case buddy %}
+        {% when 'orange' %}{% assign buddy_name = '橙橙' %}{% assign buddy_image = '/assets/optimized/character-orange-chibi.webp' %}{% assign buddy_width = 309 %}{% assign buddy_height = 420 %}
+        {% when 'pink' %}{% assign buddy_name = '桃桃' %}{% assign buddy_image = '/assets/optimized/character-pink-chibi.webp' %}{% assign buddy_width = 310 %}{% assign buddy_height = 420 %}
+        {% else %}{% assign buddy_name = '蓝蓝' %}{% assign buddy_image = '/assets/optimized/character-blue-cutout.webp' %}{% assign buddy_width = 640 %}{% assign buddy_height = 486 %}
+      {% endcase %}
+      <button class="studio-buddy buddy-{{ buddy }}" type="button" data-buddy="{{ buddy }}" aria-label="{{ buddy_name }}：打招呼，可用左右方向键移动" aria-describedby="buddy-help"><img src="{{ buddy_image | relative_url }}" width="{{ buddy_width }}" height="{{ buddy_height }}" alt="" draggable="false" decoding="async" /><span class="buddy-shadow" aria-hidden="true"></span></button>
+    {% endfor %}
     <span class="buddy-plane" aria-hidden="true">➤</span>
     <span class="buddy-pop" aria-hidden="true">✦</span>
   </div>

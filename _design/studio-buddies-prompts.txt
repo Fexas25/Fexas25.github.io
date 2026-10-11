@@ -1,0 +1,14 @@
+Approved by user: create two full-body transparent chibi interpretations from the existing orange and pink website portraits.
+Method: built-in image_gen, transparent_background=true; inspected results, preserved PNG masters in _design. Web delivery: 420px high WebP, quality 88 with alpha preserved, encoded using sharp.
+Masters: _design/character-orange-chibi.png; _design/character-pink-chibi.png
+Website assets: assets/optimized/character-orange-chibi.webp; assets/optimized/character-pink-chibi.webp
+
+orange
+Reference: assets/optimized/portrait-orange.webp
+Exact final prompt:
+Use the provided existing website portrait as the character identity reference. Create ONE cute full-body chibi anime website companion on a truly transparent alpha background. Preserve the peach-orange long hair, violet eyes, gentle expression, white angel wings, white blouse and warm golden-orange bows and trim. Translate the existing character into a polished 2.5-head-tall chibi, standing with both feet visible, small brown shoes, a modest cream and golden-orange skirt. One hand raised in a friendly small wave, other holding a tiny closed notebook. Soft pastel anime illustration, fine warm colored outlines, clear readable silhouette at 110 CSS pixels tall, subtly hand-painted shading. Match the gentle original illustration mood. Entire character including wings and feet inside canvas, tight balanced transparent margins. No floor, no background, no extra characters, no frame, no added text or logos. This is a new chibi interpretation of the existing portrait, not a background scene.
+
+pink
+Reference: assets/optimized/portrait-pink.webp
+Exact final prompt:
+Use the provided existing website portrait as the character identity reference. Create ONE cute full-body chibi anime website companion on a truly transparent alpha background. Preserve the pastel pink hair with long gathered side hair, pink-red eyes, cheerful smile, pale yellow star hair ornament, small floral hair decoration, pale cream collared outfit with charcoal cuffs and golden accent. Translate this character into a polished 2.5-head-tall chibi, standing with both feet visible, modest cream pleated skirt and small dark shoes. Hold a small pastel lilac pencil with both hands at chest level, playful slightly tilted head. Soft pastel anime illustration, fine warm colored outlines, clear readable silhouette at 110 CSS pixels tall, subtly hand-painted shading. Entire character and feet inside canvas, tight balanced transparent margins. No floor, no background, no extra characters, no frame, no added text or logos. This is a new chibi interpretation of the existing portrait, not a background scene.

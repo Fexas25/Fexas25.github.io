@@ -10,6 +10,7 @@ test('小伙伴触摸回应、纸飞机轮流接住', async ({ page }) => {
   await page.goto('/');
   const scene = page.locator('[data-buddy-scene]');
   const buddies = scene.locator('[data-buddy]');
+  await expect(buddies).toHaveCount(3);
   await scene.scrollIntoViewIfNeeded();
   await buddies.first().tap();
   await expect(scene.locator('[role=status]')).toContainText('：');
@@ -85,4 +86,24 @@ test('真正的触屏拖动能移动角色并释放指针', async ({ page, brows
   await expect(page.locator('.buddy-message')).toContainText(/位置|贴贴/);
   await buddy.tap();
   await expect(page.locator('.buddy-message')).toContainText('：');
+});
+
+test('拖到伙伴旁边会回应，并分开落座避免遮挡', async ({ page }) => {
+  await page.goto('/');
+  const buddies = page.locator('[data-buddy]');
+  await buddies.first().scrollIntoViewIfNeeded();
+  const from = await buddies.nth(0).boundingBox();
+  const to = await buddies.nth(1).boundingBox();
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await expect(page.locator('.buddy-message')).toContainText('橙橙和桃桃：贴贴');
+  for (const buddy of await buddies.all()) {
+    await expect.poll(() => buddy.evaluate(el => {
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return hit === el || el.contains(hit);
+    })).toBe(true);
+  }
 });
