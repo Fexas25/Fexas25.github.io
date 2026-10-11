@@ -1,7 +1,7 @@
 /* The artwork lives in document space, independently of the original round portraits. */
 .buddy-scene{position:static;margin:0;padding:0}
-.buddy-layer{position:absolute;left:0;top:0;width:100%;height:0;z-index:6;pointer-events:none}
-.studio-buddy{position:absolute;left:0;top:0;width:64px;height:86px;transform:translate(var(--buddy-x,0px),var(--buddy-y,0px));border:0;padding:0;background:none;border-radius:20px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;pointer-events:auto}
+.buddy-layer{position:absolute;left:0;top:0;width:100%;height:var(--buddy-page-height,100%);z-index:6;pointer-events:none}
+.studio-buddy{position:absolute;left:var(--buddy-x,0px);top:var(--buddy-y,0px);width:64px;height:86px;border:0;padding:0;background:none;border-radius:20px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;pointer-events:auto}
 .studio-buddy.buddy-blue{width:84px;height:72px}
 .studio-buddy img{width:100%;height:100%;object-fit:contain;object-position:bottom;pointer-events:none;transform-origin:50% 90%;filter:drop-shadow(0 3px 2px #ab8aab25);animation:buddy-breathe 4s ease-in-out infinite;animation-delay:var(--buddy-delay,0s)}
 .buddy-shadow{position:absolute;bottom:0;left:28%;width:44%;height:5px;background:#bda8a925;border-radius:50%;z-index:-1}

@@ -85,6 +85,8 @@
     width = document.documentElement.clientWidth;
     // offsetHeight excludes our absolutely positioned artwork, preventing a growing scroll area.
     height = Math.max(innerHeight, document.body.offsetHeight);
+    // Keep the hit-testing layer as large as the document in WebKit too.
+    scene.style.setProperty('--buddy-page-height', `${height}px`);
     buckets.clear();
     const ignored = el => el.closest('[data-buddy-scene], script, style, noscript') || getComputedStyle(el).visibility === 'hidden';
     document.querySelectorAll('a,button,input,textarea,select,summary,nav,pre,table,iframe,video,canvas,img,.site-header,.shelf-character').forEach(el => {
@@ -218,7 +220,12 @@
     el.addEventListener('lostpointercapture', () => stopDrag(true));
     el.addEventListener('keydown', event => {
       actor.focused = true;
-      if (event.key === 'Enter' || event.key === ' ') actor.suppressUntil = 0;
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        if (!event.repeat) greet(actor);
+        actor.suppressUntil = performance.now() + 700;
+        return;
+      }
       if (event.key === 'Escape') { stopDrag(true); return; }
       const delta = { ArrowLeft: [-24, 0], ArrowRight: [24, 0], ArrowUp: [0, -24], ArrowDown: [0, 24] }[event.key];
       if (!delta && event.key !== 'Home') return;
