@@ -29,6 +29,102 @@
   };
   const intro = document.getElementById('studio-intro');
   if (!intro) return;
+  function startPond() {
+    const pond = intro.querySelector('.intro-pond');
+    const effects = pond.querySelector('.pond-effects');
+    const water = pond.querySelector('.pond-water');
+    const swimmers = [pond.querySelector('.intro-swimmer')];
+    const lifetime = new Map();
+    const jumpTimers = new Map();
+    const lapDuration = 8000;
+    let frame = 0, last = 0, elapsed = 0, lastWake = 0, pauseUntil = 0, stopped = false;
+    let width = pond.clientWidth, height = pond.clientHeight;
+    const removeEffect = node => { clearTimeout(lifetime.get(node)); lifetime.delete(node); node.remove(); };
+    function effect(kind, x, y) {
+      if (lifetime.size >= 28) removeEffect(lifetime.keys().next().value);
+      const node = document.createElement('span');
+      node.className = `pond-effect ${kind}`;
+      node.style.left = `${x}px`; node.style.top = `${y}px`;
+      if (kind === 'pond-clover') {
+        node.innerHTML = '<svg viewBox="0 0 48 52" aria-hidden="true"><path d="M24 25q8 13-2 24" fill="none" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><path d="M24 25C5 24 4 11 12 10C18 9 23 14 24 25Z"/><path d="M24 25C23 6 36 1 39 9C41 15 35 22 24 25Z"/><path d="M24 25C43 24 48 37 40 40C34 42 27 36 24 25Z"/><path d="M24 25C25 44 12 49 9 41C7 35 13 28 24 25Z"/></g></svg>';
+      }
+      effects.append(node);
+      lifetime.set(node, setTimeout(() => removeEffect(node), kind === 'pond-clover' ? 1500 : 1200));
+    }
+    function place() {
+      swimmers.forEach((fish, index) => {
+        const angle = elapsed / lapDuration * Math.PI * 2 - Math.PI / 2 - index * .48;
+        const x = width / 2 + Math.cos(angle) * width * .4;
+        const y = height / 2 + Math.sin(angle) * height * .35;
+        const heading = Math.atan2(Math.cos(angle) * height * .35, -Math.sin(angle) * width * .4) * 180 / Math.PI + 180;
+        fish.style.transform = `translate(${x - 24}px,${y - 24}px)`;
+        fish.style.setProperty('--fish-heading', `${heading}deg`);
+        fish.pondPosition = { x, y };
+      });
+    }
+    function jump(event) {
+      const fish = event.currentTarget;
+      if (fish.classList.contains('is-jumping')) return;
+      pauseUntil = performance.now() + 700;
+      fish.classList.add('is-jumping');
+      const { x, y } = fish.pondPosition;
+      effect('pond-splash', x, y);
+      const timer = setTimeout(() => { fish.classList.remove('is-jumping'); jumpTimers.delete(fish); }, 700);
+      jumpTimers.set(fish, timer);
+    }
+    swimmers[0].addEventListener('click', jump);
+    function tick(now) {
+      frame = 0;
+      if (stopped || document.hidden || reduced.matches) return;
+      if (last && now >= pauseUntil) elapsed += Math.min(now - last, 64);
+      last = now;
+      // One new companion per completed lap; the leader can have three followers.
+      if (swimmers.length < Math.min(4, 1 + Math.floor(elapsed / lapDuration))) {
+        const fish = swimmers[0].cloneNode(true);
+        fish.classList.remove('is-jumping');
+        fish.setAttribute('aria-label', `摸摸跟随小鱼 ${swimmers.length}，让它跳起来`);
+        fish.style.setProperty('--fish-color', ['#eeac99', '#9abfb5', '#b4a5cd', '#e9bf78'][swimmers.length]);
+        fish.addEventListener('click', jump);
+        pond.insertBefore(fish, document.getElementById('intro-enter'));
+        swimmers.push(fish);
+      }
+      place();
+      if (elapsed - lastWake > 260) {
+        swimmers.forEach(fish => effect('pond-wake', fish.pondPosition.x, fish.pondPosition.y));
+        lastWake = elapsed;
+      }
+      frame = requestAnimationFrame(tick);
+    }
+    function resume() {
+      cancelAnimationFrame(frame); last = 0;
+      if (!stopped && !document.hidden && !reduced.matches) frame = requestAnimationFrame(tick);
+    }
+    const splash = event => {
+      const rect = pond.getBoundingClientRect();
+      const x = event.detail ? event.clientX - rect.left : width / 2;
+      const y = event.detail ? event.clientY - rect.top : height * .78;
+      effect('pond-splash', x, y);
+      effect('pond-clover', x, y);
+    };
+    const resize = () => { width = pond.clientWidth; height = pond.clientHeight; place(); };
+    water.addEventListener('click', splash);
+    window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', resume);
+    reduced.addEventListener('change', resume);
+    place(); resume();
+    return () => {
+      stopped = true; cancelAnimationFrame(frame);
+      for (const timer of lifetime.values()) clearTimeout(timer);
+      lifetime.clear(); effects.replaceChildren();
+      for (const timer of jumpTimers.values()) clearTimeout(timer);
+      jumpTimers.clear();
+      water.removeEventListener('click', splash);
+      swimmers.forEach(fish => fish.removeEventListener('click', jump));
+      window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', resume);
+      reduced.removeEventListener('change', resume);
+    };
+  }
   const introKey = 'mx-studio-intro-seen-v2';
   let firstVisit = false;
   try { firstVisit = !sessionStorage.getItem(introKey); }
@@ -38,11 +134,13 @@
     const previousOverflow = document.body.style.overflow;
     let leaving = false, exitTimer;
     intro.showModal();
+    const stopPond = startPond();
     document.body.style.overflow = 'hidden';
     const finish = () => { if (intro.open) intro.close(); };
     const enterStudio = () => {
       if (leaving) return;
       leaving = true;
+      stopPond();
       enter.disabled = true;
       enter.setAttribute('aria-busy', 'true');
       intro.classList.add('intro-leaving');
@@ -54,6 +152,7 @@
     reduced.addEventListener('change', motionChange);
     intro.addEventListener('close', () => {
       clearTimeout(exitTimer);
+      stopPond();
       reduced.removeEventListener('change', motionChange);
       enter.removeEventListener('click', enterStudio);
       document.body.style.overflow = previousOverflow;

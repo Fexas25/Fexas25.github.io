@@ -234,12 +234,12 @@ test('开屏等待点击、进入后不重复打断', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#studio-intro')).toBeVisible();
   await page.waitForTimeout(1400); // Exceed the old automatic dismissal time.
-  await expect(page.getByRole('button', { name: '进入摸鱼时间' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '开始摸鱼' })).toBeVisible();
   await noOverflow(page);
   const screenshot = test.info().outputPath('intro-mobile.png');
   await page.screenshot({ path: screenshot });
   await test.info().attach('摸鱼时间开屏', { path: screenshot, contentType: 'image/png' });
-  await page.getByRole('button', { name: '进入摸鱼时间' }).click();
+  await page.getByRole('button', { name: '开始摸鱼' }).click();
   await expect(page.locator('#studio-intro')).not.toBeVisible();
   await expect(page.locator('#hero-title')).toBeFocused();
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
@@ -255,4 +255,23 @@ test('减少动态效果下静态开屏和键盘进入', async ({ page }) => {
   await page.locator('#intro-enter').press('Enter');
   await expect(page.locator('#studio-intro')).not.toBeVisible();
   await expect(page.locator('#hero-title')).toBeFocused();
+});
+
+
+test('开屏小鱼跳跃、水面四叶草和进入按钮互不干扰', async ({ page }) => {
+  await page.goto('/');
+  const fish = page.locator('.intro-swimmer').first();
+  await expect(fish).toBeVisible();
+  const box = await fish.boundingBox();
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(fish).toHaveClass(/is-jumping/);
+  await expect(page.locator('#studio-intro')).toBeVisible();
+  const pond = await page.locator('.intro-pond').boundingBox();
+  await page.touchscreen.tap(pond.x + pond.width / 2, pond.y + pond.height - 18);
+  await expect(page.locator('.pond-clover')).toHaveCount(1);
+  await expect(page.locator('#studio-intro')).toBeVisible();
+  await noOverflow(page);
+  await page.locator('#intro-enter').click();
+  await expect(page.locator('#studio-intro')).not.toBeVisible();
+  await expect(page.locator('.pond-effect')).toHaveCount(0);
 });
