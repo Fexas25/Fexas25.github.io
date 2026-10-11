@@ -36,18 +36,18 @@ html:has(dialog[open]){overflow:hidden}
 .intro-card .pond-water{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:radial-gradient(circle closest-side,#f7fffd14 0%,#d5f1ea45 22%,#9ed7ca70 44%,#92cfc255 60%,#b7dfd82b 74%,#d7e8e310 83%,transparent 91%);cursor:crosshair;touch-action:manipulation}
 .pond-orbit{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle closest-side,transparent 65%,#8eada71c calc(65% + 1px),transparent calc(65% + 2px),transparent 76%,#8eada736 calc(76% + 1px),transparent calc(76% + 2px),transparent 87%,#8eada750 calc(87% + 1px),transparent calc(87% + 2px),transparent 98%,#8eada728 calc(98% + 1px),transparent calc(98% + 2px))}
 .intro-card .pond-water::before{content:"";position:absolute;inset:7%;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse 37% 15% at 25% 31%,#ffffff70,transparent 76%),radial-gradient(ellipse 28% 39% at 67% 47%,#e5fff548,transparent 78%),radial-gradient(ellipse 41% 13% at 45% 76%,#fffcec54,transparent 80%),radial-gradient(ellipse 19% 31% at 28% 61%,#81bfb52b,transparent 75%);mask-image:radial-gradient(circle closest-side,#0009 25%,#0007 60%,transparent 95%);animation:water-light 19s ease-in-out infinite alternate}
-.pond-caustics{position:absolute;inset:12%;width:76%;height:76%;pointer-events:none;fill:none;stroke:#f5fffa;stroke-width:1.3;stroke-linecap:round;filter:blur(.65px);mask-image:radial-gradient(circle closest-side,#000a 15%,#0006 60%,transparent 95%)}
+.pond-caustics{position:absolute;inset:12%;width:76%;height:76%;pointer-events:none;fill:none;stroke:#f5fffa;stroke-width:1.6;stroke-linecap:round;filter:blur(.45px);mask-image:radial-gradient(circle closest-side,#000a 15%,#0006 60%,transparent 95%)}
 .pond-caustics path{opacity:0;transform-origin:50% 50%;animation:water-sheen 17s ease-in-out infinite}
 .pond-caustics path:nth-child(2){animation-delay:-6s;animation-duration:21s;stroke-width:1}
 .pond-caustics path:nth-child(3){animation-delay:-11s;animation-duration:23s;stroke-width:.8}
 
 .intro-card .pond-water::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle at var(--water-x,50%) var(--water-y,20%),#f4fffc80 0, #a9ded32b 12%,transparent 31%);mask-image:radial-gradient(circle closest-side,#000 50%,transparent 90%)}
 .pond-surface-effects{position:absolute;inset:0;overflow:hidden;border-radius:50%;pointer-events:none;mask-image:radial-gradient(circle closest-side,#000 52%,#000b 72%,transparent 92%)}
-.pond-water-wave{width:44px;height:44px;border:1px solid #f1fffaab;border-radius:50%;background:radial-gradient(circle,transparent 52%,#88c7bc26 64%,#ecfff53d 68%,transparent 74%);box-shadow:0 0 5px #c6ede95c,inset 0 0 7px #7bb8ae20;animation:water-impact 2s ease-out both}
+.pond-water-wave{width:44px;height:44px;border:1.2px solid #f1fffae0;border-radius:50%;background:radial-gradient(circle,transparent 52%,#88c7bc42 64%,#ecfff566 68%,transparent 74%);box-shadow:0 0 5px #c6ede95c,inset 0 0 7px #7bb8ae20;animation:water-impact 2s ease-out both}
 .pond-water-wave{width:50px;height:50px;animation-name:water-impact}
-.pond-current-wake{width:46px;height:18px;border-radius:60% 25% 35% 60%;background:radial-gradient(ellipse at 35% 50%,#daf5e937,transparent 72%);transform-origin:center;animation:water-tail 2s ease-out both}
-.pond-current-wake::before,.pond-current-wake::after{content:"";position:absolute;inset:0;border-top:1px solid #eafff99c;border-radius:70% 35% 0 0;transform:rotate(-12deg);mask-image:linear-gradient(90deg,transparent,#000a 25%,#0004 65%,transparent)}
-.pond-current-wake::after{inset:3px 0 -3px;border-top:0;border-bottom:1px solid #b9ddd38c;border-radius:0 0 35% 70%;transform:rotate(12deg)}
+.pond-current-wake{width:46px;height:18px;border-radius:60% 25% 35% 60%;background:radial-gradient(ellipse at 35% 50%,#daf5e957,transparent 72%);transform-origin:center;animation:water-tail 2s ease-out both}
+.pond-current-wake::before,.pond-current-wake::after{content:"";position:absolute;inset:0;border-top:1px solid #f3fffbd1;border-radius:70% 35% 0 0;transform:rotate(-12deg);mask-image:linear-gradient(90deg,transparent,#000d 25%,#0007 65%,transparent)}
+.pond-current-wake::after{inset:3px 0 -3px;border-top:0;border-bottom:1px solid #8dbfb2b3;border-radius:0 0 35% 70%;transform:rotate(12deg)}
 .pond-water-wave::after{content:"";position:absolute;inset:-12px;border:1px solid #eafff88a;border-radius:50%;box-shadow:0 0 4px #b4e7db55}
 
 
@@ -57,10 +57,13 @@ html:has(dialog[open]){overflow:hidden}
 .intro-swimmer .fish:before{border-right-color:var(--fish-color);top:2px}
 .intro-swimmer .fish:after{top:6px}
 .intro-swimmer.is-jumping .fish{animation:pond-jump .7s ease-in-out}
-.intro-card #intro-enter{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:4;white-space:nowrap;background:var(--coral);border:1px solid #ffffffa8;color:#402f35;font:inherit;font-size:15px;font-weight:600;padding:0;width:108px;height:108px;border-radius:50%;min-height:108px;display:grid;place-content:center;gap:5px;box-shadow:0 8px 22px #eb9f8630,0 0 0 7px #fffaf666;transition:transform .18s,box-shadow .18s}
-.intro-card #intro-enter span{display:block;margin-left:0;font-size:18px;line-height:1;transition:transform .3s}
-.intro-card #intro-enter:hover{transform:translateY(-2px);box-shadow:0 12px 26px #eb9f8640,0 0 0 9px #fffaf666}
-.intro-card #intro-enter:hover span{transform:translateX(4px)}
+.intro-card #intro-enter{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:4;background:transparent;border:0;color:#557f91;font:inherit;font-size:12px;font-weight:500;padding:0;width:108px;height:108px;border-radius:24px;min-height:108px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:none;transition:transform .25s ease}
+.intro-cat{display:block;width:96%;height:auto;overflow:visible;pointer-events:none;animation:cat-breathe 4.8s ease-in-out infinite}
+.cat-shape{fill:#9acbe82e;stroke:#739cad;stroke-width:1.5;stroke-linejoin:round;transition:fill .3s,stroke .3s}
+.cat-face{fill:none;stroke:#658ea4;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.intro-card #intro-enter span{display:block;font-size:11px;line-height:1.4;letter-spacing:2px;pointer-events:none}
+.intro-card #intro-enter:hover{transform:translateY(-2px)}
+.intro-card #intro-enter:hover .cat-shape{fill:#a5d8ec48;stroke:#5c91a6}
 .intro-card #intro-enter:active{transform:scale(.97)}
 .intro-card .pond-hint{font-size:11px;letter-spacing:1px;color:#918e85;margin:6px 0 0}
 .pond-effect{position:absolute;pointer-events:none}
@@ -84,9 +87,7 @@ html:has(dialog[open]){overflow:hidden}
 .studio-intro::after{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle,#8cadaa55 .8px,transparent 1px);background-size:38px 38px;mask-image:radial-gradient(ellipse at center,transparent 20%,#0009 55%,transparent 76%);opacity:.35}
 .pond-orbit::before{content:"";position:absolute;inset:6%;border-radius:50%;background:repeating-conic-gradient(from 0deg,#8caeb670 0deg .45deg,transparent .45deg 15deg);mask-image:radial-gradient(circle closest-side,transparent 95%,#000 95.5% 98%,transparent 98.5%);animation:pond-signal 32s linear infinite}
 .pond-orbit::after{content:"";position:absolute;right:12%;top:6%;width:18px;height:18px;border-radius:50%;background:#efc990;box-shadow:0 0 24px #f0d5a570;animation:pond-moon 48s ease-in-out infinite}
-.intro-card #intro-enter::before,.intro-card #intro-enter::after{content:"";position:absolute;inset:-9px;border:1px solid #8dbbb46b;border-radius:50%;pointer-events:none;animation:entry-heartbeat 3.6s ease-in-out infinite}
-.intro-card #intro-enter::after{inset:-17px;border-style:dashed;border-color:#9abbbb45;animation-delay:-1.8s}
-.pond-splash::after{content:"";position:absolute;inset:-6px;border:1px dashed #89b8bb88;border-radius:50%}
+.pond-splash::after{content:"";position:absolute;inset:-7px;border:1px solid #9bcac799;border-radius:46% 54% 49% 51%;border-left-color:transparent;border-bottom-color:transparent}
 .pond-droplets{width:0;height:0}
 .pond-droplets i{position:absolute;width:4px;height:7px;border-radius:50% 50% 40% 40%;background:#8fb9b9;--dx:-28px;--dy:-30px;animation:water-droplet .9s ease-out both}
 .pond-droplets i:nth-child(2){--dx:-15px;--dy:-45px;animation-delay:.04s}
@@ -109,7 +110,13 @@ html:has(dialog[open]){overflow:hidden}
 @media(prefers-reduced-motion:reduce){.studio-intro::before,.studio-intro::after,.studio-intro *::before,.studio-intro *::after{animation:none!important;transition:none!important}.pond-droplets{display:none}.site-header nav a{transition:none}}
 
 @keyframes water-light{from{opacity:.5;transform:translate(-2%,1%) rotate(-3deg) scale(.98)}to{opacity:.8;transform:translate(2%,-1%) rotate(4deg) scale(1.04)}}
-@keyframes water-sheen{0%,100%{opacity:0;transform:translate(-5px,4px) scale(.97)}35%{opacity:.32}65%{opacity:.22}85%{opacity:0;transform:translate(9px,-6px) scale(1.04)}}
-@keyframes water-tail{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--wake-heading)) scale(.5,.6)}20%{opacity:.6}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--wake-heading)) scale(1.6,1.4)}}
+@keyframes water-sheen{0%,100%{opacity:0;transform:translate(-5px,4px) scale(.97)}35%{opacity:.52}65%{opacity:.36}85%{opacity:0;transform:translate(9px,-6px) scale(1.04)}}
+@keyframes water-tail{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--wake-heading)) scale(.5,.6)}20%{opacity:.8}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--wake-heading)) scale(1.6,1.4)}}
 
 @keyframes water-impact{0%{opacity:0;transform:translate(-50%,-50%) scale(.35)}15%{opacity:.85}100%{opacity:0;transform:translate(-50%,-50%) scale(6)}}
+
+@keyframes cat-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+
+.intro-card #intro-enter:focus-visible{outline:none}
+#intro-enter:focus-visible .cat-shape{stroke:#567f93;stroke-width:2}
+#intro-enter:focus-visible span{text-decoration:underline;text-underline-offset:4px}
