@@ -1,104 +1,13 @@
 ---
+layout: default
+title: 游戏开发
+section: works
+eyebrow: A CORNER OF MY LAB
+description: 一点游戏灵感，一点开发记录。
+portrait: /picture/微信图片_20260128002740_60_58.jpg
+bubble: 灵感慢慢积攒中。
 ---
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <title>Game Jam · MX</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
-      color: #222;
-    }
-    main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px 16px 40px;
-    }
-    section {
-      margin-bottom: 40px;
-      padding: 24px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-    h1, h2, h3 {
-      margin-top: 0;
-    }
-    .post-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .post-item {
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .post-item:last-child {
-      border-bottom: none;
-    }
-    .post-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .post-meta {
-      font-size: 12px;
-      color: #777;
-      margin-bottom: 4px;
-    }
-    .post-desc {
-      font-size: 14px;
-      color: #444;
-    }
-    footer {
-      text-align: center;
-      font-size: 12px;
-      color: #777;
-      padding: 16px 0 24px;
-    }
-  </style>
-  <link rel="stylesheet" href="../theme.css" />
-</head>
-<body class="page-gamejam">
-  <main>
-    <!-- 栏目介绍 -->
-    <section id="intro">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <a href="../index.html" style="padding: 8px 16px; background: #6b7280; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">← 返回首页</a>
-          <h1 style="margin: 0;">Game Jam</h1>
-        </div>
-        <a href="../editor.html?category=game-jam" style="padding: 8px 16px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">发布新内容</a>
-      </div>
-      <p>
-        这做的是什么？
-      </p>
-    </section>
-
-    <!-- 栏目目录 -->
-    <section id="posts">
-      <h2>OvO（？）</h2>
-      {% if site.gamejam.size == 0 %}
-      <p style="color: #777; text-align: center;">偷懒中…… </p>
-      {% endif %}
-
-      <ul class="post-list">
-        {% for post in site.gamejam %}
-        <li class="post-item">
-          <a href="{{ post.url | relative_url }}" class="post-title">{{ post.title }}</a>
-          <div class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</div>
-        </li>
-        {% endfor %}
-      </ul>
-    </section>
-  </main>
-
-  <footer>
-    © {{ site.time | date: "%Y" }} MX · Built with GitHub Pages
-  </footer>
-  <script src="../theme.js"></script>
-</body>
-</html>
+{% include section-intro.html %}
+<section class="archive"><div class="archive-heading"><h2>游戏开发 <span class="small-count">{{ site.gamejam.size }} 篇</span></h2><a class="quiet-link" href="{{ '/editor.html?category=game-jam' | relative_url }}">记录新作品 →</a></div>
+<div class="portfolio-grid">{% assign entries = site.gamejam | sort: 'date' | reverse %}{% for post in entries %}{% include work-card.html category='game' label='游戏开发' %}{% endfor %}</div>
+{% if site.gamejam.size == 0 %}<div class="empty-note"><span class="empty-doodle" aria-hidden="true">✧</span><h2>灵感还在路上</h2><p>这里还没有发布作品。先去实验室逛逛吧。</p></div>{% endif %}<a class="quiet-link" href="{{ '/projects/' | relative_url }}">← 返回所有作品</a></section>

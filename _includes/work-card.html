@@ -1,0 +1,4 @@
+{% assign work_target = post.external_url | default: post.url %}
+<article class="portfolio-card" data-entry data-category="{{ include.category }}">
+{% if post.cover %}<img class="portfolio-cover" src="{{ post.cover | relative_url }}" alt="" loading="lazy" />{% else %}<div class="portfolio-art art-{{ include.category }}" aria-hidden="true"><span>{% if include.category == 'game' %}＋{% elsif include.category == 'ai' %}✧{% else %}✿{% endif %}</span></div>{% endif %}
+<div class="portfolio-copy"><span class="tag">{{ include.label }}</span><h2><a href="{{ work_target | relative_url }}">{{ post.title | escape }}</a></h2><p>{{ post.description | default: post.content | strip_html | truncate: 90 | escape }}</p><a class="quiet-link" href="{{ work_target | relative_url }}">查看作品 →</a></div></article>

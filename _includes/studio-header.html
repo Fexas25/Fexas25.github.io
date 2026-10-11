@@ -1,0 +1,5 @@
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="{{ '/' | relative_url }}" aria-label="MX 摸鱼工作室首页"><span class="fish" aria-hidden="true"></span>MX <span class="brand-sub">· 摸鱼工作室</span></a>
+<nav aria-label="主导航"><a href="{{ '/' | relative_url }}">首页</a><a href="{{ '/blog/' | relative_url }}" {% if page.section == 'moments' or page.collection == 'posts' %}class="active" aria-current="page"{% endif %}>碎碎念</a><a href="{{ '/competitive-programming/' | relative_url }}" {% if page.section == 'writing' or page.collection == 'cp' %}class="active" aria-current="page"{% endif %}>博客</a><a href="{{ '/projects/' | relative_url }}" {% if page.section == 'works' or page.collection == 'projects' or page.collection == 'gamejam' or page.collection == 'art' %}class="active" aria-current="page"{% endif %}>作品</a><a href="{{ '/#about' | relative_url }}">关于</a></nav>
+</div></header>

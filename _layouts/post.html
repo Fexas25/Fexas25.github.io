@@ -1,14 +1,9 @@
 ---
 layout: default
 ---
-<section>
-  <a class="nav-link" href="{{ '/blog/' | relative_url }}">← 返回博客</a>
-  <h1 style="margin: 16px 0 8px 0;">{{ page.title }}</h1>
-  <div style="font-size: 12px; color: #777;">
-    {{ page.date | date: "%Y-%m-%d" }}
-  </div>
-</section>
-
-<article>
-  {{ content }}
-</article>
+{% assign back_url = '/blog/' %}{% assign label = '碎碎念' %}
+{% if page.collection == 'cp' or page.category == 'competitive-programming' %}{% assign back_url = '/competitive-programming/' %}{% assign label = '博客' %}{% elsif page.collection == 'gamejam' or page.category == 'game-jam' %}{% assign back_url = '/game-jam/' %}{% assign label = '游戏开发' %}{% elsif page.collection == 'art' or page.category == 'art' %}{% assign back_url = '/art/' %}{% assign label = '绘画创作' %}{% elsif page.collection == 'projects' or page.category == 'projects' %}{% assign back_url = '/projects/' %}{% assign label = '作品' %}{% endif %}
+<div class="reading-shell"><a class="crumb" href="{{ back_url | relative_url }}">← 返回{{ label }}</a>
+<header class="reading-header"><p class="shelf-eyebrow">MX / {{ label }}</p><h1>{{ page.title | escape }}</h1><time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: '%Y.%m.%d' }}</time><span class="reading-flower" aria-hidden="true">✿</span></header>
+<article class="prose">{{ content }}</article>
+<div class="reading-end"><span aria-hidden="true">✧</span><p>写到这里，下次再见。</p><a class="quiet-link" href="{{ back_url | relative_url }}">继续看看{{ label }} →</a></div></div>

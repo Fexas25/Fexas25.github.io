@@ -1,105 +1,16 @@
 ---
+layout: default
+title: 博客
+section: writing
+eyebrow: NOTES FROM MY WORKSPACE
+description: 认真写点东西。记录解题过程，也记录一点点进步。
+portrait: /picture/微信图片_20260128002719_46_58.jpg
+bubble: 今天又学会了什么？
 ---
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <title>Competitive Programming · MX</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
-      color: #222;
-    }
-    main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px 16px 40px;
-    }
-    section {
-      margin-bottom: 40px;
-      padding: 24px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-    h1, h2, h3 {
-      margin-top: 0;
-    }
-    .post-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .post-item {
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .post-item:last-child {
-      border-bottom: none;
-    }
-    .post-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .post-meta {
-      font-size: 12px;
-      color: #777;
-      margin-bottom: 4px;
-    }
-    .post-desc {
-      font-size: 14px;
-      color: #444;
-    }
-    footer {
-      text-align: center;
-      font-size: 12px;
-      color: #777;
-      padding: 16px 0 24px;
-    }
-  </style>
-  <link rel="stylesheet" href="../theme.css" />
-</head>
-<body class="page-cp">
-
-  <main>
-    <!-- 栏目介绍 -->
-    <section id="intro">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <a href="../index.html" style="padding: 8px 16px; background: #6b7280; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">← 返回首页</a>
-          <h1 style="margin: 0;">Competitive Programming</h1>
-        </div>
-        <a href="../editor.html?category=competitive-programming" style="padding: 8px 16px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">发布新内容</a>
-      </div>
-      <p>
-        艰难打比赛中，肖飞舞倒头就睡
-      </p>
-    </section>
-
-    <!-- 栏目目录 -->
-    <section id="posts">
-      <h2>Orz</h2>
-      {% if site.cp.size == 0 %}
-      <p style="color: #777; text-align: center;">偷懒中…… </p>
-      {% endif %}
-
-      <ul class="post-list">
-        {% for post in site.cp %}
-        <li class="post-item">
-          <a href="{{ post.url | relative_url }}" class="post-title">{{ post.title }}</a>
-          <div class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</div>
-        </li>
-        {% endfor %}
-      </ul>
-    </section>
-  </main>
-
-  <footer>
-    © {{ site.time | date: "%Y" }} MX · Built with GitHub Pages
-  </footer>
-  <script src="../theme.js"></script>
-</body>
-</html>
+{% include section-intro.html %}
+<section class="archive" data-browser aria-label="博客归档">
+<div class="archive-heading"><div><h2>算法与竞赛 <span class="small-count">{{ site.cp.size }} 篇</span></h2><p>把思路写下来，让灵感有迹可循。</p></div><a class="quiet-link" href="{{ '/editor.html?category=competitive-programming' | relative_url }}">写一篇 →</a></div>
+<div class="archive-tools"><div class="category-tabs" role="group" aria-label="博客分类"><button type="button" data-category-filter="all" aria-pressed="true">全部</button><button type="button" data-category-filter="leetcode" aria-pressed="false">LeetCode</button><button type="button" data-category-filter="atcoder" aria-pressed="false">AtCoder</button></div><label class="archive-search"><span>找文章</span><input type="search" placeholder="输入标题…" data-search-input /></label></div>
+{% assign entries = site.cp | sort: 'date' | reverse %}{% for post in entries %}{% include writing-card.html filters=true %}{% endfor %}
+<p class="empty-note" data-no-results hidden>暂时没找到这篇文章，换个关键词试试？</p><p class="result-status" data-result-status role="status" aria-live="polite"></p>
+</section>
