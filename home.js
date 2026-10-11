@@ -46,12 +46,4 @@
     const observer = new IntersectionObserver(entries => entries.forEach(entry => entry.target.classList.toggle('is-out-of-view', !entry.isIntersecting)));
     observer.observe(document.querySelector('.hero'));
   }
-  const filters = document.querySelectorAll('[data-filter]');
-  const cards = document.querySelectorAll('[data-kind]');
-  filters.forEach(button => button.addEventListener('click', () => {
-    filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
-    let count = 0;
-    cards.forEach(card => { card.hidden = button.dataset.filter !== 'all' && card.dataset.kind !== button.dataset.filter; if (!card.hidden) count++; });
-    document.getElementById('filter-status').textContent = `${button.textContent}：显示 ${count} 个条目`;
-  }));
 })();

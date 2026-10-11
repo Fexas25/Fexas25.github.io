@@ -68,6 +68,7 @@
     select.value = candidates.find(id => items.some(item => item.id === id)) || items[0]?.id || '';
     select.disabled = !items.length;
     $('draft-open').disabled = !items.length;
+    $('draft-find').querySelector('summary').textContent = query || category ? '查找草稿 · 已筛选' : '查找草稿';
     $('draft-filter-status').textContent = `显示 ${items.length} / ${all.length} 篇草稿。${all.length && !items.length ? '换个标题或清除筛选试试。' : ''}${activeDraft && !items.some(item => item.id === activeDraft) ? '正在编辑的草稿不在当前筛选结果中，内容仍保留在下方。' : ''}`;
     selectionInfo();
     window.dispatchEvent(new Event('mx-editor-change'));

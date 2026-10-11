@@ -30,7 +30,6 @@
           <p class="handwritten opening">一点日常，一点奇思妙想。</p>
           <h1 id="hero-title">今天也在折腾<br />一些有趣的东西<span class="full-stop">。</span></h1>
           <p class="intro">我是 MX。写点日常，记录学习，<br class="desktop-break" />偶尔把脑洞做成能玩的东西。</p>
-          <a class="primary-link" href="#moments">往下看看 <span aria-hidden="true">↓</span></a>
           <div class="fish-corner" hidden><button id="fish-play" type="button" aria-label="摸一下小鱼，看看它想说什么"><span class="fish" aria-hidden="true"></span><span>摸一下小鱼</span></button><p id="fish-message" role="status" aria-live="polite">工作室的小鱼，正在等你打招呼。</p></div>
           <p class="handwritten signature">做喜欢的事，<br />让平凡的日子也闪闪发光！<span>— MX ♡</span></p>
         </div>
@@ -61,19 +60,16 @@
           {% for post in latest_cp limit: 3 %}
           {% include blog-topic.html entry=post %}<a class="blog-row" href="{{ post.url | relative_url }}"><div><h3>{{ post.title | escape }}</h3><p>{{ blog_topic_label }} · <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%Y.%m.%d" }}</time></p></div><span class="row-arrow" aria-hidden="true">›</span></a>
           {% endfor %}
-          <div class="blog-categories"><span>继续探索</span><a href="game-jam/">游戏开发</a><a href="projects/">项目记录</a><a href="art/">绘画创作</a></div>
         </section>
       </div>
       <section id="works" class="works-section" aria-labelledby="works-title">
-        <div class="section-heading"><div><h2 id="works-title"><span class="section-symbol game-symbol" aria-hidden="true">＋</span>作品</h2><p>做出来的奇怪东西</p></div><a class="quiet-link" href="projects/">所有作品 →</a><div class="work-filters" role="group" aria-label="作品分类"><button type="button" data-filter="all" aria-pressed="true">全部</button><button type="button" data-filter="game" aria-pressed="false">小游戏</button><button type="button" data-filter="ai" aria-pressed="false">AI 工作流</button><button type="button" data-filter="creative" aria-pressed="false">创作</button></div></div>
+        <div class="section-heading"><div><h2 id="works-title"><span class="section-symbol game-symbol" aria-hidden="true">＋</span>作品</h2><p>做出来的奇怪东西</p></div><a class="quiet-link" href="projects/">所有作品 →</a></div>
         <div class="works-grid">
-          <article class="work-card" data-kind="game"><button class="work-cover fortune-cover" data-draw type="button" aria-label="每日占卜：抽取今日签" aria-haspopup="dialog" aria-controls="fortune-dialog"><span class="mini-slip"><small>今日签</small><strong>大吉</strong><span>宜 · 开心</span></span><span class="cover-caption">每天一点小幸运</span></button><div class="work-info"><h3><button class="text-button" type="button" data-draw aria-haspopup="dialog" aria-controls="fortune-dialog">每日占卜 <span aria-hidden="true">↗</span></button></h3><p>每天抽一支签，看看会有什么小惊喜？</p><a class="quiet-link" href="daily-checkin/">签到记录 →</a></div></article>
-          {% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="work-card upcoming" data-kind="ai"><div class="work-cover workflow-cover" aria-hidden="true"><span class="workflow-node">想法</span><span class="workflow-line">→</span><span class="workflow-node main-node">AI</span><span class="workflow-line">→</span><span class="workflow-node">作品</span></div><div class="work-info"><h3>AI 工作流 <span class="coming-label">筹备中</span></h3><p>这里会放我的 AI 工具与工作流尝试。</p><span class="work-note">有新东西就搬过来。</span></div></article>{% endif %}
-          <article class="work-card" data-kind="creative"><a class="work-cover birthday-cover" href="dad-birthday.html" aria-label="打开生日祝福页"><span class="firework firework-one" aria-hidden="true">✳</span><span class="firework firework-two" aria-hidden="true">✳</span><span class="birthday-title">把祝福交给烟花<span>HAPPY BIRTHDAY</span></span></a><div class="work-info"><h3><a href="dad-birthday.html">生日祝福页 <span aria-hidden="true">↗</span></a></h3><p>用一些小小的创意，收藏重要的日子。</p><a class="quiet-link" href="dad-birthday.html">看看这份祝福 →</a></div></article>
+          <article class="work-card" data-kind="game"><button class="work-cover fortune-cover" data-draw type="button" aria-label="每日占卜：抽取今日签" aria-haspopup="dialog" aria-controls="fortune-dialog"><span class="mini-slip"><small>今日签</small><strong>大吉</strong><span>宜 · 开心</span></span><span class="cover-caption">每天一点小幸运</span></button><div class="work-info"><h3>每日占卜</h3><p>每天抽一支签，看看会有什么小惊喜？</p><a class="quiet-link" href="daily-checkin/">签到记录 →</a></div></article>
+          {% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="work-card upcoming" data-kind="ai"><div class="work-cover workflow-cover" aria-hidden="true"><span class="workflow-node">想法</span><span class="workflow-line">→</span><span class="workflow-node main-node">AI</span><span class="workflow-line">→</span><span class="workflow-node">作品</span></div><div class="work-info"><h3>AI 工作流 <span class="coming-label">筹备中</span></h3><p>这里会放我的 AI 工具与工作流尝试。</p></div></article>{% endif %}
+          <article class="work-card" data-kind="creative"><a class="work-cover birthday-cover" href="dad-birthday.html" aria-label="打开生日祝福页"><span class="firework firework-one" aria-hidden="true">✳</span><span class="firework firework-two" aria-hidden="true">✳</span><span class="birthday-title">把祝福交给烟花<span>HAPPY BIRTHDAY</span></span></a><div class="work-info"><h3><a href="dad-birthday.html">生日祝福页 <span aria-hidden="true">↗</span></a></h3><p>用一些小小的创意，收藏重要的日子。</p></div></article>
           {% assign published_works = site.projects | concat: site.gamejam | concat: site.art | sort: 'date' | reverse %}{% for post in published_works limit: 3 %}{% include home-work-card.html %}{% endfor %}
         </div>
-        <p class="filter-status sr-only" aria-live="polite" id="filter-status"></p>
-        <p class="work-more">还有一些脑洞正在路上。<a href="projects/">项目</a><span> / </span><a href="game-jam/">Game Jam</a><span> / </span><a href="art/">Art</a></p>
       </section>
     </div>
   </main>

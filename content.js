@@ -25,6 +25,8 @@ document.querySelectorAll('[data-browser]').forEach(browser => {
     });
     browser.querySelector('[data-no-results]').hidden = visible !== 0;
     browser.querySelector('[data-result-status]').textContent = `显示 ${visible} 项`;
+    const summary = browser.querySelector('[data-filter-summary]');
+    if (summary) summary.textContent = category !== 'all' || query || year?.value || tag?.value ? ` · 已筛选 ${visible} 项` : '';
     browser.querySelectorAll('[data-month-marker]').forEach(marker => {
       let sibling = marker.nextElementSibling, anyVisible = false;
       while (sibling && !sibling.hasAttribute('data-month-marker')) {

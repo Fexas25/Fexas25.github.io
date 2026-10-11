@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
   });
   page.__mobileErrors = errors;
   // The paused GitHub publisher is outside this suite; never contact its API.
-  await page.route('https://api.github.com/**', route => route.fulfill({ json: [] }));
+  await page.route('https://api.github.com/**', route => route.fulfill({ json: { tree: [] } }));
 });
 test.afterEach(async ({ page }) => {
   expect(page.__mobileErrors, '浏览器脚本错误或本地资源加载失败').toEqual([]);
@@ -71,7 +71,21 @@ for (const route of routes) {
       await Promise.all(images.map(image => image.decode().catch(() => {})));
     });
     await noOverflow(page);
-    const controls = page.locator('a[href], button, select, input:not([type="hidden"]), textarea');
+    if (['/index.html', '/editor.html', '/competitive-programming/index.html'].includes(route)) {
+      const screenshot = test.info().outputPath('mobile-default.png');
+      await page.screenshot({ path: screenshot, fullPage: true });
+      await test.info().attach('默认简洁视图', { path: screenshot, contentType: 'image/png' });
+    }
+    // Check the quiet default view, then reveal low-frequency controls and test them too.
+    const disclosures = page.locator('details');
+    for (let i = 0; i < await disclosures.count(); i++) {
+      const disclosure = disclosures.nth(i);
+      if (await disclosure.isVisible() && await disclosure.getAttribute('open') === null) {
+        await disclosure.locator(':scope > summary').click();
+      }
+    }
+    await noOverflow(page);
+    const controls = page.locator('summary, a[href], button, select, input:not([type="hidden"]), textarea');
     for (let i = 0; i < await controls.count(); i++) {
       const control = controls.nth(i);
       if (await control.isVisible() && await control.isEnabled()) {
@@ -134,6 +148,18 @@ test('搜索、筛选和文章跳转', async ({ page, request }) => {
   await page.locator('[name="q"]').fill(entry.title);
   await result.click();
   await expect(page.locator('[data-reading-content]')).toBeVisible();
+  await page.goto('/competitive-programming/');
+  const disclosure = page.locator('.archive-disclosure');
+  await expect(page.locator('[data-search-input]')).not.toBeVisible();
+  await disclosure.locator('summary').click();
+  await page.locator('[data-search-input]').fill('不存在的文章mobilecheck987654');
+  await expect(page.locator('[data-no-results]')).toBeVisible();
+  await disclosure.locator('summary').click();
+  await expect(disclosure.locator('summary')).toContainText('已筛选');
+  await disclosure.locator('summary').click();
+  await page.locator('[data-search-input]').fill('');
+  await expect(page.locator('[data-no-results]')).not.toBeVisible();
+  await noOverflow(page);
 });
 
 test('抽签页首次签到及刷新后的记录', async ({ page }) => {
@@ -156,6 +182,7 @@ test('多篇草稿筛选、继续写、刷新和备份恢复', async ({ page, br
   await page.locator('#post-title').fill('手机草稿乙');
   await page.locator('#post-category').selectOption('projects');
   await page.locator('#markdown-input').fill('第二篇工作流');
+  await page.locator('#draft-find > summary').click();
   await page.locator('#draft-search').fill('草稿甲');
   await expect(page.locator('#markdown-input')).toHaveValue('第二篇工作流');
   await page.locator('#draft-open').click();
@@ -165,6 +192,7 @@ test('多篇草稿筛选、继续写、刷新和备份恢复', async ({ page, br
   await expect(page.locator('#draft-select option')).toHaveCount(1);
   await expect(page.locator('#draft-selection-info')).toContainText('编辑');
   await noOverflow(page);
+  await page.locator('#draft-tools > summary').click();
   const downloadPromise = page.waitForEvent('download');
   await page.locator('#draft-backup-export').click();
   const download = await downloadPromise;
@@ -176,13 +204,15 @@ test('多篇草稿筛选、继续写、刷新和备份恢复', async ({ page, br
   try {
     const fresh = await context.newPage();
     fresh.on('pageerror', error => page.__mobileErrors.push(error.message));
-    await fresh.route('https://api.github.com/**', route => route.fulfill({ json: [] }));
+    await fresh.route('https://api.github.com/**', route => route.fulfill({ json: { tree: [] } }));
     await fresh.goto('/editor.html');
+    await fresh.locator('#draft-tools > summary').click();
     const chooserPromise = fresh.waitForEvent('filechooser');
     await fresh.locator('#draft-backup-import').click();
     await (await chooserPromise).setFiles({ name: 'backup.json', mimeType: 'application/json', buffer: backup });
     await expect(fresh.locator('#draft-backup-status')).toContainText('新增 2 篇');
     await expect(fresh.locator('#draft-select option')).toHaveCount(2);
+    await fresh.locator('#draft-find > summary').click();
     await fresh.locator('#draft-search').fill('草稿乙');
     await fresh.locator('#draft-open').click();
     await expect(fresh.locator('#markdown-input')).toHaveValue('第二篇工作流');
