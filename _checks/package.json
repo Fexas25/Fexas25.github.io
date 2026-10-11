@@ -1,0 +1,8 @@
+{
+  "name": "mx-website-checks",
+  "private": true,
+  "scripts": {
+    "test": "node multi-drafts.cjs && node draft-backup.cjs && node studio-motion.cjs"
+  },
+  "devDependencies": {"jsdom": "26.1.0"}
+}

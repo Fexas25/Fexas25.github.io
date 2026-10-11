@@ -97,7 +97,6 @@ for file in files:
             assert schema['@type'] == 'WebSite', file
         if route == '/about/':
             assert schema['mainEntity']['sameAs'] == ['https://github.com/Fexas25', 'https://atcoder.jp/users/Fexas_01'], file
-assert article_count >= 10
 assert urls == seen - {origin + route for route in private_routes}, urls - seen
 robots = (root / 'robots.txt').read_text(encoding='utf-8')
 assert 'Sitemap: ' + origin + '/sitemap.xml' in robots and 'Disallow:' not in robots

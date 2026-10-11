@@ -1,0 +1,98 @@
+name: Website checks and deploy
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: website-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    name: Build and check website
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: _checks/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: npm ci --prefix _checks --ignore-scripts
+      - name: Build production site
+        id: build
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Check internal links and assets
+        id: links
+        run: python _checks/links.py _site
+      - name: Check sharing and search metadata
+        id: seo
+        run: python _checks/seo.py _site
+      - name: Test writing, backup and daily interactions
+        id: features
+        run: npm test --prefix _checks
+      - name: Publish check summary
+        if: always()
+        env:
+          BUILD: ${{ steps.build.outcome }}
+          LINKS: ${{ steps.links.outcome }}
+          SEO: ${{ steps.seo.outcome }}
+          FEATURES: ${{ steps.features.outcome }}
+        run: |
+          {
+            echo '## 网站发布检查'
+            echo "- 正式构建：$BUILD"
+            echo "- 站内链接与素材：$LINKS"
+            echo "- 分享与搜索信息：$SEO"
+            echo "- 草稿、备份及抽签功能：$FEATURES"
+            echo ''
+            echo '只有全部检查通过，main 分支才会发布。失败时展开对应步骤查看文件路径和原因；修正后再次提交即可。'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload checked site
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  external-links:
+    name: External link advisory
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Report external link availability
+        run: python3 _checks/links.py _site --external
+
+  deploy:
+    name: Publish verified website
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy checked artifact
+        id: deployment
+        uses: actions/deploy-pages@v5

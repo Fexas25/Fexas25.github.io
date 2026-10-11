@@ -16,6 +16,7 @@ baseurl: ""
 # Build settings
 markdown: kramdown
 highlighter: rouge
+strict_front_matter: true
 
 # Collections
 collections:

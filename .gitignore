@@ -1,0 +1,5 @@
+_site/
+_checks/node_modules/
+__pycache__/
+.jekyll-cache/
+.sass-cache/
