@@ -1,0 +1,195 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const { test, expect } = require('@playwright/test');
+const site = path.resolve(process.env.SITE_DIR || path.join(__dirname, '../../_site'));
+function pages(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+    const file = path.join(dir, entry.name);
+    return entry.isDirectory() ? pages(file) : entry.name.endsWith('.html') ? [file] : [];
+  });
+}
+const routes = pages(site).map(file => '/' + path.relative(site, file).split(path.sep).map(encodeURIComponent).join('/'));
+if (!routes.length) throw Error('正式构建没有 HTML 页面，无法进行手机检查');
+
+// Fail on uncaught application errors and broken local assets, independently of remote services.
+test.beforeEach(async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('response', response => {
+    if (response.url().startsWith('http://127.0.0.1:4173/') && response.status() >= 400)
+      errors.push(`${response.status()} ${response.url()}`);
+  });
+  page.__mobileErrors = errors;
+  // The paused GitHub publisher is outside this suite; never contact its API.
+  await page.route('https://api.github.com/**', route => route.fulfill({ json: [] }));
+});
+test.afterEach(async ({ page }) => {
+  expect(page.__mobileErrors, '浏览器脚本错误或本地资源加载失败').toEqual([]);
+});
+
+async function noOverflow(page) {
+  const state = await page.evaluate(() => {
+    const width = document.documentElement.clientWidth;
+    return {
+      overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - width,
+      suspects: [...document.querySelectorAll('body *')].filter(el => {
+        const r = el.getBoundingClientRect();
+        return r.width && (r.right > width + 1 || r.left < -1) && getComputedStyle(el).position !== 'fixed';
+      }).slice(0, 12).map(el => `${el.tagName}#${el.id}.${el.className}`),
+    };
+  });
+  expect(state.overflow, `横向溢出候选：${state.suspects.join(', ')}`).toBeLessThanOrEqual(1);
+}
+
+async function reachable(locator) {
+  // Skip links intentionally appear only on keyboard focus.
+  if (await locator.evaluate(el => el.classList.contains('skip-link'))) await locator.focus();
+  await locator.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' }));
+  // Floating characters intentionally never become stationary. Hit-test their current
+  // position instead of disabling the site's animation to satisfy Playwright's stability check.
+  const floating = await locator.evaluate(el => el.getAnimations({ subtree: true }).some(animation => animation.effect.getTiming().iterations === Infinity));
+  if (floating) {
+    await expect.poll(() => locator.evaluate(el => {
+      const rect = el.getBoundingClientRect();
+      const target = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+      return target === el || el.contains(target);
+    }), { message: '漂浮控件的点击位置被遮挡' }).toBe(true);
+  } else {
+    await locator.click({ trial: true });
+  }
+  if (await locator.evaluate(el => el.classList.contains('skip-link'))) await locator.blur();
+}
+
+for (const route of routes) {
+  test(`页面布局和按钮 ${route}`, async ({ page }) => {
+    await page.goto(route);
+    await expect(page.locator('#studio-intro')).not.toBeVisible();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      const images = [...document.images];
+      for (const image of images) image.loading = 'eager';
+      await Promise.all(images.map(image => image.decode().catch(() => {})));
+    });
+    await noOverflow(page);
+    const controls = page.locator('a[href], button, select, input:not([type="hidden"]), textarea');
+    for (let i = 0; i < await controls.count(); i++) {
+      const control = controls.nth(i);
+      if (await control.isVisible() && await control.isEnabled()) {
+        await test.step(`可操作：${await control.evaluate(el => el.id || el.getAttribute('aria-label') || el.textContent.trim().slice(0, 45) || el.tagName)}`, async () => {
+          await reachable(control);
+        });
+      }
+    }
+    await noOverflow(page);
+  });
+}
+
+test('检测器能识别横向溢出和按钮遮挡', async ({ page }) => {
+  await page.setContent('<meta name="viewport" content="width=device-width"><button>测试按钮</button>');
+  await reachable(page.getByRole('button'));
+  await page.evaluate(() => { document.body.style.width = '2000px'; });
+  await expect(noOverflow(page)).rejects.toThrow();
+  await page.evaluate(() => {
+    document.body.style.width = '';
+    const overlay = document.createElement('div');
+    overlay.style = 'position:fixed;inset:0;z-index:9999';
+    document.body.append(overlay);
+  });
+  await expect(page.getByRole('button').click({ trial: true, timeout: 500 })).rejects.toThrow();
+});
+
+test('首页抽签弹窗和签到记录保持一致', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#intro-skip').click();
+  await page.locator('.draw-box[data-draw]').click();
+  const dialog = page.locator('#fortune-dialog');
+  await expect(dialog).toBeVisible();
+  await expect(page.locator('#fortune-title')).not.toHaveText(/抽签中|正在/);
+  await noOverflow(page);
+  await page.getByRole('button', { name: '关闭今日签' }).click();
+  await expect(dialog).not.toBeVisible();
+  await page.goto('/daily-checkin/');
+  await expect(page.locator('#total-days')).toHaveText('1');
+  await expect(page.locator('#checkin-btn')).toBeDisabled();
+  await page.reload();
+  await expect(page.locator('#total-days')).toHaveText('1');
+});
+
+test('搜索、筛选和文章跳转', async ({ page, request }) => {
+  const response = await request.get('/search-index.json');
+  const data = await response.json();
+  const entries = Array.isArray(data) ? data : data.entries;
+  const entry = entries.find(item => item.category === 'writing');
+  expect(entry, '搜索索引需要至少一篇博客').toBeTruthy();
+  await page.goto('/search/');
+  await page.locator('[name="q"]').fill(entry.title);
+  await page.locator('[name="category"]').selectOption('writing');
+  const result = page.locator('[data-search-results] a').filter({ hasText: entry.title }).first();
+  await expect(result).toBeVisible();
+  await noOverflow(page);
+  await page.locator('[name="q"]').fill('不存在的文章mobilecheck987654');
+  await expect(page.locator('[data-search-results] .entry-card')).toHaveCount(0);
+  await page.locator('.filter-reset').click();
+  await expect(page.locator('[name="q"]')).toHaveValue('');
+  await page.locator('[name="q"]').fill(entry.title);
+  await result.click();
+  await expect(page.locator('[data-reading-content]')).toBeVisible();
+});
+
+test('抽签页首次签到及刷新后的记录', async ({ page }) => {
+  await page.goto('/daily-checkin/');
+  await expect(page.locator('#total-days')).toHaveText('0');
+  await page.locator('#checkin-btn').click();
+  await expect(page.locator('#total-days')).toHaveText('1');
+  await expect(page.locator('#checkin-btn')).toBeDisabled();
+  await noOverflow(page);
+  await page.reload();
+  await expect(page.locator('#total-days')).toHaveText('1');
+  await expect(page.locator('#checkin-btn')).toBeDisabled();
+});
+
+test('多篇草稿筛选、继续写、刷新和备份恢复', async ({ page, browser }) => {
+  await page.goto('/editor.html');
+  await page.locator('#post-title').fill('手机草稿甲');
+  await page.locator('#markdown-input').fill('第一篇 **保留内容**');
+  await page.locator('#draft-new').click();
+  await page.locator('#post-title').fill('手机草稿乙');
+  await page.locator('#post-category').selectOption('projects');
+  await page.locator('#markdown-input').fill('第二篇工作流');
+  await page.locator('#draft-search').fill('草稿甲');
+  await expect(page.locator('#markdown-input')).toHaveValue('第二篇工作流');
+  await page.locator('#draft-open').click();
+  await expect(page.locator('#markdown-input')).toHaveValue('第一篇 **保留内容**');
+  await page.locator('#draft-filter-clear').click();
+  await page.locator('#draft-category-filter').selectOption('projects');
+  await expect(page.locator('#draft-select option')).toHaveCount(1);
+  await expect(page.locator('#draft-selection-info')).toContainText('编辑');
+  await noOverflow(page);
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#draft-backup-export').click();
+  const download = await downloadPromise;
+  const backup = await fs.promises.readFile(await download.path());
+  expect(JSON.parse(backup).items).toHaveLength(2);
+  await page.reload();
+  await expect(page.locator('#markdown-input')).toHaveValue('第一篇 **保留内容**');
+  const context = await browser.newContext({ viewport: test.info().project.use.viewport, isMobile: true, hasTouch: true, locale: 'zh-CN', baseURL: 'http://127.0.0.1:4173' });
+  try {
+    const fresh = await context.newPage();
+    fresh.on('pageerror', error => page.__mobileErrors.push(error.message));
+    await fresh.route('https://api.github.com/**', route => route.fulfill({ json: [] }));
+    await fresh.goto('/editor.html');
+    const chooserPromise = fresh.waitForEvent('filechooser');
+    await fresh.locator('#draft-backup-import').click();
+    await (await chooserPromise).setFiles({ name: 'backup.json', mimeType: 'application/json', buffer: backup });
+    await expect(fresh.locator('#draft-backup-status')).toContainText('新增 2 篇');
+    await expect(fresh.locator('#draft-select option')).toHaveCount(2);
+    await fresh.locator('#draft-search').fill('草稿乙');
+    await fresh.locator('#draft-open').click();
+    await expect(fresh.locator('#markdown-input')).toHaveValue('第二篇工作流');
+    await noOverflow(fresh);
+  } catch (error) {
+    const fresh = context.pages()[0];
+    if (fresh) await test.info().attach('恢复草稿时的页面', { body: await fresh.screenshot(), contentType: 'image/png' });
+    throw error;
+  } finally { await context.close(); }
+});

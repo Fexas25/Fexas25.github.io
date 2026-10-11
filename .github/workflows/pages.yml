@@ -47,6 +47,22 @@ jobs:
       - name: Test search, writing, backup and daily interactions
         id: features
         run: npm test --prefix _checks
+      - name: Install mobile browser engines
+        working-directory: _checks
+        run: npx playwright install --with-deps chromium webkit
+      - name: Test mobile layout and critical actions
+        id: mobile
+        run: npm run test:browser --prefix _checks
+      - name: Save mobile browser report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mobile-browser-report
+          path: |
+            _checks/playwright-report/
+            _checks/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
       - name: Publish check summary
         if: always()
         env:
@@ -55,6 +71,7 @@ jobs:
           SEO: ${{ steps.seo.outcome }}
           SEARCH: ${{ steps.search.outcome }}
           FEATURES: ${{ steps.features.outcome }}
+          MOBILE: ${{ steps.mobile.outcome }}
         run: |
           {
             echo '## 网站发布检查'
@@ -63,6 +80,8 @@ jobs:
             echo "- 分享与搜索信息：$SEO"
             echo "- 全站搜索索引：$SEARCH"
             echo "- 搜索、草稿、备份及抽签功能：$FEATURES"
+            echo "- 手机浏览器布局与关键操作：$MOBILE"
+            echo '手机检查报告在本次运行的 mobile-browser-report 附件中；失败项包含截图和操作轨迹，保留 14 天。'
             echo ''
             echo '只有全部检查通过，main 分支才会发布。失败时展开对应步骤查看文件路径和原因；修正后再次提交即可。'
           } >> "$GITHUB_STEP_SUMMARY"

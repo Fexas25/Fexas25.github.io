@@ -1,5 +1,8 @@
 _site/
 _checks/node_modules/
+_checks/test-results/
+_checks/playwright-report/
+_checks/*-run.log
 __pycache__/
 .jekyll-cache/
 .sass-cache/

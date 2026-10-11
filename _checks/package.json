@@ -2,7 +2,11 @@
   "name": "mx-website-checks",
   "private": true,
   "scripts": {
-    "test": "node multi-drafts.cjs && node draft-backup.cjs && node studio-motion.cjs && node search.cjs && node reading.cjs"
+    "test": "node multi-drafts.cjs && node draft-backup.cjs && node studio-motion.cjs && node search.cjs && node reading.cjs",
+    "test:browser": "playwright test"
   },
-  "devDependencies": {"jsdom": "26.1.0"}
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "jsdom": "26.1.0"
+  }
 }
