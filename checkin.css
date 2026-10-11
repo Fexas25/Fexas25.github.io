@@ -33,3 +33,5 @@
 /* This page uses the original square orange-haired portrait. */
 .shelf-works .portrait img{transform:none;object-position:center}
 @media(max-width:600px){.shelf-bubble{left:0;width:98px;font-size:9px}}
+
+.checkin-backup{margin-top:24px}.checkin-backup h2{font-size:20px;margin:0 0 14px}.checkin-backup p{font-size:13px;line-height:1.9;color:var(--muted)}.backup-actions{display:flex;gap:12px;flex-wrap:wrap}.backup-actions button{min-height:44px;border:1px solid var(--line);border-radius:22px;background:#fff1eb;padding:10px 18px;color:var(--coral-dark);font-size:13px}.backup-note{font-size:11px!important}.checkin-backup #backup-status{color:var(--purple);overflow-wrap:anywhere}.backup-actions button:disabled{opacity:.5;cursor:wait}

@@ -24,3 +24,52 @@ document.querySelectorAll('[data-browser]').forEach(browser => {
   search?.addEventListener('input', update);
   update();
 });
+
+document.querySelectorAll('[data-reading-content]').forEach(article => {
+  const toc = document.querySelector('[data-article-toc]');
+  const headings = [...article.querySelectorAll('h2, h3')].filter(h => h.textContent.trim());
+  if (toc && headings.length >= 3) {
+    headings.forEach((heading, index) => {
+      if (!heading.id) {
+        let id = `section-${index + 1}`;
+        while (document.getElementById(id)) id += '-';
+        heading.id = id;
+      }
+      const item = document.createElement('li');
+      if (heading.tagName === 'H3') item.className = 'toc-subsection';
+      const link = document.createElement('a');
+      link.href = `#${encodeURIComponent(heading.id)}`;
+      link.textContent = heading.textContent;
+      item.append(link);
+      toc.querySelector('ol').append(item);
+    });
+    toc.hidden = false;
+  }
+  article.querySelectorAll('pre').forEach((pre, index) => {
+    const actions = document.createElement('div');
+    actions.className = 'code-actions';
+    const status = document.createElement('span');
+    status.setAttribute('role', 'status');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'code-copy';
+    button.textContent = '复制代码';
+    button.setAttribute('aria-label', `复制第 ${index + 1} 段代码`);
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        await navigator.clipboard.writeText((pre.querySelector('code') || pre).textContent);
+        status.textContent = '已复制';
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        status.textContent = '请复制已选中的代码';
+      } finally { button.disabled = false; }
+    });
+    actions.append(status, button);
+    pre.before(actions);
+  });
+});

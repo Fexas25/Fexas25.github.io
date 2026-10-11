@@ -293,6 +293,46 @@ function doCheckin() {
   $('fortune-announcement').textContent = `今日签到完成，${newItem.level}：${newItem.text}`;
 }
 document.addEventListener('DOMContentLoaded', () => {
+  $('backup-export').addEventListener('click', () => {
+    try {
+      const state = storageAvailable ? loadState() : temporaryState;
+      const blob = new Blob([window.MXCheckinBackup.serialize(state)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `mx-checkin-${getToday()}.json`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      $('backup-status').textContent = '已生成备份，请妥善保存下载的 JSON 文件。';
+    } catch { $('backup-status').textContent = '备份生成失败，请稍后重试。'; }
+  });
+  $('backup-import').addEventListener('click', () => $('backup-file').click());
+  $('backup-file').addEventListener('change', async () => {
+    const file = $('backup-file').files[0];
+    if (!file) return;
+    $('backup-import').disabled = true;
+    try {
+      if (file.size > 2 * 1024 * 1024) throw Error('文件过大，请选择小于 2 MB 的签到备份。');
+      let data;
+      try { data = JSON.parse(await file.text()); }
+      catch { throw Error('无法读取此文件，请选择导出的 JSON 备份。'); }
+      const incoming = window.MXCheckinBackup.validate(data, getToday());
+      const current = loadState();
+      const merged = window.MXCheckinBackup.merge(current, incoming);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); }
+      catch { throw Error('浏览器无法保存备份，原记录未更改。请检查存储设置后重试。'); }
+      temporaryState = merged;
+      storageAvailable = true;
+      render();
+      $('backup-status').textContent = `导入完成，新增 ${merged.history.length - current.history.length} 条记录。同一天的原签文已保留。`;
+    } catch (error) { $('backup-status').textContent = error.message; }
+    finally {
+      $('backup-import').disabled = false;
+      $('backup-file').value = '';
+    }
+  });
   $('checkin-btn').addEventListener('click', doCheckin);
   $('history-toggle').addEventListener('click', () => { showAllHistory = !showAllHistory; render(); });
   window.addEventListener('storage', event => {

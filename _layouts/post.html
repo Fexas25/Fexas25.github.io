@@ -5,5 +5,17 @@ layout: default
 {% if page.collection == 'cp' or page.category == 'competitive-programming' %}{% assign back_url = '/competitive-programming/' %}{% assign label = '博客' %}{% elsif page.collection == 'gamejam' or page.category == 'game-jam' %}{% assign back_url = '/game-jam/' %}{% assign label = '游戏开发' %}{% elsif page.collection == 'art' or page.category == 'art' %}{% assign back_url = '/art/' %}{% assign label = '绘画创作' %}{% elsif page.collection == 'projects' or page.category == 'projects' %}{% assign back_url = '/projects/' %}{% assign label = '作品' %}{% endif %}
 <div class="reading-shell"><a class="crumb" href="{{ back_url | relative_url }}">← 返回{{ label }}</a>
 <header class="reading-header"><p class="shelf-eyebrow">MX / {{ label }}</p><h1>{{ page.title | escape }}</h1><time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: '%Y.%m.%d' }}</time><span class="reading-flower" aria-hidden="true">✿</span></header>
-<article class="prose">{{ content }}</article>
+<details class="article-toc" data-article-toc hidden><summary>本文目录</summary><ol></ol></details>
+<article class="prose" data-reading-content>{{ content }}</article>
+{% assign reading_collection = page.collection | default: 'posts' %}
+{% assign reading_entries = site[reading_collection] | sort: 'date' %}
+{% assign older_entry = nil %}{% assign newer_entry = nil %}{% assign found_entry = false %}
+{% for entry in reading_entries %}
+{% if found_entry %}{% assign newer_entry = entry %}{% break %}{% endif %}
+{% if entry.url == page.url %}{% assign found_entry = true %}{% else %}{% assign older_entry = entry %}{% endif %}
+{% endfor %}
+{% if found_entry %}{% if older_entry or newer_entry %}<nav class="article-neighbors" aria-label="同栏目文章">
+{% if older_entry %}<a href="{{ older_entry.url | relative_url }}"><span>← 上一篇</span><strong>{{ older_entry.title | escape }}</strong></a>{% endif %}
+{% if newer_entry %}<a href="{{ newer_entry.url | relative_url }}"><span>下一篇 →</span><strong>{{ newer_entry.title | escape }}</strong></a>{% endif %}
+</nav>{% endif %}{% endif %}
 <div class="reading-end"><span aria-hidden="true">✧</span><p>写到这里，下次再见。</p><a class="quiet-link" href="{{ back_url | relative_url }}">继续看看{{ label }} →</a></div></div>
