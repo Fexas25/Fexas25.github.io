@@ -106,3 +106,5 @@
 @media(max-width:600px){.archive-filters{gap:12px}.archive-filters label{flex-basis:calc(50% - 6px)}.site-search-form .archive-filters label:last-of-type{flex-basis:100%}.archive-filters .quiet-link{width:100%}.entry-tags a{min-height:44px}.search-year .entry-link h3{font-size:17px}.search-query input{font-size:16px}}
 
 @media(max-width:700px){.inner-page .site-header nav{gap:0}}
+
+.search-archive mark{background:#fff0c2;color:inherit;border-radius:3px;padding:0 1px}

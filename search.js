@@ -9,7 +9,40 @@
   const fields = Object.fromEntries(['q','category','year','tag'].map(key => [key, form.elements.namedItem(key)]));
   const labels = {moments:'碎碎念',writing:'博客',works:'作品',pages:'其他页面'};
   const normalize = value => String(value || '').normalize('NFKC').toLocaleLowerCase();
-  let entries = [], limit = 20, timer;
+  let entries = [], limit = 20, timer, composing = false;
+  // Map normalized matches back to original text (e.g. full-width letters and ligatures).
+  function ranges(text, words) {
+    let normalized = '', offsets = [], offset = 0;
+    for (const character of text) {
+      const value = normalize(character);
+      for (let i = 0; i < value.length; i++) offsets.push([offset, offset + character.length]);
+      normalized += value; offset += character.length;
+    }
+    const found = [];
+    for (const word of words) {
+      let start = normalized.indexOf(word);
+      while (start !== -1) {
+        found.push([offsets[start][0], offsets[start + word.length - 1][1]]);
+        start = normalized.indexOf(word, start + word.length);
+      }
+    }
+    const merged = [];
+    for (const range of found.sort((a,b) => a[0] - b[0])) {
+      const last = merged[merged.length - 1];
+      if (last && range[0] <= last[1]) last[1] = Math.max(last[1], range[1]);
+      else merged.push([...range]);
+    }
+    return merged;
+  }
+  function highlight(element, text, words) {
+    let offset = 0;
+    for (const [start, end] of ranges(text, words)) {
+      element.append(document.createTextNode(text.slice(offset, start)), make('mark', text.slice(start, end)));
+      offset = end;
+    }
+    element.append(document.createTextNode(text.slice(offset)));
+    return element;
+  }
   const make = (tag, text, className) => {
     const element = document.createElement(tag);
     if (text != null) element.textContent = text;
@@ -18,6 +51,8 @@
   };
   function readURL() {
     const params = new URLSearchParams(location.search);
+    const shown = Number(params.get('shown'));
+    limit = Number.isSafeInteger(shown) && shown > 20 ? Math.min(shown, Math.max(20, entries.length)) : 20;
     for (const [key, field] of Object.entries(fields)) {
       const value = params.get(key) || '';
       // Keep unknown shared filters visible, with an honest empty result.
@@ -35,6 +70,7 @@
     if (syncURL) {
       const url = new URL(location.href); url.search = '';
       for (const [key, value] of Object.entries(state)) if (value) url.searchParams.set(key, value);
+      if (limit > 20) url.searchParams.set('shown', String(limit));
       history.replaceState(null, '', url);
     }
     const matches = entries.filter(entry => (!state.category || entry.category === state.category) &&
@@ -54,15 +90,16 @@
       meta.append(make('span', labels[entry.category] || '作品'));
       if (entry.date) { const time = make('time', entry.date.replaceAll('-','.')); time.dateTime = entry.date; meta.append(time); }
       const link = make('a', null, 'entry-link'); link.href = entry.url;
-      link.append(make('h3', entry.title));
-      const position = words.length ? normalize(entry.content).indexOf(words[0]) : 0;
+      link.append(highlight(make('h3'), entry.title, words));
+      const position = ranges(entry.content, words)[0]?.[0] || 0;
       const start = Math.max(0, position - 35), excerpt = entry.content.slice(start, start + 150);
-      link.append(make('p', (start ? '…' : '') + excerpt + (entry.content.length > start + 150 ? '…' : '')));
+      link.append(highlight(make('p'), (start ? '…' : '') + excerpt + (entry.content.length > start + 150 ? '…' : ''), words));
       card.append(meta, link);
       if (entry.tags.length) {
         const tags = make('div', null, 'entry-tags');
         for (const value of entry.tags) {
           const a = make('a', '# ' + value), url = new URL(location.href);
+          url.searchParams.delete('shown');
           url.searchParams.set('tag',value); a.href = url.pathname + url.search;
           a.addEventListener('click', event => {
             if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -75,8 +112,11 @@
     }
     more.hidden = matches.length <= limit;
   }
-  form.addEventListener('submit', event => { event.preventDefault(); limit = 20; render(); });
-  fields.q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => { limit = 20; render(); }, 120); });
+  form.addEventListener('submit', event => { event.preventDefault(); if (composing) return; limit = 20; render(); });
+  const scheduleSearch = () => { clearTimeout(timer); timer = setTimeout(() => { limit = 20; render(); }, 120); };
+  fields.q.addEventListener('compositionstart', () => { composing = true; clearTimeout(timer); });
+  fields.q.addEventListener('compositionend', () => { composing = false; scheduleSearch(); });
+  fields.q.addEventListener('input', event => { if (!composing && !event.isComposing) scheduleSearch(); });
   for (const key of ['category','year','tag']) fields[key].addEventListener('change', () => { limit = 20; render(); });
   root.querySelector('.filter-reset').addEventListener('click', () => {
     for (const field of Object.values(fields)) field.value = '';
@@ -86,7 +126,7 @@
     const previous = results.querySelectorAll('.entry-card').length;
     limit += 20; render(); results.querySelectorAll('.entry-link')[previous]?.focus();
   });
-  window.addEventListener('popstate', () => { readURL(); limit = 20; if (entries.length) render(false); });
+  window.addEventListener('popstate', () => { readURL(); if (entries.length) render(false); });
   async function load() {
     retry.hidden = true; status.textContent = '正在准备搜索…';
     const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 12000);
