@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="theme-color" content="#fffaf6" />
-<title>{{ page.title | escape }} · MX 摸鱼工作室</title>
+{% include seo.html %}
 <link rel="stylesheet" href="{{ '/home.css' | relative_url }}" /><link rel="stylesheet" href="{{ '/content.css' | relative_url }}" /><script src="{{ '/content.js' | relative_url }}" defer></script>
 {% if page.stylesheet %}<link rel="stylesheet" href="{{ page.stylesheet | relative_url }}" />{% endif %}
 {% for dependency in page.scripts %}<script src="{{ dependency | relative_url }}" defer></script>{% endfor %}
