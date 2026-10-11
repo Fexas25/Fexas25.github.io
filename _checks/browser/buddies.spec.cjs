@@ -59,14 +59,15 @@ test('小伙伴触摸回应、集合与纸飞机轮流接住', async ({ page }) 
   const buddies = page.locator('[data-buddy]');
   for (let i = 0; i < 3; i++) {
     await tapBuddy(page, buddies.nth(i));
-    await expect(page.locator('.buddy-message')).toContainText(['橙橙：', '桃桃：', '全员集合'][i]);
+    await expect(page.locator('.buddy-message')).toContainText(['花花：', '桃桃：', '全员集合'][i]);
+    await expect(page.locator('.buddy-message')).toContainText(['花里实乃理', '桃井爱莉', '芙宁娜'][i]);
   }
   await expect(page.locator('.buddy-message')).toContainText('全员集合');
   const send = page.locator('.buddy-send');
   await send.tap();
   await expect(send).toHaveAttribute('aria-disabled', 'true');
   await send.tap({ force: true });
-  await expect(page.locator('.buddy-message')).toContainText('橙橙接住了纸飞机');
+  await expect(page.locator('.buddy-message')).toContainText('花花接住了纸飞机');
   await send.tap();
   await expect(page.locator('.buddy-message')).toContainText('桃桃接住了纸飞机');
   await unobstructed(page);
@@ -124,7 +125,7 @@ test('键盘自由移动、编辑时让开、窗口改变后不遮挡', async ({
   await page.goto('/projects/');
   const buddy = page.locator('[data-buddy]');
   await buddy.press('Enter');
-  await expect(page.locator('.buddy-message')).toContainText('蓝蓝：');
+  await expect(page.locator('.buddy-message')).toContainText('芙芙：');
   for (const key of ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home']) await buddy.press(key);
   await expect(buddy).toBeFocused();
   await page.setViewportSize({ width: 320, height: 780 });
@@ -147,7 +148,7 @@ test('拖到伙伴旁边会贴贴，放手后不互相遮挡', async ({ page }) 
   await page.mouse.down();
   await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
   await page.mouse.up();
-  await expect(page.locator('.buddy-message')).toContainText('橙橙和桃桃：贴贴');
+  await expect(page.locator('.buddy-message')).toContainText('花花和桃桃：贴贴');
   const a = await buddies.nth(0).boundingBox(), b = await buddies.nth(1).boundingBox();
   expect(a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y).toBe(true);
   await unobstructed(page);

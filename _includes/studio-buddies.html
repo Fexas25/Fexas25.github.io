@@ -8,12 +8,13 @@
       {% if page.portrait contains 'orange' %}{% assign buddy_cast = 'orange' | split: ',' %}{% elsif page.portrait contains 'pink' %}{% assign buddy_cast = 'pink' | split: ',' %}{% endif %}
     {% endif %}
     {% for buddy in buddy_cast %}
+      {% assign character = site.data.characters[buddy] %}
       {% case buddy %}
-        {% when 'orange' %}{% assign buddy_name = '橙橙' %}{% assign buddy_image = '/assets/optimized/character-orange-chibi.webp' %}{% assign buddy_width = 309 %}{% assign buddy_height = 420 %}
-        {% when 'pink' %}{% assign buddy_name = '桃桃' %}{% assign buddy_image = '/assets/optimized/character-pink-chibi.webp' %}{% assign buddy_width = 310 %}{% assign buddy_height = 420 %}
-        {% else %}{% assign buddy_name = '蓝蓝' %}{% assign buddy_image = '/assets/optimized/character-blue-cutout.webp' %}{% assign buddy_width = 640 %}{% assign buddy_height = 486 %}
+        {% when 'orange' %}{% assign buddy_image = '/assets/optimized/character-orange-chibi.webp' %}{% assign buddy_width = 309 %}{% assign buddy_height = 420 %}
+        {% when 'pink' %}{% assign buddy_image = '/assets/optimized/character-pink-chibi.webp' %}{% assign buddy_width = 310 %}{% assign buddy_height = 420 %}
+        {% else %}{% assign buddy_image = '/assets/optimized/character-blue-cutout.webp' %}{% assign buddy_width = 640 %}{% assign buddy_height = 486 %}
       {% endcase %}
-      <button class="studio-buddy buddy-{{ buddy }}" type="button" data-buddy="{{ buddy }}" aria-label="{{ buddy_name }}：打招呼，可用方向键自由移动" aria-describedby="buddy-help"><img src="{{ buddy_image | relative_url }}" width="{{ buddy_width }}" height="{{ buddy_height }}" alt="" draggable="false" decoding="async" /><span class="buddy-shadow" aria-hidden="true"></span></button>
+      <button class="studio-buddy buddy-{{ buddy }}" type="button" data-buddy="{{ buddy }}" data-buddy-name="{{ character.name }}" data-buddy-introduction="{{ character.introduction }}" title="{{ character.full_name }} · {{ character.aliases }}" aria-label="{{ character.name }}（{{ character.full_name }}）：打招呼，可用方向键自由移动" aria-describedby="buddy-help"><img src="{{ buddy_image | relative_url }}" width="{{ buddy_width }}" height="{{ buddy_height }}" alt="" draggable="false" decoding="async" /><span class="buddy-shadow" aria-hidden="true"></span></button>
     {% endfor %}
     <span class="buddy-plane" aria-hidden="true">➤</span>
   </div>

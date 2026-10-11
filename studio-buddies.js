@@ -8,7 +8,7 @@
   const plane = scene.querySelector('.buddy-plane');
   const send = scene.querySelector('.buddy-send');
   const toggle = scene.querySelector('.buddy-toggle');
-  const names = { orange: '橙橙', pink: '桃桃', blue: '蓝蓝' };
+  const names = Object.fromEntries([...scene.querySelectorAll('[data-buddy]')].map(el => [el.dataset.buddy, el.dataset.buddyName]));
   const lines = {
     orange: ['今天的快乐，分你一半！', '我在收集生活里的小事。', '散步也会遇见好灵感。'],
     pink: ['脑洞接收中……收到！', '写累了就伸个懒腰吧。', '换个角落，继续摸鱼。'],
@@ -153,8 +153,13 @@
     if (actors.length > 1 && touched.size === actors.length) {
       touched.clear();
       actors.forEach(other => animate(other));
-      say('全员集合！今天的摸鱼搭子就是你啦。', actor);
-    } else say(`${names[actor.id]}：${lines[actor.id][actor.count++ % 3]}`, actor);
+      const introduction = actor.count++ === 0 ? `${actor.el.dataset.buddyIntroduction} ` : '';
+      say(`${names[actor.id]}：${introduction}全员集合！今天的摸鱼搭子就是你啦。`, actor);
+    } else {
+      const line = actor.count === 0 ? actor.el.dataset.buddyIntroduction : lines[actor.id][(actor.count - 1) % 3];
+      actor.count++;
+      say(`${names[actor.id]}：${line}`, actor);
+    }
   }
   function land(actor, cancelled = false) {
     const friend = actors.find(other => other !== actor && other.placed && Math.hypot(other.x - actor.x, other.y - actor.y) < 100);
