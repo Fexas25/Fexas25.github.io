@@ -1,7 +1,7 @@
 <section class="buddy-scene{% if include.compact %} buddy-compact{% endif %}" data-buddy-scene data-context="{{ page.section | default: 'home' }}" aria-label="工作室的小伙伴" hidden>
-  <p class="buddy-message" role="status" aria-live="polite">{{ page.bubble | default: '摸鱼搭子已就位。碰一下，打个招呼？' }}</p>
-  <div class="buddy-floor">
-    <span class="buddy-trail" aria-hidden="true"></span>
+  <p class="buddy-message sr-only" role="status" aria-live="polite"></p>
+  <div class="buddy-layer">
+    <span class="buddy-speech" aria-hidden="true" hidden></span>
     {% assign buddy_cast = 'orange,pink,blue' | split: ',' %}
     {% if include.compact %}
       {% assign buddy_cast = 'blue' | split: ',' %}
@@ -13,10 +13,9 @@
         {% when 'pink' %}{% assign buddy_name = '桃桃' %}{% assign buddy_image = '/assets/optimized/character-pink-chibi.webp' %}{% assign buddy_width = 310 %}{% assign buddy_height = 420 %}
         {% else %}{% assign buddy_name = '蓝蓝' %}{% assign buddy_image = '/assets/optimized/character-blue-cutout.webp' %}{% assign buddy_width = 640 %}{% assign buddy_height = 486 %}
       {% endcase %}
-      <button class="studio-buddy buddy-{{ buddy }}" type="button" data-buddy="{{ buddy }}" aria-label="{{ buddy_name }}：打招呼，可用左右方向键移动" aria-describedby="buddy-help"><img src="{{ buddy_image | relative_url }}" width="{{ buddy_width }}" height="{{ buddy_height }}" alt="" draggable="false" decoding="async" /><span class="buddy-shadow" aria-hidden="true"></span></button>
+      <button class="studio-buddy buddy-{{ buddy }}" type="button" data-buddy="{{ buddy }}" aria-label="{{ buddy_name }}：打招呼，可用方向键自由移动" aria-describedby="buddy-help"><img src="{{ buddy_image | relative_url }}" width="{{ buddy_width }}" height="{{ buddy_height }}" alt="" draggable="false" decoding="async" /><span class="buddy-shadow" aria-hidden="true"></span></button>
     {% endfor %}
     <span class="buddy-plane" aria-hidden="true">➤</span>
-    <span class="buddy-pop" aria-hidden="true">✦</span>
   </div>
-  <div class="buddy-bottom"><span id="buddy-help">点点小人，也能拖着走</span><button type="button" class="buddy-send">飞一架纸飞机 <span aria-hidden="true">↗</span></button></div>
+  <div class="buddy-tools"><span id="buddy-help" class="sr-only">小伙伴会在页面留白处散步。可拖动，或用四个方向键移动；Escape 取消拖动，Home 回到附近空位。</span><button type="button" class="buddy-send">飞一架纸飞机 <span aria-hidden="true">↗</span></button><button type="button" class="buddy-toggle" aria-pressed="false">小伙伴休息一下</button></div>
 </section>
