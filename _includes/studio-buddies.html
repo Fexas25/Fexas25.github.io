@@ -1,0 +1,10 @@
+<section class="buddy-scene{% if include.compact %} buddy-compact{% endif %}" data-buddy-scene data-context="{{ page.section | default: 'home' }}" aria-label="工作室的小伙伴" hidden>
+  <p class="buddy-message" role="status" aria-live="polite">{{ page.bubble | default: '摸鱼搭子已就位。碰一下，打个招呼？' }}</p>
+  <div class="buddy-floor">
+    <span class="buddy-trail" aria-hidden="true"></span>
+    <button class="studio-buddy buddy-blue" type="button" data-buddy="blue" aria-label="蓝蓝：打招呼，可用左右方向键移动" aria-describedby="buddy-help"><img src="{{ '/assets/optimized/character-blue-cutout.webp' | relative_url }}" width="640" height="486" alt="" draggable="false" decoding="async" /><span class="buddy-shadow" aria-hidden="true"></span></button>
+    <span class="buddy-plane" aria-hidden="true">➤</span>
+    <span class="buddy-pop" aria-hidden="true">✦</span>
+  </div>
+  <div class="buddy-bottom"><span id="buddy-help">点点小人，也能拖着走</span><button type="button" class="buddy-send">飞一架纸飞机 <span aria-hidden="true">↗</span></button></div>
+</section>

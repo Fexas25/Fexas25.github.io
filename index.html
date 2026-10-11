@@ -12,6 +12,8 @@
   <script src="fortune.js?v={{ asset_version }}" defer></script>
   <script src="studio-motion.js?v={{ asset_version }}" defer></script>
   <script src="home.js?v={{ asset_version }}" defer></script>
+  <link rel="stylesheet" href="studio-buddies.css?v={{ asset_version }}" />
+  <script src="studio-buddies.js?v={{ asset_version }}" defer></script>
 <link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
 </head>
 <body>
@@ -53,6 +55,7 @@
       </div>
       <p class="scene-credit">背景与角色来自原站素材库 · 原图署名保留于素材文件</p>
     </section>
+    {% include studio-buddies.html %}
     <div class="content-wrap">
       <div class="writing-grid">
         <section id="moments" class="writing-section" aria-labelledby="moments-title">
