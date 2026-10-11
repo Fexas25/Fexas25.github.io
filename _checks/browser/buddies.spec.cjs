@@ -11,8 +11,9 @@ async function tapBuddy(page, buddy) {
   await buddy.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
   await page.waitForTimeout(220); // Let the companions yield to scrolling, then reappear.
   await expect(buddy).toBeVisible();
-  const box = await buddy.boundingBox();
-  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  // Wait for a stable, hittable target instead of tapping a cached coordinate.
+  // Late font/layout updates can move a companion between two protocol calls.
+  await buddy.tap();
 }
 
 async function unobstructed(page) {
