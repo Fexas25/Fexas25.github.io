@@ -1,0 +1,1 @@
+{% if include.tags.size > 0 %}<div class="entry-tags" aria-label="标签">{% for tag in include.tags %}<a href="{{ '/search/' | relative_url }}?tag={{ tag | url_encode }}"># {{ tag | escape }}</a>{% endfor %}</div>{% endif %}

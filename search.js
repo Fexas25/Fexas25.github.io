@@ -1,0 +1,114 @@
+/* Build-generated local index; no visitor queries are sent to a search service. */
+(() => {
+  'use strict';
+  const root = document.querySelector('[data-site-search]');
+  if (!root) return;
+  const form = root.querySelector('form'), status = root.querySelector('[data-search-status]');
+  const results = root.querySelector('[data-search-results]'), fallback = root.querySelector('[data-search-fallback]');
+  const more = root.querySelector('.search-more'), retry = root.querySelector('.search-retry');
+  const fields = Object.fromEntries(['q','category','year','tag'].map(key => [key, form.elements.namedItem(key)]));
+  const labels = {moments:'碎碎念',writing:'博客',works:'作品',pages:'其他页面'};
+  const normalize = value => String(value || '').normalize('NFKC').toLocaleLowerCase();
+  let entries = [], limit = 20, timer;
+  const make = (tag, text, className) => {
+    const element = document.createElement(tag);
+    if (text != null) element.textContent = text;
+    if (className) element.className = className;
+    return element;
+  };
+  function readURL() {
+    const params = new URLSearchParams(location.search);
+    for (const [key, field] of Object.entries(fields)) {
+      const value = params.get(key) || '';
+      // Keep unknown shared filters visible, with an honest empty result.
+      field.querySelectorAll('[data-unknown]').forEach(option => option.remove());
+      if (key !== 'q' && value && ![...field.options].some(option => option.value === value)) {
+        const option = new Option(value, value); option.dataset.unknown = ''; field.add(option);
+      }
+      field.value = key === 'q' ? value.slice(0,200) : value;
+    }
+  }
+  function render(syncURL = true) {
+    clearTimeout(timer);
+    const state = Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value.trim()]));
+    const words = normalize(state.q).split(/\s+/).filter(Boolean);
+    if (syncURL) {
+      const url = new URL(location.href); url.search = '';
+      for (const [key, value] of Object.entries(state)) if (value) url.searchParams.set(key, value);
+      history.replaceState(null, '', url);
+    }
+    const matches = entries.filter(entry => (!state.category || entry.category === state.category) &&
+      (!state.year || entry.date.slice(0,4) === state.year) && (!state.tag || entry.tags.includes(state.tag)) &&
+      words.every(word => entry.searchText.includes(word)));
+    results.replaceChildren();
+    status.textContent = matches.length ? `找到 ${matches.length} 项，显示 ${Math.min(limit, matches.length)} 项` : '没有找到符合条件的内容，试试更短的关键词或清除筛选。';
+    let currentYear, list;
+    for (const entry of matches.slice(0, limit)) {
+      const year = entry.date.slice(0,4) || '其他记录';
+      if (year !== currentYear) {
+        const group = make('section', null, 'search-year');
+        group.append(make('h2', year, 'month-marker'));
+        list = make('div'); group.append(list); results.append(group); currentYear = year;
+      }
+      const card = make('article', null, 'entry-card'), meta = make('div', null, 'entry-meta');
+      meta.append(make('span', labels[entry.category] || '作品'));
+      if (entry.date) { const time = make('time', entry.date.replaceAll('-','.')); time.dateTime = entry.date; meta.append(time); }
+      const link = make('a', null, 'entry-link'); link.href = entry.url;
+      link.append(make('h3', entry.title));
+      const position = words.length ? normalize(entry.content).indexOf(words[0]) : 0;
+      const start = Math.max(0, position - 35), excerpt = entry.content.slice(start, start + 150);
+      link.append(make('p', (start ? '…' : '') + excerpt + (entry.content.length > start + 150 ? '…' : '')));
+      card.append(meta, link);
+      if (entry.tags.length) {
+        const tags = make('div', null, 'entry-tags');
+        for (const value of entry.tags) {
+          const a = make('a', '# ' + value), url = new URL(location.href);
+          url.searchParams.set('tag',value); a.href = url.pathname + url.search;
+          a.addEventListener('click', event => {
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+            event.preventDefault(); fields.tag.value = value; limit = 20; render(); fields.tag.focus();
+          }); tags.append(a);
+        }
+        card.append(tags);
+      }
+      list.append(card);
+    }
+    more.hidden = matches.length <= limit;
+  }
+  form.addEventListener('submit', event => { event.preventDefault(); limit = 20; render(); });
+  fields.q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => { limit = 20; render(); }, 120); });
+  for (const key of ['category','year','tag']) fields[key].addEventListener('change', () => { limit = 20; render(); });
+  root.querySelector('.filter-reset').addEventListener('click', () => {
+    for (const field of Object.values(fields)) field.value = '';
+    limit = 20; render(); fields.q.focus();
+  });
+  more.addEventListener('click', () => {
+    const previous = results.querySelectorAll('.entry-card').length;
+    limit += 20; render(); results.querySelectorAll('.entry-link')[previous]?.focus();
+  });
+  window.addEventListener('popstate', () => { readURL(); limit = 20; if (entries.length) render(false); });
+  async function load() {
+    retry.hidden = true; status.textContent = '正在准备搜索…';
+    const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(root.dataset.indexUrl, {signal:controller.signal});
+      if (!response.ok) throw Error('index unavailable');
+      const data = await response.json();
+      if (!Array.isArray(data)) throw Error('invalid index');
+      entries = data.map(entry => {
+        const url = new URL(entry.url, location.origin);
+        if (url.origin !== location.origin || !['http:','https:'].includes(url.protocol) || typeof entry.title !== 'string' || typeof entry.content !== 'string') throw Error('invalid entry');
+        const tags = Array.isArray(entry.tags) ? entry.tags.filter(tag => typeof tag === 'string') : [];
+        return {...entry, date:entry.date || '', tags, url:url.pathname + url.search + url.hash, searchText:normalize([entry.title,entry.content,...tags].join(' '))};
+      }).sort((a,b) => b.date.localeCompare(a.date));
+      for (const [key, values] of [['year', entries.map(entry => entry.date.slice(0,4)).filter(Boolean).sort().reverse()], ['tag', entries.flatMap(entry => entry.tags).sort()]]) {
+        for (const value of new Set(values)) fields[key].add(new Option(value, value));
+      }
+      readURL(); render(false); form.hidden = false; results.hidden = false; fallback.hidden = true;
+    } catch {
+      status.textContent = '搜索暂时没加载好，可以重试，或先按下方年份翻阅。'; retry.hidden = false;
+    } finally { clearTimeout(timeout); }
+  }
+  retry.addEventListener('click', load);
+  load();
+})();

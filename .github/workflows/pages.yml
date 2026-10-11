@@ -41,7 +41,10 @@ jobs:
       - name: Check sharing and search metadata
         id: seo
         run: python _checks/seo.py _site
-      - name: Test writing, backup and daily interactions
+      - name: Check generated search index
+        id: search
+        run: python _checks/search-index.py _site
+      - name: Test search, writing, backup and daily interactions
         id: features
         run: npm test --prefix _checks
       - name: Publish check summary
@@ -50,6 +53,7 @@ jobs:
           BUILD: ${{ steps.build.outcome }}
           LINKS: ${{ steps.links.outcome }}
           SEO: ${{ steps.seo.outcome }}
+          SEARCH: ${{ steps.search.outcome }}
           FEATURES: ${{ steps.features.outcome }}
         run: |
           {
@@ -57,7 +61,8 @@ jobs:
             echo "- 正式构建：$BUILD"
             echo "- 站内链接与素材：$LINKS"
             echo "- 分享与搜索信息：$SEO"
-            echo "- 草稿、备份及抽签功能：$FEATURES"
+            echo "- 全站搜索索引：$SEARCH"
+            echo "- 搜索、草稿、备份及抽签功能：$FEATURES"
             echo ''
             echo '只有全部检查通过，main 分支才会发布。失败时展开对应步骤查看文件路径和原因；修正后再次提交即可。'
           } >> "$GITHUB_STEP_SUMMARY"

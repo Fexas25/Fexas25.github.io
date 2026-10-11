@@ -1,0 +1,32 @@
+---
+layout: default
+title: 搜索与归档
+section: search
+eyebrow: FIND A LITTLE MEMORY
+description: 搜索 MX 的日常、博客和作品，按标签与年份翻找旧记录。
+portrait: /assets/optimized/portrait-orange.webp
+bubble: 找找以前的灵感？
+script: /search.js
+---
+{% include section-intro.html %}
+<section class="archive search-archive" data-site-search data-index-url="{{ '/search-index.json' | relative_url }}" aria-label="全站搜索">
+<form class="site-search-form" role="search" hidden>
+<label class="search-query">搜点什么<input name="q" type="search" placeholder="标题、正文、标签…" autocomplete="off" maxlength="200" /></label>
+<div class="archive-filters">
+<label>栏目<select name="category"><option value="">全部栏目</option><option value="moments">碎碎念</option><option value="writing">博客</option><option value="works">作品</option><option value="pages">其他页面</option></select></label>
+<label>年份<select name="year"><option value="">全部年份</option></select></label>
+<label>标签<select name="tag"><option value="">全部标签</option></select></label>
+<button type="button" class="filter-reset">清除筛选</button>
+</div>
+</form>
+<p class="result-status" role="status" aria-live="polite" data-search-status>正在准备搜索。下方也可以按年份直接翻阅。</p>
+<button type="button" class="search-retry" hidden>重新加载搜索</button>
+<div data-search-results hidden></div>
+<button type="button" class="search-more" hidden>再看 20 条</button>
+<div data-search-fallback>
+{% assign entries = site.posts | concat: site.cp | concat: site.projects | concat: site.gamejam | concat: site.art | sort: 'date' | reverse %}
+{% assign years = entries | group_by_exp: 'entry', "entry.date | date: '%Y'" %}
+{% for year in years %}<details class="year-archive" open><summary>{{ year.name }} <span>{{ year.items.size }} 篇</span></summary><ul>{% for entry in year.items %}<li><time datetime="{{ entry.date | date: '%Y-%m-%d' }}">{{ entry.date | date: '%m.%d' }}</time><a href="{{ entry.url | relative_url }}">{{ entry.title | escape }}</a></li>{% endfor %}</ul></details>{% endfor %}
+<p class="collection-links"><a href="{{ '/projects/' | relative_url }}">互动与作品 →</a><a href="{{ '/about/' | relative_url }}">关于 MX →</a></p>
+</div>
+</section>

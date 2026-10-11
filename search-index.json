@@ -1,0 +1,14 @@
+---
+layout: null
+sitemap: false
+---
+{% assign entries = site.posts | concat: site.cp | concat: site.projects | concat: site.gamejam | concat: site.art | sort: 'date' | reverse %}
+[
+{% for entry in entries %}
+{% assign category = 'works' %}{% if entry.collection == 'posts' %}{% assign category = 'moments' %}{% elsif entry.collection == 'cp' %}{% assign category = 'writing' %}{% endif %}
+{"title":{{ entry.title | jsonify }},"url":{{ entry.url | relative_url | jsonify }},"date":{{ entry.date | date: '%Y-%m-%d' | jsonify }},"category":{{ category | jsonify }},"tags":{% if entry.tags %}{{ entry.tags | jsonify }}{% else %}[]{% endif %},"content":{{ entry.content | markdownify | strip_html | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&amp;', '&' | normalize_whitespace | jsonify }}},
+{% endfor %}
+{"title":"今日抽签","url":{{ '/daily-checkin/' | relative_url | jsonify }},"date":"","category":"works","tags":["互动"],"content":"抽一支今日签，签到、查看历史记录，收下一点好运。"},
+{"title":"爸爸，生日快乐","url":{{ '/dad-birthday.html' | relative_url | jsonify }},"date":"","category":"works","tags":["创作"],"content":"把照片、音乐和祝福，装进一个小小的网页里。"},
+{"title":"关于 MX","url":{{ '/about/' | relative_url | jsonify }},"date":"","category":"pages","tags":[],"content":{{ site.description | jsonify }}}
+]

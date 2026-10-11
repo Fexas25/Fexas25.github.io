@@ -1,0 +1,36 @@
+const fs = require('fs'), path = require('path'), assert = require('assert/strict');
+const {JSDOM} = require('jsdom');
+const root = path.resolve(__dirname, '..');
+const source = name => fs.readFileSync(path.join(root, name), 'utf8');
+const wait = () => new Promise(resolve => setTimeout(resolve, 10));
+const fixture = Array.from({length:25}, (_, i) => ({title:`文章 ${i}`,url:`/blog/${i}/`,date:i ? '2025-02-01' : '2026-01-01',category:i ? 'moments' : 'writing',tags:i ? ['日常'] : ['C++','算法'],content:i ? '日常记录' : '特殊正文关键词 ＡＩ <img src=x onerror=alert(1)>'}));
+async function page(query = '', fail = false) {
+  const dom = new JSDOM(source('search/index.html'), {url:'https://test.local/search/' + query,runScripts:'outside-only'}), w = dom.window;
+  let calls = 0;
+  w.fetch = async () => { calls++; return {ok:!fail || calls > 1,json:async () => fixture}; };
+  w.eval(source('search.js')); await wait();
+  const form = w.document.querySelector('form'), cards = () => [...w.document.querySelectorAll('[data-search-results] .entry-card')];
+  const change = (key, value) => { form.elements.namedItem(key).value = value; form.dispatchEvent(new w.Event('submit',{cancelable:true})); };
+  return {w,form,cards,change,close:() => w.close()};
+}
+(async () => {
+  const p = await page('?q=特殊正文关键词+ai&tag=C%2B%2B&year=2026&category=writing');
+  assert.equal(p.cards().length,1,'body, normalized text, tag, category and year intersect');
+  assert.equal(p.cards()[0].querySelector('img'),null,'result text must not execute HTML');
+  assert.match(p.cards()[0].textContent,/特殊正文关键词/);
+  p.change('year','2025'); assert.equal(p.cards().length,0);
+  p.w.document.querySelector('.filter-reset').click(); assert.equal(p.cards().length,20);
+  assert.equal(p.w.location.search,'');
+  p.w.document.querySelector('.search-more').click(); assert.equal(p.cards().length,25);
+  assert.equal(p.w.document.querySelector('.search-more').hidden,true);
+  p.change('tag','C++'); assert.equal(p.cards().length,1); assert.match(p.w.location.search,/tag=C%2B%2B/);
+  p.w.history.pushState(null,'','?q=日常&year=2025');p.w.dispatchEvent(new p.w.PopStateEvent('popstate'));assert.equal(p.cards().length,20);
+  p.close();
+  const unknown = await page('?tag=没有这个标签');assert.equal(unknown.cards().length,0);unknown.close();
+  const error = await page('',true);assert.equal(error.w.document.querySelector('[data-search-fallback]').hidden,false);assert.equal(error.form.hidden,true);
+  error.w.document.querySelector('.search-retry').click();await wait();assert.equal(error.cards().length,20);error.close();
+  const archive = new JSDOM(`<section data-browser><select data-year-filter><option value="">全部</option></select><select data-tag-filter><option value="">全部</option></select><h3 data-month-marker>2026</h3><article data-entry data-year="2026" data-tags='["算法"]'></article><h3 data-month-marker>2025</h3><article data-entry data-year="2025" data-tags='["日常"]'></article><p data-no-results hidden></p><p data-result-status></p></section>`,{runScripts:'outside-only'});
+  archive.window.eval(source('content.js'));const year = archive.window.document.querySelector('select');year.value='2025';year.dispatchEvent(new archive.window.Event('change'));
+  assert.equal(archive.window.document.querySelector('[data-month-marker]').hidden,true);assert.equal(archive.window.document.querySelectorAll('[data-entry]')[1].hidden,false);archive.window.close();
+  console.log('PASS: full-text search, Unicode normalization, combined filters, share URL/back navigation, empty state, pagination, safe rendering, offline fallback/retry and archive month visibility.');
+})().catch(error => {console.error(error);process.exit(1);});

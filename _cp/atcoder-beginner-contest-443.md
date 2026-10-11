@@ -2,6 +2,7 @@
 title: "AtCoder Beginner Contest 443"
 date: 2026-02-01
 category: competitive-programming
+tags: [算法, AtCoder]
 ---
 
 每周例行Atcode，感谢学校的club，个人组织起这个团队真的很厉害，给厉害的朋友们点赞。没有这我的高中oi生涯就荒废了。有生之年还能在icpc打到下一轮，队友太有实力了，泪目了，我终于是被带的那个了。

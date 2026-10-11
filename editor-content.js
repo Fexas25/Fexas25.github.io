@@ -38,10 +38,18 @@
     for (const field of ['title','date','type','external_url','description','cover']) {
       if (metadata[field] !== undefined && typeof metadata[field] !== 'string') throw Error(`文章信息 ${field} 必须是文本。`);
     }
+    tags(metadata.tags);
     const date = (metadata.date || filename.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || '').slice(0,10);
     if (date && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0,10) !== date)) throw Error('文章日期不正确，请使用 YYYY-MM-DD。');
     const title = metadata.title || body.match(/^#\s+(.+)$/m)?.[1] || filename.replace(/\.md(?:own)?$|\.markdown$/i,'').replace(/^\d{4}-\d{2}-\d{2}-/,'');
     return {metadata,body,category,title,date};
   }
-  window.MXContent = {parse,update,folders,importMarkdown};
+  function tags(value) {
+    if (value == null) return [];
+    if (!Array.isArray(value) && typeof value !== 'string') throw Error('标签应为文字列表，或用逗号分隔的文本。');
+    const items = Array.isArray(value) ? value : value.split(/[,，]/);
+    if (items.some(item => typeof item !== 'string')) throw Error('每个标签都应是文字。');
+    return [...new Set(items.map(item => item.trim()).filter(Boolean))];
+  }
+  window.MXContent = {parse,update,folders,importMarkdown,tags};
 })();

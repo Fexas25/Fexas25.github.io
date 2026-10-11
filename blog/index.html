@@ -8,9 +8,11 @@ portrait: /assets/optimized/portrait-orange.webp
 bubble: 今天过得开心吗？
 ---
 {% include section-intro.html %}
-<section class="archive diary" aria-label="碎碎念归档">
+<section class="archive diary" data-browser aria-label="碎碎念归档">
 <div class="archive-heading"><div><h2>日常存档 <span class="small-count">{{ site.posts.size }} 篇</span></h2><p>想到什么，就记下什么。QWQ</p></div><a class="quiet-link" href="{{ '/editor.html?category=blog' | relative_url }}">写一篇 →</a></div>
+{% include archive-filters.html %}
 {% assign entries = site.posts | sort: 'date' | reverse %}
-{% for post in entries %}{% assign month = post.date | date: '%Y · %m' %}{% if month != previous_month %}<h3 class="month-marker">{{ month }}</h3>{% assign previous_month = month %}{% endif %}{% include writing-card.html %}{% endfor %}
+{% for post in entries %}{% assign month = post.date | date: '%Y · %m' %}{% if month != previous_month %}<h3 class="month-marker" data-month-marker>{{ month }}</h3>{% assign previous_month = month %}{% endif %}{% include writing-card.html %}{% endfor %}
 {% if site.posts.size == 0 %}<p class="empty-note">今天的碎碎念还在酝酿中。</p>{% endif %}
+<p class="empty-note" data-no-results hidden>这个年份或标签下还没有记录，换个条件看看吧。</p><p class="result-status" data-result-status role="status" aria-live="polite"></p>
 </section>

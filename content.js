@@ -3,18 +3,36 @@ document.querySelectorAll('[data-browser]').forEach(browser => {
   const entries = [...browser.querySelectorAll('[data-entry]')];
   const buttons = [...browser.querySelectorAll('[data-category-filter]')];
   const search = browser.querySelector('[data-search-input]');
+  const year = browser.querySelector('[data-year-filter]');
+  const tag = browser.querySelector('[data-tag-filter]');
+  const tags = entry => { try { const value = JSON.parse(entry.dataset.tags || '[]'); return Array.isArray(value) ? value : []; } catch { return []; } };
+  for (const [select, values] of [[year, entries.map(entry => entry.dataset.year).filter(Boolean).sort().reverse()], [tag, entries.flatMap(tags).sort()]]) {
+    if (select) for (const value of new Set(values)) select.add(new Option(value, value));
+    select?.addEventListener('change', () => update());
+  }
+  const filters = browser.querySelector('[data-archive-filters]');
+  if (filters && entries.length) filters.hidden = false;
   let category = 'all';
   const update = () => {
     const query = (search?.value || '').trim().toLocaleLowerCase();
     let visible = 0;
     entries.forEach(entry => {
       const matches = (category === 'all' || entry.dataset.category === category) &&
-        (!query || (entry.dataset.search || '').toLocaleLowerCase().includes(query));
+        (!year?.value || entry.dataset.year === year.value) && (!tag?.value || tags(entry).includes(tag.value)) &&
+        (!query || ((entry.dataset.search || '') + ' ' + tags(entry).join(' ')).toLocaleLowerCase().includes(query));
       entry.hidden = !matches;
       if (matches) visible++;
     });
     browser.querySelector('[data-no-results]').hidden = visible !== 0;
     browser.querySelector('[data-result-status]').textContent = `显示 ${visible} 项`;
+    browser.querySelectorAll('[data-month-marker]').forEach(marker => {
+      let sibling = marker.nextElementSibling, anyVisible = false;
+      while (sibling && !sibling.hasAttribute('data-month-marker')) {
+        if (sibling.hasAttribute('data-entry') && !sibling.hidden) anyVisible = true;
+        sibling = sibling.nextElementSibling;
+      }
+      marker.hidden = !anyVisible;
+    });
   };
   buttons.forEach(button => button.addEventListener('click', () => {
     category = button.dataset.categoryFilter;
