@@ -56,7 +56,10 @@ test('原有小圆圈保留，小伙伴额外分布在页面中', async ({ page 
 test('小伙伴触摸回应、集合与纸飞机轮流接住', async ({ page }) => {
   await page.goto('/');
   const buddies = page.locator('[data-buddy]');
-  for (let i = 0; i < 3; i++) await tapBuddy(page, buddies.nth(i));
+  for (let i = 0; i < 3; i++) {
+    await tapBuddy(page, buddies.nth(i));
+    await expect(page.locator('.buddy-message')).toContainText(['橙橙：', '桃桃：', '全员集合'][i]);
+  }
   await expect(page.locator('.buddy-message')).toContainText('全员集合');
   const send = page.locator('.buddy-send');
   await send.tap();

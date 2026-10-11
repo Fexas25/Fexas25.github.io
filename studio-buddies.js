@@ -177,7 +177,7 @@
     const el = actor.el;
     el.style.setProperty('--buddy-delay', `${index * -1.3}s`);
     el.addEventListener('click', event => {
-      if (!event.detail || performance.now() >= (actor.suppressUntil || 0)) greet(actor);
+      if (performance.now() >= (actor.suppressUntil || 0)) greet(actor);
     });
     el.addEventListener('pointerenter', () => { actor.hover = true; });
     el.addEventListener('pointerleave', () => { actor.hover = false; });
@@ -205,11 +205,20 @@
       el.classList.add('is-picked');
       paint(actor, drag.x + event.clientX - drag.startX, drag.y + event.clientY - drag.startY + scrollY - drag.scroll);
     });
-    el.addEventListener('pointerup', event => { if (drag?.pointer === event.pointerId) stopDrag(); });
+    el.addEventListener('pointerup', event => {
+      if (drag?.pointer !== event.pointerId) return;
+      const tapped = !drag.moved;
+      stopDrag();
+      // Touch browsers need not emit a compatibility click after pointer capture.
+      // Handle the completed tap here, then ignore any duplicate synthetic click.
+      actor.suppressUntil = performance.now() + 700;
+      if (tapped) greet(actor);
+    });
     el.addEventListener('pointercancel', () => stopDrag(true));
     el.addEventListener('lostpointercapture', () => stopDrag(true));
     el.addEventListener('keydown', event => {
       actor.focused = true;
+      if (event.key === 'Enter' || event.key === ' ') actor.suppressUntil = 0;
       if (event.key === 'Escape') { stopDrag(true); return; }
       const delta = { ArrowLeft: [-24, 0], ArrowRight: [24, 0], ArrowUp: [0, -24], ArrowDown: [0, 24] }[event.key];
       if (!delta && event.key !== 'Home') return;
