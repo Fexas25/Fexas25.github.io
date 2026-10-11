@@ -15,16 +15,16 @@ concurrency:
 jobs:
   checks:
     name: Build and check website
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: _checks/package-lock.json
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Install test dependencies
@@ -69,10 +69,10 @@ jobs:
 
   external-links:
     name: External link advisory
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/jekyll-build-pages@v1
         with:
           source: ./
@@ -84,7 +84,7 @@ jobs:
     name: Publish verified website
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       pages: write
