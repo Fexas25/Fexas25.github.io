@@ -39,14 +39,15 @@
     const jumpTimers = new Map();
     const lapDuration = 8000;
     let nextJump = 4600;
-    let frame = 0, last = 0, elapsed = 0, lastWake = 0, lastCurrent = 0, pauseUntil = 0, stopped = false;
+    let frame = 0, last = 0, elapsed = 0, lastCurrent = 0, pauseUntil = 0, stopped = false;
     let width = pond.clientWidth, height = pond.clientHeight;
     const removeEffect = node => { clearTimeout(lifetime.get(node)); lifetime.delete(node); node.remove(); };
-    function effect(kind, x, y) {
+    function effect(kind, x, y, heading = 0) {
       if (lifetime.size >= 28) removeEffect(lifetime.keys().next().value);
       const node = document.createElement('span');
       node.className = `pond-effect ${kind}`;
       node.style.left = `${x}px`; node.style.top = `${y}px`;
+      if (kind === 'pond-current-wake') node.style.setProperty('--wake-heading', `${heading}deg`);
       if (kind === 'pond-clover') {
         node.innerHTML = '<svg viewBox="0 0 48 52" aria-hidden="true"><path d="M24 25q8 13-2 24" fill="none" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><path d="M24 25C5 24 4 11 12 10C18 9 23 14 24 25Z"/><path d="M24 25C23 6 36 1 39 9C41 15 35 22 24 25Z"/><path d="M24 25C43 24 48 37 40 40C34 42 27 36 24 25Z"/><path d="M24 25C25 44 12 49 9 41C7 35 13 28 24 25Z"/></g></svg>';
       }
@@ -64,7 +65,7 @@
         const heading = angle * 180 / Math.PI + 270;
         fish.style.transform = `translate(${x - 24}px,${y - 24}px)`;
         fish.style.setProperty('--fish-heading', `${heading}deg`);
-        fish.pondPosition = { x, y };
+        fish.pondPosition = { x, y, angle, heading };
       });
       water.style.setProperty('--water-x', `${swimmers[0].pondPosition.x}px`);
       water.style.setProperty('--water-y', `${swimmers[0].pondPosition.y}px`);
@@ -113,12 +114,12 @@
         jumpFish(swimmers[Math.floor(Math.random() * swimmers.length)], now);
         nextJump = elapsed + 5200 + Math.random() * 3600;
       }
-      if (elapsed - lastWake > 440) {
-        swimmers.forEach(fish => effect('pond-wake', fish.pondPosition.x, fish.pondPosition.y));
-        lastWake = elapsed;
-      }
-      if (elapsed - lastCurrent > 760) {
-        swimmers.filter(fish => !fish.classList.contains('is-jumping')).forEach(fish => effect('pond-current-wake', fish.pondPosition.x, fish.pondPosition.y));
+      if (elapsed - lastCurrent > 520) {
+        swimmers.filter(fish => !fish.classList.contains('is-jumping')).forEach(fish => {
+          const { x, y, angle, heading } = fish.pondPosition;
+          // The fish faces left in its local coordinates; leave a tapered wake behind its tail.
+          effect('pond-current-wake', x + Math.sin(angle) * 20, y - Math.cos(angle) * 20, heading);
+        });
         lastCurrent = elapsed;
       }
       frame = requestAnimationFrame(tick);

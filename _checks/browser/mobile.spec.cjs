@@ -278,16 +278,21 @@ test('开屏小鱼跳跃、水面四叶草和进入按钮互不干扰', async ({
 
 
 test('开屏圆形入口与自主跃鱼落水波纹', async ({ page }) => {
+  // Advance animation frames deterministically, even on busy CI machines.
+  await page.clock.install();
   await page.goto('/');
   const pond = await page.locator('.intro-pond').boundingBox();
   expect(Math.abs(pond.width - pond.height)).toBeLessThan(1);
   const entry = await page.locator('#intro-enter').boundingBox();
   expect(Math.abs(entry.width - entry.height)).toBeLessThan(1);
-  await expect(page.locator('.pond-droplets')).toHaveCount(1, { timeout: 10000 });
+  await page.clock.runFor(5000);
+  await expect(page.locator('.pond-droplets')).toHaveCount(1);
+  await page.clock.runFor(750);
   await expect(page.locator('.pond-resonance')).toHaveCount(1);
   await expect(page.locator('.pond-surface-effects .pond-water-wave').first()).toBeVisible();
   await noOverflow(page);
   await page.locator('#intro-enter').click();
+  await page.clock.runFor(400);
   await expect(page.locator('#studio-intro')).not.toBeVisible();
   await expect(page.locator('.pond-effect')).toHaveCount(0);
 });

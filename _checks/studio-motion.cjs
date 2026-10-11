@@ -16,6 +16,8 @@ assert.ok(pond.querySelector('.pond-resonance'),'landing sends a wave across the
 for(let t=16;t<41000;t+=64){const callbacks=[...queued.values()];queued.clear();callbacks.forEach(fn=>fn(t));}
 assert.equal(pond.querySelectorAll('.intro-swimmer').length,4,'three followers maximum after five laps');
 assert.ok(pond.querySelectorAll('.pond-effect').length<=28,'wake nodes stay bounded');
+assert.ok(pond.querySelector('.pond-current-wake').style.getPropertyValue('--wake-heading'),'tail wakes follow swimming direction');
+assert.equal(pond.querySelectorAll('.pond-wake').length,0,'swimming does not produce chains of geometric circles');
 pond.querySelector('.intro-swimmer').click();
 assert.ok(pond.querySelectorAll('.is-jumping').length>=1);
 pond.querySelector('.pond-water').click();
