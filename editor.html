@@ -25,6 +25,9 @@ script: /editor-github.js
 <p>自动保存到当前浏览器。切换、新建或导入前，会先保存正在写的内容。</p>
 <div class="draft-controls"><label for="draft-select">选择草稿</label><select id="draft-select"><option value="">还没有草稿</option></select><button type="button" id="draft-open">继续写</button><button type="button" id="draft-new">新建草稿</button><button type="button" id="markdown-import">导入 Markdown ↑</button><input id="markdown-file" type="file" accept=".md,.markdown,.mdown,text/markdown,text/plain" hidden /></div>
 <p id="draft-library-status" role="status" aria-live="polite">支持普通 Markdown 和含 YAML 文章信息的文件；每个文件导入为一篇新草稿。</p>
+<div class="draft-controls draft-backup-controls"><button type="button" id="draft-backup-export">备份全部草稿 ↓</button><button type="button" id="draft-backup-import">恢复草稿备份 ↑</button><input id="draft-backup-file" type="file" accept=".json,application/json" hidden /></div>
+<p>换设备时：备份全部草稿，保存 JSON 文件，再到新设备恢复。相同内容会跳过；同一草稿有不同内容时另存副本，保留两份。文件仅在本机处理，不包含图片文件或登录凭据。</p>
+<p id="draft-backup-status" role="status" aria-live="polite"></p>
 </section>
 <section class="github-panel archive" aria-labelledby="github-heading">
 <div class="github-heading"><div><h2 id="github-heading">我的内容</h2><p id="github-status" role="status" aria-live="polite">登录 GitHub 后，可以直接发布或修改文章。</p></div><div class="publish-links"><button type="button" id="github-login" class="primary-link">登录 GitHub</button><button type="button" id="github-logout" hidden>退出登录</button></div></div>

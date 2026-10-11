@@ -45,7 +45,7 @@
     for (const item of drafts.state().items) {
       const option = document.createElement('option');
       option.value = item.id;
-      option.textContent = `${item.meta['post-title'] || '未命名草稿'} · ${item.meta['post-date'] || ''}${item.id === activeDraft ? '（正在写）' : ''}`;
+      option.textContent = `${item.meta['post-title'] || '未命名草稿'}${item.restoredCopy ? '（恢复副本）' : ''} · ${item.meta['post-date'] || ''}${item.id === activeDraft ? '（正在写）' : ''}`;
       select.append(option);
     }
     if (!select.options.length) select.append(new Option('还没有草稿',''));
@@ -85,6 +85,7 @@
     draftStatus(drafts.error() || (item ? '已恢复上次编辑的草稿。' : '开始写作后，会自动保存草稿。'));
   }
   function preserveCurrent() {
+    if (activeDraft && !dirty) return true;
     return !(activeDraft || ids.some(id=>!['post-category','post-date','work-type'].includes(id) && $(id).value) || $('markdown-input').value) || saveDraft();
   }
   function blankDocument() {
@@ -170,6 +171,38 @@
     } catch (error) { draftStatus(error.message); }
   });
   $('draft-new').addEventListener('click', () => window.MXEditor.newDocument());
+  $('draft-backup-export').addEventListener('click', () => {
+    try {
+      const saved = preserveCurrent();
+      const snapshot = {id:activeDraft || drafts.id(),body:$('markdown-input').value,meta:{...Object.fromEntries(ids.map(id=>[id,$(id).value])),__record:currentRecord,__imported:importedMetadata},updatedAt:new Date().toISOString()};
+      const text = drafts.backup(saved ? null : snapshot);
+      const blob = new Blob([text],{type:'application/json;charset=utf-8'});
+      if (blob.size > 20 * 1024 * 1024) throw Error('备份超过 20 MB，请分别导出部分文章后重试。');
+      const url = URL.createObjectURL(blob), link = document.createElement('a');
+      link.href = url; link.download = `mx-writing-backup-${today()}.json`;
+      document.body.append(link); link.click(); link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),30000);
+      $('draft-backup-status').textContent = `已生成 ${JSON.parse(text).items.length} 篇草稿的备份，请保存下载的 JSON 文件。${saved ? '' : '当前未保存内容也已作为副本收入备份。'}`;
+    } catch (error) { $('draft-backup-status').textContent = error.message; }
+  });
+  $('draft-backup-import').addEventListener('click',()=>$('draft-backup-file').click());
+  $('draft-backup-file').addEventListener('change',async () => {
+    const file = $('draft-backup-file').files[0];
+    if (!file) return;
+    $('draft-backup-import').disabled = true;
+    try {
+      if (file.size > 20 * 1024 * 1024) throw Error('请选择小于 20 MB 的全部草稿备份。');
+      let data;
+      try { data = JSON.parse(await file.text()); } catch { throw Error('无法读取此 JSON 文件，请选择“备份全部草稿”生成的文件。'); }
+      const incoming = drafts.validateBackup(data);
+      if (!preserveCurrent()) throw Error('当前草稿无法保存，尚未恢复备份。请先备份全部草稿或导出当前 Markdown。');
+      const result = drafts.restore(incoming);
+      if (!activeDraft && drafts.state().active) showDraft(drafts.state().items.find(x=>x.id === drafts.state().active));
+      else refreshLibrary();
+      $('draft-backup-status').textContent = `恢复完成：新增 ${result.added} 篇，跳过 ${result.duplicates} 篇相同内容，${result.conflicts} 篇另存为恢复副本。原草稿已保留。`;
+    } catch (error) { $('draft-backup-status').textContent = error.message; }
+    finally { $('draft-backup-import').disabled = false; $('draft-backup-file').value = ''; }
+  });
   $('markdown-import').addEventListener('click', () => $('markdown-file').click());
   $('markdown-file').addEventListener('change', async () => {
     const file = $('markdown-file').files[0];
