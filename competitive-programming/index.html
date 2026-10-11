@@ -9,8 +9,8 @@ bubble: 今天又学会了什么？
 ---
 {% include section-intro.html %}
 <section class="archive" data-browser aria-label="博客归档">
-<div class="archive-heading"><div><h2>算法与竞赛 <span class="small-count">{{ site.cp.size }} 篇</span></h2><p>把思路写下来，让灵感有迹可循。</p></div><a class="quiet-link" href="{{ '/editor.html?category=competitive-programming' | relative_url }}">写一篇 →</a></div>
-<div class="archive-tools"><div class="category-tabs" role="group" aria-label="博客分类"><button type="button" data-category-filter="all" aria-pressed="true">全部</button><button type="button" data-category-filter="leetcode" aria-pressed="false">LeetCode</button><button type="button" data-category-filter="atcoder" aria-pressed="false">AtCoder</button></div><label class="archive-search"><span>找文章</span><input type="search" placeholder="输入标题…" data-search-input /></label></div>
+<div class="archive-heading"><div><h2>学习与创作笔记 <span class="small-count">{{ site.cp.size }} 篇</span></h2><p>把思路写下来，让灵感有迹可循。</p></div><a class="quiet-link" href="{{ '/editor.html?category=competitive-programming' | relative_url }}">写一篇 →</a></div>
+<div class="archive-tools"><div class="category-tabs" role="group" aria-label="博客分类"><button type="button" data-category-filter="all" aria-pressed="true">全部</button>{% for topic in site.data.blog_topics %}<button type="button" data-category-filter="{{ topic[0] }}" aria-pressed="false">{{ topic[1] }}</button>{% endfor %}</div><label class="archive-search"><span>找文章</span><input type="search" placeholder="输入标题…" data-search-input /></label></div>
 {% include archive-filters.html %}
 {% assign entries = site.cp | sort: 'date' | reverse %}{% for post in entries %}{% include writing-card.html filters=true %}{% endfor %}
 <p class="empty-note" data-no-results hidden>暂时没找到这篇文章，换个关键词试试？</p><p class="result-status" data-result-status role="status" aria-live="polite"></p>

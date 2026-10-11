@@ -1,4 +1,5 @@
-<article class="entry-card" data-year="{{ post.date | date: '%Y' }}" data-tags="{{ post.tags | jsonify | escape }}" data-entry data-search="{{ post.title | escape }}" {% if include.filters %}{% if post.title contains 'AtCoder' or post.title contains 'atcoder' %}data-category="atcoder"{% else %}data-category="leetcode"{% endif %}{% endif %}>
-<div class="entry-meta"><time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: '%Y.%m.%d' }}</time>{% if include.filters %}<span>{% if post.title contains 'AtCoder' or post.title contains 'atcoder' %}AtCoder{% else %}LeetCode{% endif %}</span>{% endif %}</div>
+{% if include.filters %}{% include blog-topic.html entry=post %}{% endif %}
+<article class="entry-card" data-year="{{ post.date | date: '%Y' }}" data-tags="{{ post.tags | jsonify | escape }}" data-entry data-search="{{ post.title | escape }}" {% if include.filters %}data-category="{{ blog_topic }}"{% endif %}>
+<div class="entry-meta"><time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: '%Y.%m.%d' }}</time>{% if include.filters %}<span>{{ blog_topic_label }}</span>{% endif %}</div>
 <a class="entry-link" href="{{ post.url | relative_url }}"><h2>{{ post.title | escape }}</h2><p>{{ post.content | strip_html | strip_newlines | truncate: 110 | escape }}</p><span class="entry-arrow" aria-hidden="true">↗</span></a>
 {% include entry-tags.html tags=post.tags %}</article>

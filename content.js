@@ -44,6 +44,62 @@ document.querySelectorAll('[data-browser]').forEach(browser => {
 });
 
 document.querySelectorAll('[data-reading-content]').forEach(article => {
+  const topLink = document.querySelector('[data-reading-top]');
+  if (topLink) {
+    let pending = false;
+    const updateTop = () => {
+      pending = false;
+      topLink.hidden = article.getBoundingClientRect().height < window.innerHeight * 1.5 || window.scrollY < 600;
+    };
+    window.addEventListener('scroll', () => {
+      if (!pending) { pending = true; requestAnimationFrame(updateTop); }
+    }, {passive:true});
+    window.addEventListener('resize', updateTop);
+    window.addEventListener('load', updateTop);
+    if (window.ResizeObserver) new ResizeObserver(updateTop).observe(article);
+    updateTop();
+  }
+  const images = [...article.querySelectorAll('img')].filter(img => !img.closest('a, button') && img.getAttribute('src'));
+  if (images.length && typeof HTMLDialogElement !== 'undefined' && HTMLDialogElement.prototype.showModal) {
+    const dialog = document.createElement('dialog');
+    dialog.className = 'reading-viewer';
+    dialog.setAttribute('aria-label', '文章图片预览');
+    const toolbar = document.createElement('div'); toolbar.className = 'viewer-toolbar';
+    const zoom = document.createElement('button'); zoom.type = 'button'; zoom.textContent = '查看原尺寸'; zoom.setAttribute('aria-pressed','false');
+    const close = document.createElement('button'); close.type = 'button'; close.textContent = '关闭图片 ×';
+    const viewport = document.createElement('div'); viewport.className = 'viewer-viewport';
+    const preview = document.createElement('img');
+    const caption = document.createElement('p'); caption.className = 'viewer-caption'; caption.setAttribute('role','status');
+    viewport.append(preview); toolbar.append(zoom, close); dialog.append(toolbar, viewport, caption); document.body.append(dialog);
+    let opener, previousOverflow = '';
+    close.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => {
+      document.body.style.overflow = previousOverflow;
+      preview.removeAttribute('src'); opener?.focus();
+    });
+    zoom.addEventListener('click', () => {
+      const expanded = zoom.getAttribute('aria-pressed') !== 'true';
+      zoom.setAttribute('aria-pressed',String(expanded)); zoom.textContent = expanded ? '适应屏幕' : '查看原尺寸';
+      viewport.classList.toggle('original-size',expanded);
+    });
+    preview.addEventListener('error', () => { caption.textContent = '图片暂时无法加载，可以关闭后重试。'; });
+    for (const img of images) {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'article-image-open';
+      button.setAttribute('aria-label', `放大图片：${img.alt || '正文配图'}`);
+      button.setAttribute('aria-haspopup','dialog'); button.title = '点击放大图片';
+      const element = img.parentElement.tagName === 'PICTURE' ? img.parentElement : img;
+      element.before(button); button.append(element);
+      button.addEventListener('click', () => {
+        opener = button; previousOverflow = document.body.style.overflow;
+        viewport.classList.remove('original-size'); zoom.setAttribute('aria-pressed','false'); zoom.textContent = '查看原尺寸';
+        caption.textContent = img.alt || '正文配图'; preview.alt = img.alt;
+        preview.src = img.currentSrc || img.src;
+        dialog.showModal(); document.body.style.overflow = 'hidden'; close.focus();
+        viewport.scrollTop = 0; viewport.scrollLeft = 0;
+      });
+    }
+  }
   const toc = document.querySelector('[data-article-toc]');
   const headings = [...article.querySelectorAll('h2, h3')].filter(h => h.textContent.trim());
   if (toc && headings.length >= 3) {

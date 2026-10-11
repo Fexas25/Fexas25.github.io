@@ -35,7 +35,7 @@
     }
     const category = metadata.category || fallbackCategory;
     if (!folders[category]) throw Error('无法识别栏目，请将 category 改为 blog、competitive-programming、projects、game-jam 或 art。');
-    for (const field of ['title','date','type','external_url','description','cover']) {
+    for (const field of ['title','date','topic','type','external_url','description','cover']) {
       if (metadata[field] !== undefined && typeof metadata[field] !== 'string') throw Error(`文章信息 ${field} 必须是文本。`);
     }
     tags(metadata.tags);
@@ -51,5 +51,12 @@
     if (items.some(item => typeof item !== 'string')) throw Error('每个标签都应是文字。');
     return [...new Set(items.map(item => item.trim()).filter(Boolean))];
   }
-  window.MXContent = {parse,update,folders,importMarkdown,tags};
+  function topic(metadata) {
+    if (['leetcode','atcoder','algorithm','game-dev','ai','notes'].includes(metadata.topic)) return metadata.topic;
+    const oldTags = tags(metadata.tags).map(tag => tag.toLowerCase());
+    if (oldTags.includes('atcoder')) return 'atcoder';
+    if (oldTags.includes('leetcode')) return 'leetcode';
+    return 'notes';
+  }
+  window.MXContent = {parse,update,folders,importMarkdown,tags,topic};
 })();

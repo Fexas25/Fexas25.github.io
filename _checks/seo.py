@@ -4,7 +4,7 @@ import sys
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, parse_qs
 
 
 class Head(HTMLParser):
@@ -16,6 +16,7 @@ class Head(HTMLParser):
         self.links = {}
         self.titles = []
         self.schemas = []
+        self.scripts = []
         self.feed(html)
 
     def handle_starttag(self, tag, attrs):
@@ -31,6 +32,8 @@ class Head(HTMLParser):
                 self.meta[key] = attrs.get('content', '')
         if tag == 'link':
             self.links.setdefault(attrs.get('rel'), []).append(attrs.get('href'))
+        if tag == 'script' and attrs.get('src'):
+            self.scripts.append(attrs['src'])
         if tag == 'title':
             self.titles.append('')
             self.capture = self.titles
@@ -61,6 +64,11 @@ files = list(root.rglob('*.html'))
 for file in files:
     html = file.read_text(encoding='utf-8')
     head = Head(html)
+    for asset in head.scripts + head.links.get('stylesheet', []):
+        parsed = urlsplit(asset)
+        if not parsed.netloc or parsed.netloc == urlsplit(origin).netloc:
+            version = parse_qs(parsed.query).get('v', [''])[0]
+            assert version.isdigit(), f'{file}: unversioned asset {asset}'
     route = '/' + file.relative_to(root).as_posix()
     route = route.removesuffix('index.html') if route.endswith('/index.html') else route
     assert len(head.titles) == 1 and head.titles[0].strip(), file

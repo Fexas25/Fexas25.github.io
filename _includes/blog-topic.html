@@ -1,0 +1,1 @@
+{% assign blog_topic = include.entry.topic | default: 'notes' %}{% assign blog_topic_label = site.data.blog_topics[blog_topic] %}{% unless blog_topic_label %}{% assign blog_topic = 'notes' %}{% assign blog_topic_label = site.data.blog_topics.notes %}{% endunless %}

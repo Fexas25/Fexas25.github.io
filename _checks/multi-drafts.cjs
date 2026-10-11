@@ -35,5 +35,11 @@ function page(saved={}){
  const before=p.w.localStorage.getItem(key);p.w.Storage.prototype.setItem=()=>{throw Error('quota')};p.input('markdown-input','未能保存的正文');p.$('draft-new').click();assert.equal(p.$('markdown-input').value,'未能保存的正文');assert.equal(p.w.localStorage.getItem(key),before);assert.match(p.$('draft-status').textContent,/无法保存/);p.close();
  const broken=page({[key]:'broken','markdown-draft':'原备份'});broken.input('markdown-input','临时内容');broken.$('draft-new').click();assert.equal(broken.w.localStorage.getItem(key),'broken');assert.equal(broken.$('markdown-input').value,'临时内容');broken.close();
  const conflict=page();conflict.input('post-title','原内容');const other=JSON.stringify({version:1,active:null,items:[]});conflict.w.localStorage.setItem(key,other);conflict.input('markdown-input','另一个标签页冲突');assert.equal(conflict.w.localStorage.getItem(key),other);assert.match(conflict.$('draft-status').textContent,/另一标签页/);conflict.close();
+ const topics=page();await topics.upload('---\ntitle: 游戏开发笔记\ncategory: competitive-programming\ntopic: game-dev\ndate: 2026-02-01\n---\n正文');
+ assert.equal(topics.$('post-topic').value,'game-dev');assert.equal(topics.$('blog-topic-field').hidden,false);assert.match(topics.w.MXEditor.exportDocument().text,/topic: game-dev/);
+ topics.input('post-topic','ai');const topicReload=page(topics.saved());assert.equal(topicReload.$('post-topic').value,'ai');assert.match(topicReload.w.MXEditor.exportDocument().text,/topic: ai/);topicReload.close();
+ topics.$('draft-new').click();assert.equal(topics.$('post-topic').value,'notes');
+ assert.equal(topics.w.MXContent.topic({title:'不是一道刷题笔记'}),'notes');assert.equal(topics.w.MXContent.topic({tags:['LeetCode']}),'leetcode');
+ topics.close();
  console.log('PASS: legacy migration, multi-draft switching/reload/delete isolation, YAML/BOM/CRLF/plain Markdown import, metadata roundtrip, malformed import preservation, preview XSS protection, quota/corrupt storage/conflict protection.');
 })().catch(error => { console.error(error); process.exit(1); });

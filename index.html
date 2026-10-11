@@ -7,10 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   {% include seo.html %}
   <meta name="theme-color" content="#fffaf6" />
-  <link rel="stylesheet" href="home.css" />
-  <script src="fortune.js" defer></script>
-  <script src="studio-motion.js" defer></script>
-  <script src="home.js" defer></script>
+  {% assign asset_version = site.time | date: '%s' %}
+  <link rel="stylesheet" href="home.css?v={{ asset_version }}" />
+  <script src="fortune.js?v={{ asset_version }}" defer></script>
+  <script src="studio-motion.js?v={{ asset_version }}" defer></script>
+  <script src="home.js?v={{ asset_version }}" defer></script>
 <link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
 </head>
 <body>
@@ -58,7 +59,7 @@
           <div class="section-heading"><div><h2 id="blog-title"><span class="section-symbol paper-symbol" aria-hidden="true">≡</span>博客</h2><p>认真写点东西</p></div><a class="quiet-link" href="competitive-programming/">更多博客 →</a></div>
           {% assign latest_cp = site.cp | sort: 'date' | reverse %}
           {% for post in latest_cp limit: 3 %}
-          <a class="blog-row" href="{{ post.url | relative_url }}"><div><h3>{{ post.title | escape }}</h3><p>算法与竞赛 · <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%Y.%m.%d" }}</time></p></div><span class="row-arrow" aria-hidden="true">›</span></a>
+          {% include blog-topic.html entry=post %}<a class="blog-row" href="{{ post.url | relative_url }}"><div><h3>{{ post.title | escape }}</h3><p>{{ blog_topic_label }} · <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%Y.%m.%d" }}</time></p></div><span class="row-arrow" aria-hidden="true">›</span></a>
           {% endfor %}
           <div class="blog-categories"><span>继续探索</span><a href="game-jam/">游戏开发</a><a href="projects/">项目记录</a><a href="art/">绘画创作</a></div>
         </section>

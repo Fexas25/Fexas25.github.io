@@ -46,7 +46,7 @@
     const items = data.items.map(item => {
       if (!object(item) || typeof item.id !== 'string' || !item.id || item.id.length > 200 || ids.has(item.id) || typeof item.body !== 'string' || !object(item.meta)) throw Error('备份的草稿内容或编号格式不正确。');
       ids.add(item.id); safe(item.meta);
-      for (const field of ['post-title','post-tags','post-category','post-date','work-type','work-url','work-description','work-cover']) if (item.meta[field] !== undefined && typeof item.meta[field] !== 'string') throw Error('备份的文章信息格式不正确。');
+      for (const field of ['post-title','post-tags','post-topic','post-category','post-date','work-type','work-url','work-description','work-cover']) if (item.meta[field] !== undefined && typeof item.meta[field] !== 'string') throw Error('备份的文章信息格式不正确。');
       const category = item.meta['post-category'];
       if (category && !Object.hasOwn(window.MXContent.folders,category)) throw Error('备份中有无法识别的栏目。');
       if (item.meta.__imported != null && !object(item.meta.__imported)) throw Error('备份中的原始文章信息格式不正确。');

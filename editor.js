@@ -10,11 +10,12 @@
     $('publish-panel').hidden = true;
     $('publish-source').value = '';
   }
-  const ids = ['post-title','post-tags','post-category','post-date','work-type','work-url','work-description','work-cover'];
+  const ids = ['post-title','post-tags','post-topic','post-category','post-date','work-type','work-url','work-description','work-cover'];
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
   const isWork = () => ['projects','game-jam','art'].includes($('post-category').value);
   function updateFields() {
     $('work-fields').hidden = !isWork();
+    $('blog-topic-field').hidden = $('post-category').value !== 'competitive-programming';
     $('post-category').disabled = Boolean(currentRecord);
     $('editing-status').textContent = currentRecord ? `正在修改：${currentRecord.path}（保留原文件名）` : '正在新建内容';
     const category = $('post-category').value;
@@ -74,6 +75,7 @@
     if (currentRecord) $('post-category').value = currentRecord.category;
     if (!folders[$('post-category').value]) $('post-category').value = 'blog';
     if (!$('post-date').value) $('post-date').value = today();
+    if (!$('post-topic').value) $('post-topic').value = window.MXContent.topic(currentRecord?.metadata || importedMetadata || {});
     if (!$('work-type').value) $('work-type').value = 'creative';
     $('markdown-input').value = item.body;
     activeDraft = item.id; dirty = false;
@@ -87,13 +89,13 @@
   }
   function preserveCurrent() {
     if (activeDraft && !dirty) return true;
-    return !(activeDraft || ids.some(id=>!['post-category','post-date','work-type'].includes(id) && $(id).value) || $('markdown-input').value) || saveDraft();
+    return !(activeDraft || ids.some(id=>!['post-category','post-date','post-topic','work-type'].includes(id) && $(id).value) || $('markdown-input').value) || saveDraft();
   }
   function blankDocument() {
     dirty = false;
     activeDraft = null; currentRecord = null; importedMetadata = null;
-    ['post-title','post-tags','markdown-input','work-url','work-description','work-cover'].forEach(id => $(id).value = '');
-    $('post-date').value = today(); $('work-type').value = 'creative';
+    ['post-title','post-tags','post-topic','markdown-input','work-url','work-description','work-cover'].forEach(id => $(id).value = '');
+    $('post-date').value = today(); $('work-type').value = 'creative'; $('post-topic').value = 'notes';
     invalidatePublish(); updateFields(); preview(); refreshLibrary();
   }
   function slugify(title) { return title.toLowerCase().trim().replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'') || 'note'; }
@@ -109,6 +111,7 @@
     if (!title || !folders[category] || !/^\d{4}-\d{2}-\d{2}$/.test(date) || (!body && !(isWork() && link))) throw Error('请填写标题、日期和内容；作品也可以只填写链接。');
     if (isWork() && (!validAddress(link) || !validAddress(cover))) throw Error('作品和封面地址请使用 http(s) 链接，或以 / 开头的站内路径。');
     const lines = ['---',`title: ${JSON.stringify(title)}`,`date: ${date}`,`category: ${category}`];
+    if (category === 'competitive-programming') lines.push(`topic: ${$('post-topic').value || 'notes'}`);
     lines.push(`tags: ${JSON.stringify(window.MXContent.tags($('post-tags').value))}`);
     if (isWork()) {
       lines.push(`type: ${$('work-type').value}`);
@@ -215,7 +218,7 @@
       if (!/\.(md|markdown|mdown)$/i.test(file.name)) throw Error('请选择 .md、.markdown 或 .mdown 文件。');
       const parsed = window.MXContent.importMarkdown(await file.text(),file.name,$('post-category').value);
       if (!preserveCurrent()) throw Error('当前内容尚未保存，请先导出备份，再导入。');
-      const meta = {'post-tags':window.MXContent.tags(parsed.metadata.tags).join(', '),'post-title':parsed.title,'post-category':parsed.category,'post-date':parsed.date || today(),'work-type':parsed.metadata.type || 'creative','work-url':parsed.metadata.external_url || '','work-description':parsed.metadata.description || '','work-cover':parsed.metadata.cover || '',__imported:parsed.metadata};
+      const meta = {'post-topic':window.MXContent.topic(parsed.metadata),'post-tags':window.MXContent.tags(parsed.metadata.tags).join(', '),'post-title':parsed.title,'post-category':parsed.category,'post-date':parsed.date || today(),'work-type':parsed.metadata.type || 'creative','work-url':parsed.metadata.external_url || '','work-description':parsed.metadata.description || '','work-cover':parsed.metadata.cover || '',__imported:parsed.metadata};
       const item = {id:drafts.id(),body:parsed.body,meta};
       drafts.save(item);
       showDraft(item);
@@ -260,6 +263,7 @@
       $('post-category').value = record.category;
       $('post-title').value = String(meta.title || '');
       $('post-tags').value = window.MXContent.tags(meta.tags).join(', ');
+      $('post-topic').value = window.MXContent.topic(meta);
       $('post-date').value = String(meta.date || record.path.match(/\d{4}-\d{2}-\d{2}/)?.[0] || today()).slice(0,10);
       $('work-type').value = ['creative','game','ai'].includes(meta.type) ? meta.type : 'creative';
       for (const [id,key] of [['work-url','external_url'],['work-description','description'],['work-cover','cover']]) $(id).value = String(meta[key] || '');
