@@ -17,7 +17,7 @@ bubble: 来玩点有趣的！
 {% assign entries = site.projects | sort: 'date' | reverse %}{% for post in entries %}{% assign kind = post.type | default: 'creative' %}{% include work-card.html category=kind label='项目' %}{% endfor %}
 {% assign entries = site.gamejam | sort: 'date' | reverse %}{% for post in entries %}{% include work-card.html category='game' label='游戏开发' %}{% endfor %}
 {% assign entries = site.art | sort: 'date' | reverse %}{% for post in entries %}{% include work-card.html category='creative' label='绘画创作' %}{% endfor %}
-<article class="portfolio-card upcoming" data-entry data-category="ai"><div class="portfolio-art art-ai" aria-hidden="true"><span>✦</span><i>Idea → Workflow</i></div><div class="portfolio-copy"><span class="tag">筹备中</span><h2>AI 工作流</h2><p>给自动化、AI 小工具和工作流留个位置。做完后就放在这里。</p><span class="quiet-link">灵感正在加载…</span></div></article>
+{% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="portfolio-card upcoming" data-entry data-category="ai"><div class="portfolio-art art-ai" aria-hidden="true"><span>✦</span><i>Idea → Workflow</i></div><div class="portfolio-copy"><span class="tag">筹备中</span><h2>AI 工作流</h2><p>给自动化、AI 小工具和工作流留个位置。做完后就放在这里。</p><span class="quiet-link">灵感正在加载…</span></div></article>{% endif %}
 </div><p class="empty-note" data-no-results hidden>这个分类还没有作品，正在慢慢积攒灵感。</p><p class="result-status" data-result-status role="status" aria-live="polite"></p>
 <div class="collection-links"><span>继续翻翻</span><a href="{{ '/game-jam/' | relative_url }}">游戏开发 →</a><a href="{{ '/art/' | relative_url }}">绘画创作 →</a></div>
 </section>

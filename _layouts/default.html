@@ -3,6 +3,7 @@
 <title>{{ page.title | escape }} · MX 摸鱼工作室</title>
 <link rel="stylesheet" href="{{ '/home.css' | relative_url }}" /><link rel="stylesheet" href="{{ '/content.css' | relative_url }}" /><script src="{{ '/content.js' | relative_url }}" defer></script>
 {% if page.stylesheet %}<link rel="stylesheet" href="{{ page.stylesheet | relative_url }}" />{% endif %}
+{% for dependency in page.scripts %}<script src="{{ dependency | relative_url }}" defer></script>{% endfor %}
 {% if page.script %}<script src="{{ page.script | relative_url }}" defer></script>{% endif %}
 </head><body class="inner-page">
 {% include studio-header.html %}
