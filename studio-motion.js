@@ -56,9 +56,10 @@
     function place() {
       swimmers.forEach((fish, index) => {
         const angle = elapsed / lapDuration * Math.PI * 2 - Math.PI / 2 - index * .48;
-        const x = width / 2 + Math.cos(angle) * width * .4;
-        const y = height / 2 + Math.sin(angle) * height * .38;
-        const heading = Math.atan2(Math.cos(angle) * height * .38, -Math.sin(angle) * width * .4) * 180 / Math.PI + 180;
+        const radius = Math.min(width, height) * .4;
+        const x = width / 2 + Math.cos(angle) * radius;
+        const y = height / 2 + Math.sin(angle) * radius;
+        const heading = angle * 180 / Math.PI + 270;
         fish.style.transform = `translate(${x - 24}px,${y - 24}px)`;
         fish.style.setProperty('--fish-heading', `${heading}deg`);
         fish.pondPosition = { x, y };

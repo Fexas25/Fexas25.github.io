@@ -279,6 +279,8 @@ test('开屏小鱼跳跃、水面四叶草和进入按钮互不干扰', async ({
 
 test('开屏圆形入口与自主跃鱼落水波纹', async ({ page }) => {
   await page.goto('/');
+  const pond = await page.locator('.intro-pond').boundingBox();
+  expect(Math.abs(pond.width - pond.height)).toBeLessThan(1);
   const entry = await page.locator('#intro-enter').boundingBox();
   expect(Math.abs(entry.width - entry.height)).toBeLessThan(1);
   await expect(page.locator('.pond-droplets')).toHaveCount(1, { timeout: 10000 });

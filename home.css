@@ -32,9 +32,11 @@ html:has(dialog[open]){overflow:hidden}
 .intro-card .intro-brand{font-size:12px;letter-spacing:3px;margin:0 0 24px}
 .studio-intro .intro-card h2{font-size:clamp(25px,6vw,34px);font-weight:600;letter-spacing:1px;margin:12px 0}
 .intro-card #intro-description{letter-spacing:1px;font-size:13px;line-height:1.8;margin:0}
-.intro-pond{width:100%;height:360px;position:relative;margin:16px auto 0;isolation:isolate}
-.intro-card .pond-water{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:radial-gradient(ellipse,#edf7f055,#d7e9e066 43%,#d9ece92b 64%,transparent 72%);cursor:crosshair;touch-action:manipulation}
-.pond-orbit{position:absolute;inset:12% 10%;border:1px solid #a9c9bc40;border-radius:50%;pointer-events:none;box-shadow:0 0 0 14px #d7e5d818,0 0 0 30px #d7e5d810}
+.intro-pond{width:min(100%,460px,max(180px,calc(100svh - 260px)));aspect-ratio:1;height:auto;position:relative;margin:16px auto 0;isolation:isolate}
+.intro-card .pond-water{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:radial-gradient(circle closest-side,#ffffff08 0%,#e4f4ee28 23%,#b3ded048 45%,#95c7c12e 58%,#c6e1dc12 70%,transparent 82%);cursor:crosshair;touch-action:manipulation}
+.pond-orbit{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle closest-side,transparent 65%,#8eada71c calc(65% + 1px),transparent calc(65% + 2px),transparent 76%,#8eada736 calc(76% + 1px),transparent calc(76% + 2px),transparent 87%,#8eada750 calc(87% + 1px),transparent calc(87% + 2px),transparent 98%,#8eada728 calc(98% + 1px),transparent calc(98% + 2px))}
+.intro-card .pond-water::before{content:"";position:absolute;inset:14%;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse at 32% 28%,#ffffff90 0%,transparent 38%),radial-gradient(ellipse at 68% 66%,#acd7cd35 0%,transparent 52%);mask-image:radial-gradient(circle closest-side,#0009 30%,transparent 95%);animation:water-light 12s ease-in-out infinite alternate}
+
 .pond-effects{position:absolute;inset:0;pointer-events:none;z-index:1}
 .intro-card .intro-swimmer{position:absolute;left:0;top:0;width:48px;height:48px;min-height:48px;padding:0;border:0;border-radius:50%;background:transparent;z-index:3;cursor:pointer;touch-action:manipulation;animation:fish-appear .75s ease-out both;--fish-color:#eeac99}
 .intro-swimmer .fish{display:block;width:27px;height:18px;margin:15px 0 0 8px;background:var(--fish-color);transform:rotate(var(--fish-heading,0deg));box-shadow:0 4px 8px #63877620;pointer-events:none}
@@ -58,16 +60,16 @@ html:has(dialog[open]){overflow:hidden}
 @keyframes clover-rise{0%{transform:translate(-50%,-30%) scale(.25) rotate(-25deg);opacity:0}22%{opacity:1}75%{opacity:1}100%{transform:translate(-35%,-170%) scale(1.1) rotate(20deg);opacity:0}}
 @keyframes pond-jump{0%,100%{translate:0 0;scale:1}45%{translate:0 -34px;scale:1.2;filter:drop-shadow(0 22px 4px #63877630)}}
 @keyframes intro-depart{to{opacity:0;transform:translateY(-12px)}}
-@media(max-width:380px){.intro-pond{height:300px}.intro-card #intro-enter{width:94px;height:94px;min-height:94px;font-size:14px}.intro-card .pond-hint{letter-spacing:0}}
-@media(max-height:560px){.intro-pond{height:210px;margin-top:0}.intro-card #intro-enter{width:86px;height:86px;min-height:86px}.intro-card .intro-brand{margin:0}.studio-intro .intro-card{padding:0}.studio-intro[open]{padding:16px}}
+@media(max-width:380px){.intro-card #intro-enter{width:94px;height:94px;min-height:94px;font-size:14px}.intro-card .pond-hint{letter-spacing:0}}
+@media(max-height:560px){.intro-pond{margin-top:0}.intro-card #intro-enter{width:86px;height:86px;min-height:86px}.intro-card .intro-brand{margin:0}.studio-intro .intro-card{padding:0}.studio-intro[open]{padding:16px}}
 @media(prefers-reduced-motion:reduce){.studio-intro *{animation:none!important;transition:none!important}.studio-intro.intro-leaving{animation:none!important}.pond-effect{transform:translate(-50%,-50%)}.intro-swimmer.is-jumping{background:#e3efdc}}
 
 /* Quiet digital accents: warm by day, a soft lavender evening. */
 .studio-intro{isolation:isolate}
 .studio-intro::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 65% 34%,#cfdaed 0%,#e9e3f0 38%,#f3e9e5 76%);opacity:0;animation:pond-night 48s ease-in-out infinite}
 .studio-intro::after{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle,#8cadaa55 .8px,transparent 1px);background-size:38px 38px;mask-image:radial-gradient(ellipse at center,transparent 20%,#0009 55%,transparent 76%);opacity:.35}
-.pond-orbit::before{content:"";position:absolute;inset:-13px;border:1px dashed #7caeb438;border-radius:50%;animation:pond-signal 32s linear infinite}
-.pond-orbit::after{content:"";position:absolute;right:10%;top:-26px;width:18px;height:18px;border-radius:50%;background:#efc990;box-shadow:0 0 24px #f0d5a570;animation:pond-moon 48s ease-in-out infinite}
+.pond-orbit::before{content:"";position:absolute;inset:6%;border-radius:50%;background:repeating-conic-gradient(from 0deg,#8caeb670 0deg .45deg,transparent .45deg 15deg);mask-image:radial-gradient(circle closest-side,transparent 95%,#000 95.5% 98%,transparent 98.5%);animation:pond-signal 32s linear infinite}
+.pond-orbit::after{content:"";position:absolute;right:12%;top:6%;width:18px;height:18px;border-radius:50%;background:#efc990;box-shadow:0 0 24px #f0d5a570;animation:pond-moon 48s ease-in-out infinite}
 .intro-card #intro-enter::before,.intro-card #intro-enter::after{content:"";position:absolute;inset:-9px;border:1px solid #8dbbb46b;border-radius:50%;pointer-events:none;animation:entry-heartbeat 3.6s ease-in-out infinite}
 .intro-card #intro-enter::after{inset:-17px;border-style:dashed;border-color:#9abbbb45;animation-delay:-1.8s}
 .pond-wake::after,.pond-splash::after{content:"";position:absolute;inset:-6px;border:1px dashed #89b8bb88;border-radius:50%}
@@ -90,6 +92,7 @@ html:has(dialog[open]){overflow:hidden}
 @keyframes entry-heartbeat{0%,100%{transform:scale(.97);opacity:.35}45%{transform:scale(1.07);opacity:.8}65%{transform:scale(1);opacity:.55}}
 @keyframes water-droplet{0%{transform:translate(0,0) scale(.3);opacity:0}20%{opacity:.85}60%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:.8}100%{transform:translate(var(--dx),8px) scale(.4);opacity:0}}
 @keyframes pond-resonate{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}20%{opacity:.65}100%{transform:translate(-50%,-50%) scale(3.3);opacity:0}}
-@media(max-width:700px){.intro-pond{height:320px}}
-@media(max-height:560px){.intro-pond{height:210px}.intro-card .pond-hint{margin-top:0}}
+@media(max-height:560px){.intro-card .pond-hint{margin-top:0}}
 @media(prefers-reduced-motion:reduce){.studio-intro::before,.studio-intro::after,.studio-intro *::before,.studio-intro *::after{animation:none!important;transition:none!important}.pond-droplets{display:none}.site-header nav a{transition:none}}
+
+@keyframes water-light{from{opacity:.4;transform:rotate(-8deg) scale(.97)}to{opacity:.85;transform:rotate(8deg) scale(1.03)}}
