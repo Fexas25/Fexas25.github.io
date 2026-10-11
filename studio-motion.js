@@ -37,6 +37,7 @@
     const lifetime = new Map();
     const jumpTimers = new Map();
     const lapDuration = 8000;
+    let nextJump = 4600;
     let frame = 0, last = 0, elapsed = 0, lastWake = 0, pauseUntil = 0, stopped = false;
     let width = pond.clientWidth, height = pond.clientHeight;
     const removeEffect = node => { clearTimeout(lifetime.get(node)); lifetime.delete(node); node.remove(); };
@@ -48,30 +49,38 @@
       if (kind === 'pond-clover') {
         node.innerHTML = '<svg viewBox="0 0 48 52" aria-hidden="true"><path d="M24 25q8 13-2 24" fill="none" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><path d="M24 25C5 24 4 11 12 10C18 9 23 14 24 25Z"/><path d="M24 25C23 6 36 1 39 9C41 15 35 22 24 25Z"/><path d="M24 25C43 24 48 37 40 40C34 42 27 36 24 25Z"/><path d="M24 25C25 44 12 49 9 41C7 35 13 28 24 25Z"/></g></svg>';
       }
+      if (kind === 'pond-droplets') node.innerHTML = '<i></i><i></i><i></i><i></i><i></i>';
       effects.append(node);
-      lifetime.set(node, setTimeout(() => removeEffect(node), kind === 'pond-clover' ? 1500 : 1200));
+      lifetime.set(node, setTimeout(() => removeEffect(node), kind === 'pond-resonance' ? 1800 : kind === 'pond-clover' ? 1500 : 1200));
     }
     function place() {
       swimmers.forEach((fish, index) => {
         const angle = elapsed / lapDuration * Math.PI * 2 - Math.PI / 2 - index * .48;
         const x = width / 2 + Math.cos(angle) * width * .4;
-        const y = height / 2 + Math.sin(angle) * height * .35;
-        const heading = Math.atan2(Math.cos(angle) * height * .35, -Math.sin(angle) * width * .4) * 180 / Math.PI + 180;
+        const y = height / 2 + Math.sin(angle) * height * .38;
+        const heading = Math.atan2(Math.cos(angle) * height * .38, -Math.sin(angle) * width * .4) * 180 / Math.PI + 180;
         fish.style.transform = `translate(${x - 24}px,${y - 24}px)`;
         fish.style.setProperty('--fish-heading', `${heading}deg`);
         fish.pondPosition = { x, y };
       });
     }
-    function jump(event) {
-      const fish = event.currentTarget;
+    function jumpFish(fish, now = performance.now()) {
       if (fish.classList.contains('is-jumping')) return;
-      pauseUntil = performance.now() + 700;
+      pauseUntil = now + 700;
       fish.classList.add('is-jumping');
       const { x, y } = fish.pondPosition;
       effect('pond-splash', x, y);
-      const timer = setTimeout(() => { fish.classList.remove('is-jumping'); jumpTimers.delete(fish); }, 700);
+      if (!reduced.matches) effect('pond-droplets', x, y);
+      const timer = setTimeout(() => {
+        fish.classList.remove('is-jumping'); jumpTimers.delete(fish);
+        if (!stopped && !document.hidden) {
+          effect('pond-splash', fish.pondPosition.x, fish.pondPosition.y);
+          if (!reduced.matches) effect('pond-resonance', width / 2, height / 2);
+        }
+      }, 700);
       jumpTimers.set(fish, timer);
     }
+    const jump = event => jumpFish(event.currentTarget);
     swimmers[0].addEventListener('click', jump);
     function tick(now) {
       frame = 0;
@@ -89,6 +98,10 @@
         swimmers.push(fish);
       }
       place();
+      if (elapsed >= nextJump) {
+        jumpFish(swimmers[Math.floor(Math.random() * swimmers.length)], now);
+        nextJump = elapsed + 5200 + Math.random() * 3600;
+      }
       if (elapsed - lastWake > 260) {
         swimmers.forEach(fish => effect('pond-wake', fish.pondPosition.x, fish.pondPosition.y));
         lastWake = elapsed;
@@ -112,10 +125,11 @@
     document.addEventListener('visibilitychange', resume);
     reduced.addEventListener('change', resume);
     place(); resume();
-    return () => {
+    return (clear = true) => {
       stopped = true; cancelAnimationFrame(frame);
       for (const timer of lifetime.values()) clearTimeout(timer);
-      lifetime.clear(); effects.replaceChildren();
+      lifetime.clear();
+      if (clear) effects.replaceChildren();
       for (const timer of jumpTimers.values()) clearTimeout(timer);
       jumpTimers.clear();
       water.removeEventListener('click', splash);
@@ -140,7 +154,7 @@
     const enterStudio = () => {
       if (leaving) return;
       leaving = true;
-      stopPond();
+      stopPond(false);
       enter.disabled = true;
       enter.setAttribute('aria-busy', 'true');
       intro.classList.add('intro-leaving');

@@ -23,41 +23,73 @@ html:has(dialog[open]){overflow:hidden}
 
 .site-footer>div{flex-wrap:wrap;gap:8px 15px}
 /* Optional studio entrance, pointer depth and short click feedback. */
-.studio-intro{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;margin:0;border:0;border-radius:0;background:#fffaf6;padding:24px;box-shadow:none;color:var(--ink)}.studio-intro[open]{display:grid;place-items:center;animation:intro-arrive .18s ease-out}.studio-intro::backdrop{background:#fffaf6;backdrop-filter:none}.intro-card{text-align:center}.intro-card>.fish{transform:scale(1.6);margin:0 0 24px;animation:intro-fish .8s ease-in-out}.intro-card p{font-size:13px;color:var(--muted);letter-spacing:2px}.intro-card h2{font-size:clamp(22px,4vw,32px);font-weight:500;margin:20px 0 30px}.intro-card button{border:1px solid var(--line);border-radius:24px;background:var(--surface);padding:12px 22px;min-height:44px;color:var(--coral-dark)}.fish-corner{margin-top:18px;max-width:340px}.fish-corner button{display:inline-flex;align-items:center;gap:15px;min-height:44px;border:1px solid var(--line);border-radius:24px;padding:8px 18px;background:#fffaf5;color:var(--coral-dark);font-size:12px}.fish-corner p{font-size:12px;line-height:1.8;color:var(--muted);min-height:44px;margin:8px 0 0}.fish-swimming .fish{animation:fish-swim .65s ease-in-out}.draw-box.is-drawing{animation:draw-shake .3s ease-in-out;opacity:1;cursor:wait}.draw-box.is-drawing .draw-sticks i:nth-child(2){animation:stick-rise .46s ease-in-out}.sign-revealed{animation:slip-reveal .3s ease-out}@media(hover:hover) and (pointer:fine) and (min-width:851px) and (prefers-reduced-motion:no-preference){.hero .room{transform:translate(var(--scene-x,0px),var(--scene-y,0px)) scale(1.025);transition:transform .18s ease-out}.hero .character-stage{transform:translate(calc(var(--scene-x,0px) * -.65),calc(var(--scene-y,0px) * -.65));transition:transform .18s ease-out}}.scene-enter .hero-copy{animation:scene-arrive .3s ease-out}.scene-enter .character-stage{animation:scene-arrive .4s ease-out}@keyframes intro-arrive{from{opacity:0}to{opacity:1}}@keyframes intro-fish{0%{opacity:0;transform:translateX(-16px) scale(1.6)}100%{opacity:1;transform:translateX(0) scale(1.6)}}@keyframes scene-arrive{from{opacity:.4;translate:0 8px}to{opacity:1;translate:0 0}}@keyframes fish-swim{0%,100%{transform:translate(0,0) rotate(0)}35%{transform:translate(12px,-7px) rotate(-12deg)}70%{transform:translate(-5px,2px) rotate(8deg)}}@keyframes draw-shake{0%,100%{rotate:0deg}25%{rotate:-4deg}75%{rotate:4deg}}@keyframes stick-rise{0%,100%{translate:0 0}60%{translate:0 -25px}}@media(prefers-reduced-motion:reduce){.studio-intro,.scene-enter *,.is-drawing,.is-drawing *,.fish-swimming *,.sign-revealed{animation:none!important;transition:none!important}.hero .room,.hero .character-stage{transform:none!important}}
+.studio-intro{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;margin:0;border:0;border-radius:0;background:#fffaf6;padding:24px;box-shadow:none;color:var(--ink)}.studio-intro[open]{display:grid;place-items:center;animation:intro-arrive .55s ease-out}.studio-intro::backdrop{background:#fffaf6;backdrop-filter:none}.intro-card{text-align:center}.intro-card>.fish{transform:scale(1.6);margin:0 0 24px;animation:intro-fish .8s ease-in-out}.intro-card p{font-size:13px;color:var(--muted);letter-spacing:2px}.intro-card h2{font-size:clamp(22px,4vw,32px);font-weight:500;margin:20px 0 30px}.intro-card button{border:1px solid var(--line);border-radius:24px;background:var(--surface);padding:12px 22px;min-height:44px;color:var(--coral-dark)}.fish-corner{margin-top:18px;max-width:340px}.fish-corner button{display:inline-flex;align-items:center;gap:15px;min-height:44px;border:1px solid var(--line);border-radius:24px;padding:8px 18px;background:#fffaf5;color:var(--coral-dark);font-size:12px}.fish-corner p{font-size:12px;line-height:1.8;color:var(--muted);min-height:44px;margin:8px 0 0}.fish-swimming .fish{animation:fish-swim .65s ease-in-out}.draw-box.is-drawing{animation:draw-shake .3s ease-in-out;opacity:1;cursor:wait}.draw-box.is-drawing .draw-sticks i:nth-child(2){animation:stick-rise .46s ease-in-out}.sign-revealed{animation:slip-reveal .3s ease-out}@media(hover:hover) and (pointer:fine) and (min-width:851px) and (prefers-reduced-motion:no-preference){.hero .room{transform:translate(var(--scene-x,0px),var(--scene-y,0px)) scale(1.025);transition:transform .18s ease-out}.hero .character-stage{transform:translate(calc(var(--scene-x,0px) * -.65),calc(var(--scene-y,0px) * -.65));transition:transform .18s ease-out}}.scene-enter .hero-copy{animation:scene-arrive .3s ease-out}.scene-enter .character-stage{animation:scene-arrive .4s ease-out}@keyframes intro-arrive{from{opacity:0}to{opacity:1}}@keyframes intro-fish{0%{opacity:0;transform:translateX(-16px) scale(1.6)}100%{opacity:1;transform:translateX(0) scale(1.6)}}@keyframes scene-arrive{from{opacity:.4;translate:0 8px}to{opacity:1;translate:0 0}}@keyframes fish-swim{0%,100%{transform:translate(0,0) rotate(0)}35%{transform:translate(12px,-7px) rotate(-12deg)}70%{transform:translate(-5px,2px) rotate(8deg)}}@keyframes draw-shake{0%,100%{rotate:0deg}25%{rotate:-4deg}75%{rotate:4deg}}@keyframes stick-rise{0%,100%{translate:0 0}60%{translate:0 -25px}}@media(prefers-reduced-motion:reduce){.studio-intro,.scene-enter *,.is-drawing,.is-drawing *,.fish-swimming *,.sign-revealed{animation:none!important;transition:none!important}.hero .room,.hero .character-stage{transform:none!important}}
 
 @media(max-width:380px){.site-header nav a{padding-left:3px;padding-right:3px}.header-inner{padding-left:14px;padding-right:14px}}
 /* A small interactive pond around the entrance. */
 .studio-intro[open]{overflow-x:hidden;background:radial-gradient(ellipse at 50% 48%,#f1f5ed 0%,#fff0e5 38%,#fffaf6 72%)}
-.studio-intro .intro-card{width:min(100%,420px);padding:20px 0;position:relative}
+.studio-intro .intro-card{width:min(100%,580px);padding:20px 0;position:relative;z-index:1}
 .intro-card .intro-brand{font-size:12px;letter-spacing:3px;margin:0 0 24px}
 .studio-intro .intro-card h2{font-size:clamp(25px,6vw,34px);font-weight:600;letter-spacing:1px;margin:12px 0}
 .intro-card #intro-description{letter-spacing:1px;font-size:13px;line-height:1.8;margin:0}
-.intro-pond{width:100%;height:280px;position:relative;margin:16px auto 0;isolation:isolate}
+.intro-pond{width:100%;height:360px;position:relative;margin:16px auto 0;isolation:isolate}
 .intro-card .pond-water{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:radial-gradient(ellipse,#edf7f055,#d7e9e066 43%,#d9ece92b 64%,transparent 72%);cursor:crosshair;touch-action:manipulation}
-.pond-orbit{position:absolute;inset:15% 10%;border:1px solid #a9c9bc40;border-radius:50%;pointer-events:none;box-shadow:0 0 0 14px #d7e5d818,0 0 0 30px #d7e5d810}
+.pond-orbit{position:absolute;inset:12% 10%;border:1px solid #a9c9bc40;border-radius:50%;pointer-events:none;box-shadow:0 0 0 14px #d7e5d818,0 0 0 30px #d7e5d810}
 .pond-effects{position:absolute;inset:0;pointer-events:none;z-index:1}
-.intro-card .intro-swimmer{position:absolute;left:0;top:0;width:48px;height:48px;min-height:48px;padding:0;border:0;border-radius:50%;background:transparent;z-index:3;cursor:pointer;touch-action:manipulation;animation:none;--fish-color:#eeac99}
+.intro-card .intro-swimmer{position:absolute;left:0;top:0;width:48px;height:48px;min-height:48px;padding:0;border:0;border-radius:50%;background:transparent;z-index:3;cursor:pointer;touch-action:manipulation;animation:fish-appear .75s ease-out both;--fish-color:#eeac99}
 .intro-swimmer .fish{display:block;width:27px;height:18px;margin:15px 0 0 8px;background:var(--fish-color);transform:rotate(var(--fish-heading,0deg));box-shadow:0 4px 8px #63877620;pointer-events:none}
 .intro-swimmer .fish:before{border-right-color:var(--fish-color);top:2px}
 .intro-swimmer .fish:after{top:6px}
 .intro-swimmer.is-jumping .fish{animation:pond-jump .7s ease-in-out}
-.intro-card #intro-enter{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:4;white-space:nowrap;background:var(--coral);border:1px solid #ffffffa8;color:#402f35;font:inherit;font-size:15px;font-weight:600;padding:15px 22px;border-radius:30px;min-height:50px;box-shadow:0 8px 22px #eb9f8630,0 0 0 7px #fffaf666;transition:transform .18s,box-shadow .18s}
-.intro-card #intro-enter span{display:inline-block;margin-left:12px;transition:transform .18s}
+.intro-card #intro-enter{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:4;white-space:nowrap;background:var(--coral);border:1px solid #ffffffa8;color:#402f35;font:inherit;font-size:15px;font-weight:600;padding:0;width:108px;height:108px;border-radius:50%;min-height:108px;display:grid;place-content:center;gap:5px;box-shadow:0 8px 22px #eb9f8630,0 0 0 7px #fffaf666;transition:transform .18s,box-shadow .18s}
+.intro-card #intro-enter span{display:block;margin-left:0;font-size:18px;line-height:1;transition:transform .3s}
 .intro-card #intro-enter:hover{transform:translateY(-2px);box-shadow:0 12px 26px #eb9f8640,0 0 0 9px #fffaf666}
 .intro-card #intro-enter:hover span{transform:translateX(4px)}
 .intro-card #intro-enter:active{transform:scale(.97)}
 .intro-card .pond-hint{font-size:11px;letter-spacing:1px;color:#918e85;margin:6px 0 0}
 .pond-effect{position:absolute;pointer-events:none}
-.pond-wake,.pond-splash{width:28px;height:18px;border:1px solid #7cae9e80;border-radius:50%;animation:pond-wake 1.2s ease-out forwards}
-.pond-splash{width:42px;height:28px;border-color:#94b79b;box-shadow:0 0 0 7px #adcbb329}
+.pond-wake,.pond-splash{width:28px;height:28px;border:1px solid #7cae9e80;border-radius:50%;animation:pond-wake 1.2s ease-out forwards}
+.pond-splash{width:42px;height:42px;border-color:#94b79b;box-shadow:0 0 0 7px #adcbb329}
 .pond-clover{width:35px;height:39px;color:#8daf8f;filter:drop-shadow(0 3px 3px #6d987529);animation:clover-rise 1.5s ease-out forwards}
 .pond-clover svg{width:100%;height:100%;overflow:visible}
 .studio-intro.intro-leaving{animation:intro-depart .38s ease-in forwards}
 #hero-title:focus{outline:none}
-@keyframes pond-wake{from{transform:translate(-50%,-50%) scale(.35);opacity:.8}to{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
+@keyframes pond-wake{0%{transform:translate(-50%,-50%) scale(.35);opacity:0}20%{opacity:.7}100%{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
 @keyframes clover-rise{0%{transform:translate(-50%,-30%) scale(.25) rotate(-25deg);opacity:0}22%{opacity:1}75%{opacity:1}100%{transform:translate(-35%,-170%) scale(1.1) rotate(20deg);opacity:0}}
 @keyframes pond-jump{0%,100%{translate:0 0;scale:1}45%{translate:0 -34px;scale:1.2;filter:drop-shadow(0 22px 4px #63877630)}}
 @keyframes intro-depart{to{opacity:0;transform:translateY(-12px)}}
-@media(max-width:380px){.intro-pond{height:240px}.intro-card #intro-enter{padding:14px 18px;font-size:14px}.intro-card .pond-hint{letter-spacing:0}}
-@media(max-height:560px){.intro-pond{height:200px;margin-top:0}.intro-card .intro-brand{margin:0}.studio-intro .intro-card{padding:0}.studio-intro[open]{padding:16px}}
+@media(max-width:380px){.intro-pond{height:300px}.intro-card #intro-enter{width:94px;height:94px;min-height:94px;font-size:14px}.intro-card .pond-hint{letter-spacing:0}}
+@media(max-height:560px){.intro-pond{height:210px;margin-top:0}.intro-card #intro-enter{width:86px;height:86px;min-height:86px}.intro-card .intro-brand{margin:0}.studio-intro .intro-card{padding:0}.studio-intro[open]{padding:16px}}
 @media(prefers-reduced-motion:reduce){.studio-intro *{animation:none!important;transition:none!important}.studio-intro.intro-leaving{animation:none!important}.pond-effect{transform:translate(-50%,-50%)}.intro-swimmer.is-jumping{background:#e3efdc}}
+
+/* Quiet digital accents: warm by day, a soft lavender evening. */
+.studio-intro{isolation:isolate}
+.studio-intro::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 65% 34%,#cfdaed 0%,#e9e3f0 38%,#f3e9e5 76%);opacity:0;animation:pond-night 48s ease-in-out infinite}
+.studio-intro::after{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle,#8cadaa55 .8px,transparent 1px);background-size:38px 38px;mask-image:radial-gradient(ellipse at center,transparent 20%,#0009 55%,transparent 76%);opacity:.35}
+.pond-orbit::before{content:"";position:absolute;inset:-13px;border:1px dashed #7caeb438;border-radius:50%;animation:pond-signal 32s linear infinite}
+.pond-orbit::after{content:"";position:absolute;right:10%;top:-26px;width:18px;height:18px;border-radius:50%;background:#efc990;box-shadow:0 0 24px #f0d5a570;animation:pond-moon 48s ease-in-out infinite}
+.intro-card #intro-enter::before,.intro-card #intro-enter::after{content:"";position:absolute;inset:-9px;border:1px solid #8dbbb46b;border-radius:50%;pointer-events:none;animation:entry-heartbeat 3.6s ease-in-out infinite}
+.intro-card #intro-enter::after{inset:-17px;border-style:dashed;border-color:#9abbbb45;animation-delay:-1.8s}
+.pond-wake::after,.pond-splash::after{content:"";position:absolute;inset:-6px;border:1px dashed #89b8bb88;border-radius:50%}
+.pond-wake::before{content:"";position:absolute;top:2px;left:2px;width:3px;height:3px;background:#8cb7b5;border-radius:1px;box-shadow:0 0 5px #9ecfca80}
+.pond-droplets{width:0;height:0}
+.pond-droplets i{position:absolute;width:4px;height:7px;border-radius:50% 50% 40% 40%;background:#8fb9b9;--dx:-28px;--dy:-30px;animation:water-droplet .9s ease-out both}
+.pond-droplets i:nth-child(2){--dx:-15px;--dy:-45px;animation-delay:.04s}
+.pond-droplets i:nth-child(3){--dx:4px;--dy:-50px;animation-delay:.07s}
+.pond-droplets i:nth-child(4){--dx:22px;--dy:-40px;animation-delay:.03s}
+.pond-droplets i:nth-child(5){--dx:33px;--dy:-20px;animation-delay:.09s}
+.pond-resonance{width:80px;height:80px;border:1px solid #94bbb887;border-radius:50%;box-shadow:0 0 0 12px #a7bcd91c;animation:pond-resonate 1.8s ease-out both}
+.intro-leaving .pond-effects{opacity:0;transition:opacity .35s ease-out}
+.site-header{border-image:linear-gradient(90deg,transparent,#e9c7bf,#a5c8c350,transparent) 1}
+.site-header nav a{transition:color .25s ease,background-color .25s ease}
+.section-heading .section-symbol{color:#88aaa8}
+@keyframes fish-appear{from{opacity:0}to{opacity:1}}
+@keyframes pond-night{0%,12%,100%{opacity:0}45%,66%{opacity:.9}}
+@keyframes pond-moon{0%,12%,100%{background:#efc990;box-shadow:0 0 24px #f0d5a570;transform:translateY(0)}45%,66%{background:#f9f5e9;box-shadow:inset -5px -2px 0 #bdcbdc,0 0 22px #c3d4ef88;transform:translateY(-8px)}}
+@keyframes pond-signal{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes entry-heartbeat{0%,100%{transform:scale(.97);opacity:.35}45%{transform:scale(1.07);opacity:.8}65%{transform:scale(1);opacity:.55}}
+@keyframes water-droplet{0%{transform:translate(0,0) scale(.3);opacity:0}20%{opacity:.85}60%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:.8}100%{transform:translate(var(--dx),8px) scale(.4);opacity:0}}
+@keyframes pond-resonate{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}20%{opacity:.65}100%{transform:translate(-50%,-50%) scale(3.3);opacity:0}}
+@media(max-width:700px){.intro-pond{height:320px}}
+@media(max-height:560px){.intro-pond{height:210px}.intro-card .pond-hint{margin-top:0}}
+@media(prefers-reduced-motion:reduce){.studio-intro::before,.studio-intro::after,.studio-intro *::before,.studio-intro *::after{animation:none!important;transition:none!important}.pond-droplets{display:none}.site-header nav a{transition:none}}
