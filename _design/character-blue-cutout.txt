@@ -1,0 +1,9 @@
+Asset: assets/optimized/character-blue-cutout.webp
+Source: assets/optimized/portrait-blue.webp (existing website illustration)
+Method: built-in image_gen edit, transparent_background=true.
+User approved creating one transparent cutout from the existing blue-and-white-haired character.
+Generated master: _design/character-blue-cutout.png
+Delivery: 640px WebP with alpha, encoded from the generated PNG for the website.
+
+Final prompt:
+Edit the provided existing website illustration into ONE transparent-background character cutout for a small decorative website mascot. Isolate ONLY the central blue-and-white-haired anime character with navy blue top hat and navy/white costume, cheerful wink, arms spread. Preserve the original identity, pose, colors and drawn style as closely as possible, keeping the visible cropped pose rather than inventing legs or other new pose. Remove the surrounding sketch characters, confetti and background entirely. Keep any existing signature/lettering on the character itself; do not erase an artist signature or watermark. Actual alpha transparency, no white rectangle, no simulated checkerboard. Center the character silhouette with small transparent margins, appropriate for display at 160 CSS pixels wide, no extra props, no newly added text. Save as a compact transparent PNG ideally about 768 pixels wide.

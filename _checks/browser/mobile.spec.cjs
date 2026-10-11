@@ -76,7 +76,7 @@ for (const route of routes) {
       await Promise.all(images.map(image => image.decode().catch(() => {})));
     });
     await noOverflow(page);
-    if (['/index.html', '/editor.html', '/competitive-programming/index.html'].includes(route)) {
+    if (['/index.html', '/editor.html', '/competitive-programming/index.html', '/projects/index.html', '/art/index.html'].includes(route)) {
       const screenshot = test.info().outputPath('mobile-default.png');
       await page.screenshot({ path: screenshot, fullPage: true });
       await test.info().attach('默认简洁视图', { path: screenshot, contentType: 'image/png' });

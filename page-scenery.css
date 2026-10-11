@@ -1,0 +1,45 @@
+/* Each room has its own palette; opaque reading surfaces keep long text clear. */
+.inner-page{--scene-base:#fff5eb;--scene-a:#ffd6af;--scene-b:#ffd9e7;--scene-accent:#ab5153;--scene-line:#eaded9;--scene-pattern:#d7999229;background:var(--scene-base);isolation:isolate;position:relative;--paper:var(--scene-base);--line:var(--scene-line);--coral-dark:var(--scene-accent)}
+.page-scenery{position:absolute;inset:0 0 auto;height:780px;z-index:-1;overflow:hidden;pointer-events:none;background:linear-gradient(180deg,transparent 60%,var(--scene-base)),radial-gradient(ellipse at 12% 12%,var(--scene-a),transparent 65%),radial-gradient(ellipse at 95% 36%,var(--scene-b),transparent 60%)}
+.scenery-shape{position:absolute;display:block;border:1px solid var(--scene-pattern);border-radius:50%}.shape-one{width:440px;height:440px;right:-80px;top:90px}.shape-two{width:270px;height:270px;left:-110px;top:360px}.scenery-pattern{position:absolute;inset:0;opacity:.7;background-image:radial-gradient(circle,var(--scene-pattern) 1px,transparent 1.5px);background-size:26px 26px;mask-image:linear-gradient(#000,transparent 85%)}
+.inner-page .site-header{background:#fffefbe8;border-bottom-color:var(--scene-line)}
+.inner-page .archive,.inner-page .prose,.inner-page .reading-header{--surface:#fffefcf5}
+.inner-page .shelf-description{color:#535e70}.inner-page .shelf-intro{position:relative}.inner-page .shelf-eyebrow{color:var(--scene-accent)}
+.inner-page .shelf-character .portrait{box-shadow:0 8px 0 var(--scene-b),0 15px 30px #52657614}
+.inner-page .inner-footer{background:transparent;border-top-color:var(--scene-line)}
+/* Moments: strawberry stationery with a soft dotted texture. */
+.scene-moments,.scene-posts{--scene-base:#fff3f4;--scene-a:#ffd4dd;--scene-b:#ffe9c6;--scene-accent:#a44462;--scene-line:#ecd6dd;--scene-pattern:#c888a135}
+.scene-moments .shape-one,.scene-posts .shape-one{border-radius:44% 56% 65% 35%;transform:rotate(-18deg);background:#fff8fb44}
+/* Writing: airy blue graph paper. */
+.scene-writing,.scene-cp{--scene-base:#eff7ff;--scene-a:#c6e6ff;--scene-b:#e1d9fc;--scene-accent:#356990;--scene-line:#d5e2ed;--scene-pattern:#79a9cf2e}
+.scene-writing .scenery-pattern,.scene-cp .scenery-pattern{background-image:linear-gradient(var(--scene-pattern) 1px,transparent 1px),linear-gradient(90deg,var(--scene-pattern) 1px,transparent 1px);background-size:36px 36px}
+/* Works: lilac, periwinkle and scattered points of light. */
+.scene-works,.scene-projects{--scene-base:#f3f0ff;--scene-a:#dbccff;--scene-b:#cceaff;--scene-accent:#6851a0;--scene-line:#ded8ee;--scene-pattern:#987dcc40}
+.scene-works .scenery-pattern,.scene-projects .scenery-pattern{background-image:radial-gradient(circle,#fff 2px,transparent 3px),radial-gradient(circle,var(--scene-pattern) 1px,transparent 2px);background-size:83px 79px,37px 43px;background-position:15px 20px,0 0}
+.scene-works .shape-one,.scene-projects .shape-one{width:460px;height:240px;transform:rotate(-28deg);border-width:2px}
+/* Game development: mint tiles. */
+.scene-gamejam{--scene-base:#edf9f3;--scene-a:#c5eedc;--scene-b:#d7e9ff;--scene-accent:#327762;--scene-line:#cfe4da;--scene-pattern:#6baa952d}
+.scene-gamejam .scenery-pattern{background-image:linear-gradient(45deg,var(--scene-pattern) 25%,transparent 25%,transparent 75%,var(--scene-pattern) 75%);background-size:48px 48px;opacity:.35}
+.scene-gamejam .scenery-shape{border-radius:24px;transform:rotate(14deg)}
+/* Art: overlapping watercolor-like color fields. */
+.scene-art{--scene-base:#fff2f7;--scene-a:#f9c9e0;--scene-b:#cbece8;--scene-accent:#9b467d;--scene-line:#ead7e2;--scene-pattern:#d0a0c730}
+.scene-art .page-scenery{background:linear-gradient(180deg,transparent 55%,var(--scene-base)),radial-gradient(ellipse at 16% 22%,#f8c4df,transparent 56%),radial-gradient(ellipse at 90% 18%,#c5e9eb,transparent 50%),radial-gradient(ellipse at 50% 55%,#ffdfb5,transparent 52%)}
+.scene-art .scenery-shape{border-radius:68% 32% 40% 60%;background:#fff6f54d;transform:rotate(-22deg)}
+/* About: soft apricot sunshine. */
+.scene-about .shape-one{width:360px;height:360px;background:#fff3c977;border:16px double #f9c39e44}
+/* Daily fortune: a gold sunrise. */
+.scene-fortune{--scene-base:#fff8e9;--scene-a:#ffe3a6;--scene-b:#ffdacf;--scene-accent:#96601f;--scene-line:#ecdfc5;--scene-pattern:#d4a96d35}
+.scene-fortune .scenery-pattern{background-image:repeating-conic-gradient(from -20deg at 85% 25%,#ffe4a944 0deg 12deg,transparent 12deg 27deg);background-size:auto;opacity:.7}
+/* Search: calm turquoise rings; editor: a quiet lavender notebook. */
+.scene-search{--scene-base:#eefafa;--scene-a:#c4eeea;--scene-b:#dbe8fc;--scene-accent:#326e79;--scene-line:#cee2e5;--scene-pattern:#6baeb336}
+.scene-search .scenery-pattern{background-image:radial-gradient(circle at 85% 25%,transparent 80px,var(--scene-pattern) 81px,transparent 82px,transparent 140px,var(--scene-pattern) 141px,transparent 142px);background-size:auto}
+.scene-editor{--scene-base:#f7f4ff;--scene-a:#e6ddfa;--scene-b:#fce6e9;--scene-accent:#76548c;--scene-line:#e0d8e9;--scene-pattern:#c0b2d525}
+.scene-editor .scenery-pattern{background-image:linear-gradient(var(--scene-pattern) 1px,transparent 1px);background-size:100% 32px}
+.scene-setup{--scene-base:#f1f6f8;--scene-a:#dbe7f0;--scene-b:#e6e6fa;--scene-accent:#526a80;--scene-line:#dce3ec}
+.scene-lost{--scene-base:#f4f1fa;--scene-a:#dfd5f5;--scene-b:#f5dce2;--scene-accent:#775c91;--scene-line:#e0d8e9}
+/* A transparent character stays in the title layout, never over links or text. */
+.inner-page .shelf-cutout{flex-basis:260px;height:210px;margin-right:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.shelf-cutout>img{display:block;width:100%;height:auto;max-height:100%;object-fit:contain;filter:drop-shadow(0 10px 9px #70609c20)}
+.shelf-cutout .shelf-spark{right:8px;top:12px;color:#9a82c7}
+@media(max-width:700px){.page-scenery{height:610px}.shape-one{width:280px;height:280px;right:-100px}.scenery-pattern{opacity:.45}.inner-page .shelf-cutout{flex-basis:132px;height:135px;margin:0}.shelf-cutout .shelf-spark{font-size:23px;right:0;top:0}}
+@media(max-width:380px){.inner-page .shelf-cutout{flex-basis:108px;height:118px}.scene-works .shelf-intro{gap:12px}}
