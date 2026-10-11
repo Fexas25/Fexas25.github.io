@@ -1,0 +1,30 @@
+---
+layout: default
+title: 写作页首次配置
+section: writing
+eyebrow: CONNECT YOUR STUDIO
+description: 只需配置一次，之后就能在写作页直接发布和修改。
+portrait: /picture/微信图片_20260128002719_46_58.jpg
+bubble: 把工作室连接起来。
+---
+{% include section-intro.html %}
+<article class="prose">
+<h2>1. 创建登录服务</h2>
+<p>注册并登录 <a href="https://dash.cloudflare.com/">Cloudflare</a>。打开 Workers &amp; Pages，创建一个 Worker，使用简单的 Hello World 模板，名称可以叫 <code>mx-writing-auth</code>。部署后记下它的 HTTPS 地址，例如 <code>https://mx-writing-auth.你的子域.workers.dev</code>。</p>
+<p>打开 Worker 的代码编辑器，把<a href="https://github.com/Fexas25/Fexas25.github.io/blob/main/_publishing/worker.mjs">仓库中的 worker.mjs</a>完整复制进去并部署。服务只用于 GitHub 登录，网站仍由 GitHub Pages 托管。</p>
+<h2>2. 注册你自己的 GitHub App</h2>
+<p>用 Fexas25 登录 <a href="https://github.com/settings/apps/new">GitHub App 创建页面</a>，填写：</p>
+<ul><li>应用名称：取一个尚未被使用的名称，例如 <code>Fexas25 MX Writing</code>。</li><li>Homepage URL：<code>https://fexas25.github.io</code></li><li>Callback URL：你的 Worker 地址加 <code>/callback</code>。</li><li>保留用户令牌过期设置；不需要启用 Device Flow，也不需要设置 Setup URL。</li><li>Webhook：取消勾选 Active。</li><li>Repository permissions → Contents：选择 <strong>Read and write</strong>；Metadata 的只读权限保持默认。其余权限不需要开启。</li><li>安装范围：选择 <strong>Only on this account</strong>。</li></ul>
+<p>创建后，打开应用的 Install App，安装到自己的账号，选择 <strong>Only select repositories</strong>，仅勾选 <code>Fexas25.github.io</code>。这会允许该应用读取和更新这个仓库的内容。</p>
+<h2>3. 填入登录配置</h2>
+<p>在 GitHub App 的 General 页面找到 <strong>Client ID</strong>，再生成 <strong>Client secret</strong>。不用生成 Private key。</p>
+<p>回到 Worker 的 Settings → Variables and Secrets，添加以下两个值并重新部署：</p>
+<ul><li><code>GITHUB_CLIENT_ID</code>：Client ID，普通文本变量。</li><li><code>GITHUB_CLIENT_SECRET</code>：Client secret，类型必须选择 <strong>Secret</strong>。</li></ul>
+<p>密钥只填写在 Cloudflare 的 Secret 输入框，不要贴到聊天、网站代码或 GitHub 文件中。Worker 地址加 <code>/health</code> 显示 <code>{"configured":true}</code> 表示两个配置项已填入。</p>
+<h2>4. 连接写作页</h2>
+<p>把 Worker 的公开地址告诉我，我可以帮你完成这一步；或者自己编辑仓库的 <a href="https://github.com/Fexas25/Fexas25.github.io/edit/main/editor-config.js">editor-config.js</a>，把 <code>authOrigin</code> 的空字符串改成你的 Worker HTTPS 地址（不要加 <code>/callback</code>），提交后等待网站部署。</p>
+<h2>5. 以后这样使用</h2>
+<p>打开<a href="{{ '/editor.html' | relative_url }}">写作页</a>，点击“登录 GitHub”，在弹窗里授权。新内容填写后点击“发布到网站”；旧内容在列表里选择并点“打开修改”，改好后点“保存修改”。提交成功后等待 Pages 部署即可。</p>
+<p>首次授权时，核对是你刚创建的应用和网站仓库。登录状态只留在当前页面的内存中；刷新、关闭或退出后重新登录。草稿会继续保留。如果远端文章有新修改，系统会提醒你先导出草稿再合并，不会直接覆盖。</p>
+<p>如果登录弹窗没有打开，请允许本站弹出窗口；若提示没有仓库权限，请检查应用是否已安装到网站仓库，且 Contents 权限为读写。<a href="https://github.com/Fexas25/Fexas25.github.io/actions">查看网站部署状态 →</a></p>
+</article>

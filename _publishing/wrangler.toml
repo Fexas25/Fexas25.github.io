@@ -1,0 +1,8 @@
+name = "mx-writing-auth"
+main = "worker.mjs"
+compatibility_date = "2026-10-11"
+
+# Configure GITHUB_CLIENT_ID as a variable and GITHUB_CLIENT_SECRET as a secret.
+# No credentials belong in this file or in the GitHub repository.
+[observability]
+enabled = false

@@ -4,6 +4,7 @@
   const folders = {blog:'_posts','competitive-programming':'_cp',projects:'_projects','game-jam':'_gamejam',art:'_art'};
   const repository = 'https://github.com/Fexas25/Fexas25.github.io';
   let publishRevision = 0;
+  let currentRecord = null;
   function invalidatePublish() {
     publishRevision++;
     $('publish-panel').hidden = true;
@@ -14,6 +15,8 @@
   const isWork = () => ['projects','game-jam','art'].includes($('post-category').value);
   function updateFields() {
     $('work-fields').hidden = !isWork();
+    $('post-category').disabled = Boolean(currentRecord);
+    $('editing-status').textContent = currentRecord ? `正在修改：${currentRecord.path}（保留原文件名）` : '正在新建内容';
     const category = $('post-category').value;
     $('manage-category').href = `${repository}/tree/main/${folders[category] || '_posts'}`;
     $('work-type').disabled = category !== 'projects';
@@ -33,7 +36,7 @@
     invalidatePublish();
     try {
       localStorage.setItem('markdown-draft', $('markdown-input').value);
-      localStorage.setItem('mx-writing-meta', JSON.stringify(Object.fromEntries(ids.map(id => [id,$(id).value]))));
+      localStorage.setItem('mx-writing-meta', JSON.stringify({...Object.fromEntries(ids.map(id => [id,$(id).value])),__record:currentRecord}));
       $('draft-status').textContent = '草稿已保存到当前浏览器。';
     } catch { $('draft-status').textContent = '浏览器无法保存草稿，请及时导出 Markdown。'; }
   }
@@ -46,7 +49,11 @@
       $('markdown-input').value = body;
       try {
         const meta = JSON.parse(localStorage.getItem('mx-writing-meta'));
-        if (meta && typeof meta === 'object') ids.forEach(id => { if(typeof meta[id] === 'string') $(id).value = meta[id]; });
+        if (meta && typeof meta === 'object') {
+          currentRecord = meta.__record && typeof meta.__record.path === 'string' && typeof meta.__record.sha === 'string' && meta.__record.metadata ? meta.__record : null;
+          ids.forEach(id => { if(typeof meta[id] === 'string') $(id).value = meta[id]; });
+          if (currentRecord) $('post-category').value = currentRecord.category;
+        }
       } catch { /* Legacy text-only drafts can still be restored. */ }
       if (!folders[$('post-category').value]) $('post-category').value = 'blog';
       if (!$('post-date').value) $('post-date').value = today();
@@ -72,7 +79,7 @@
       for (const [key,value] of [['external_url',link],['description',$('work-description').value.trim()],['cover',cover]]) if(value) lines.push(`${key}: ${JSON.stringify(value)}`);
     }
     lines.push('---','',body,'');
-    return {folder:folders[category],filename:`${category === 'blog' ? date+'-' : ''}${slugify(title)}.md`,text:lines.join('\n')};
+    return window.MXContent.update({folder:folders[category],filename:`${category === 'blog' ? date+'-' : ''}${slugify(title)}.md`,text:lines.join('\n')},currentRecord);
   }
   function showPublish(file, message) {
     $('publish-panel').hidden = false;
@@ -112,7 +119,7 @@
   $('post-date').value = today();
   restoreDraft();
   const category = new URLSearchParams(window.location.search).get('category');
-  if (folders[category]) $('post-category').value = category;
+  if (!currentRecord && folders[category]) $('post-category').value = category;
   updateFields(); preview();
   ids.forEach(id => $(id).addEventListener('input', () => { updateFields(); saveDraft(); }));
   $('markdown-input').addEventListener('input', () => { preview(); saveDraft(); });
@@ -123,6 +130,7 @@
     invalidatePublish();
     $('post-title').value = ''; $('markdown-input').value = '';
     ['work-url','work-description','work-cover'].forEach(id => $(id).value = '');
+    currentRecord = null; updateFields();
     $('post-date').value = today(); preview(); $('export-status').hidden = true;
     try { localStorage.removeItem('markdown-draft');localStorage.removeItem('mx-writing-meta');$('draft-status').textContent = '草稿已清空，可以开始新的记录。'; }
     catch { $('draft-status').textContent = '当前内容已清空，浏览器中的旧草稿未能删除。'; }
@@ -141,4 +149,30 @@
       status.textContent = `已导出 ${file.filename}。发布步骤和对应文件夹入口在下方。`;
     } catch(error) { status.textContent = error.message; }
   });
+  window.MXEditor = {
+    exportDocument,
+    record: () => currentRecord,
+    hasContent: () => Boolean($('post-title').value.trim() || $('markdown-input').value.trim() || $('work-url').value.trim()),
+    load(record) {
+      const meta = record.metadata;
+      currentRecord = record;
+      $('post-category').value = record.category;
+      $('post-title').value = String(meta.title || '');
+      $('post-date').value = String(meta.date || record.path.match(/\d{4}-\d{2}-\d{2}/)?.[0] || today()).slice(0,10);
+      $('work-type').value = ['creative','game','ai'].includes(meta.type) ? meta.type : 'creative';
+      for (const [id,key] of [['work-url','external_url'],['work-description','description'],['work-cover','cover']]) $(id).value = String(meta[key] || '');
+      $('markdown-input').value = record.body;
+      updateFields(); preview(); saveDraft();
+    },
+    newDocument() {
+      currentRecord = null;
+      ['post-title','markdown-input','work-url','work-description','work-cover'].forEach(id => $(id).value = '');
+      $('post-date').value = today(); $('work-type').value = 'creative';
+      updateFields(); preview(); saveDraft();
+    },
+    committed(file, sha) {
+      currentRecord = window.MXContent.parse(file.text, `${file.folder}/${file.filename}`, sha);
+      updateFields(); saveDraft();
+    }
+  };
 })();
