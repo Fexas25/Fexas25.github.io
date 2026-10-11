@@ -333,7 +333,11 @@ document.addEventListener('DOMContentLoaded', () => {
       $('backup-file').value = '';
     }
   });
-  $('checkin-btn').addEventListener('click', doCheckin);
+  $('checkin-btn').addEventListener('click', () => {
+    const finish = () => { doCheckin(); document.querySelector('.checkin-result')?.classList.add('sign-revealed'); };
+    if (window.MXMotion) window.MXMotion.draw($('checkin-btn'),finish);
+    else finish();
+  });
   $('history-toggle').addEventListener('click', () => { showAllHistory = !showAllHistory; render(); });
   window.addEventListener('storage', event => {
     if (event.key === STORAGE_KEY || event.key === null) { storageAvailable = true; render(); }

@@ -9,10 +9,12 @@
   <meta name="theme-color" content="#fffaf6" />
   <link rel="stylesheet" href="home.css" />
   <script src="fortune.js" defer></script>
+  <script src="studio-motion.js" defer></script>
   <script src="home.js" defer></script>
 <link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
 </head>
 <body>
+  <dialog id="studio-intro" class="studio-intro" aria-labelledby="intro-title"><div class="intro-card"><span class="fish" aria-hidden="true"></span><p>MX · 摸鱼工作室</p><h2 id="intro-title">今天也来摸一会儿鱼。</h2><button type="button" id="intro-skip">跳过动画 →</button></div></dialog>
   <a class="skip-link" href="#main">跳到主要内容</a>
   <header class="site-header"><div class="header-inner">
     <a class="brand" href="./" aria-label="MX 摸鱼工作室首页"><span class="fish" aria-hidden="true"></span>MX <span class="brand-sub">· 摸鱼工作室</span></a>
@@ -28,6 +30,7 @@
           <h1 id="hero-title">今天也在折腾<br />一些有趣的东西<span class="full-stop">。</span></h1>
           <p class="intro">我是 MX。写点日常，记录学习，<br class="desktop-break" />偶尔把脑洞做成能玩的东西。</p>
           <a class="primary-link" href="#moments">往下看看 <span aria-hidden="true">↓</span></a>
+          <div class="fish-corner" hidden><button id="fish-play" type="button" aria-label="摸一下小鱼，看看它想说什么"><span class="fish" aria-hidden="true"></span><span>摸一下小鱼</span></button><p id="fish-message" role="status" aria-live="polite">工作室的小鱼，正在等你打招呼。</p></div>
           <p class="handwritten signature">做喜欢的事，<br />让平凡的日子也闪闪发光！<span>— MX ♡</span></p>
         </div>
         <div class="character-stage" aria-label="角色导航与今日抽签">

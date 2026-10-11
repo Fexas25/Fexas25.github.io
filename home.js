@@ -7,6 +7,7 @@
   document.querySelectorAll('[data-draw]').forEach(button => {
     button.addEventListener('click', () => {
       if (!window.MXFortune) { window.location.href = 'daily-checkin/'; return; }
+      const reveal = () => {
       const result = window.MXFortune.draw();
       const fortune = result.item;
       opener = button;
@@ -22,6 +23,9 @@
       document.querySelector('[data-draw-label]').textContent = result.persisted ? '今日已抽 · 点击查看' : '查看今日签';
       dialog.showModal();
       closeButton.focus();
+      };
+      if (window.MXFortune.hasDrawnToday() || !window.MXMotion) reveal();
+      else window.MXMotion.draw(button,reveal);
     });
   });
   closeButton.addEventListener('click', () => dialog.close());
