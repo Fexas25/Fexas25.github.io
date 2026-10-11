@@ -1,0 +1,20 @@
+.shelf-about .portrait{box-shadow:0 8px 0 #ede6fa,0 15px 30px #97755916;transform:rotate(-7deg)}
+.shelf-about .shelf-bubble{color:var(--purple)}
+.about-introduction{padding:34px 40px;position:relative}
+.about-note{font-size:12px;letter-spacing:2px;color:var(--coral-dark);margin:0 0 15px}
+.about-introduction h2{font-size:26px;margin:0 0 20px;line-height:1.5}
+.about-introduction>p:not(.about-note){font-size:15px;line-height:2;color:#666d7a;max-width:760px;margin:0 0 18px}
+.about-signature{display:block;text-align:right;font-family:"KaiTi","STKaiti",serif;color:var(--coral-dark);font-size:19px;margin-top:8px}
+.about-section{margin-top:40px}
+.about-section .section-heading h2{font-size:23px}
+.interest-grid,.social-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.interest-card{border:1px solid var(--line);border-radius:18px;padding:26px 28px;background:#fffefd}
+.interest-card:nth-child(2){background:#fffbf2}.interest-card:nth-child(3){background:#fff6f2}.interest-card:nth-child(4){background:#f9f6fd}
+.interest-mark{font-size:12px;letter-spacing:2px;color:var(--purple)}
+.interest-card h3{font-size:19px;margin:14px 0 10px}
+.interest-card p{font-size:14px;color:#747989;line-height:1.9;margin:0}
+.social-card{display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid var(--line);border-radius:16px;padding:23px 27px;background:var(--surface);transition:border-color .2s,transform .2s}
+.social-card:hover{border-color:#d6bfdc;transform:translateY(-2px)}
+.social-card strong{display:block;font-size:18px}.social-card small{display:block;font-size:13px;line-height:1.8;color:var(--muted);margin-top:8px}.social-card>span:last-child{font-size:24px;color:var(--purple)}
+.about-goodbye{text-align:center;font-size:13px;line-height:1.9;color:var(--muted);margin:36px 0 0}
+@media(max-width:600px){.about-introduction{padding:25px 22px}.about-introduction h2{font-size:23px}.about-introduction>p:not(.about-note){font-size:14px}.about-section{margin-top:30px}.about-section .section-heading h2{font-size:21px}.interest-grid,.social-grid{grid-template-columns:1fr;gap:14px}.interest-card{padding:22px}.social-card{padding:21px 22px}}

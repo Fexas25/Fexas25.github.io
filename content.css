@@ -96,3 +96,5 @@
 .work-record{display:block;margin-top:12px}
 
 @media(max-width:700px){.category-tabs button{min-height:44px}.archive-search input{font-size:16px;min-height:44px}.collection-links a,.inner-footer a,.crumb{display:inline-flex;align-items:center;min-height:44px}}
+
+.inner-footer>div{flex-wrap:wrap;gap:10px 24px}
