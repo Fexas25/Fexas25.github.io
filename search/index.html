@@ -9,7 +9,7 @@ bubble: 找找以前的灵感？
 script: /search.js
 ---
 {% include section-intro.html %}
-<section class="archive search-archive" data-site-search data-index-url="{{ '/search-index.json' | relative_url }}" aria-label="全站搜索">
+<section class="archive search-archive" data-site-search data-index-url="{{ '/search-index.json' | relative_url }}?v={{ site.time | date: '%s' }}" aria-label="全站搜索">
 <form class="site-search-form" role="search" hidden>
 <label class="search-query">搜点什么<input name="q" type="search" placeholder="标题、正文、标签…" autocomplete="off" maxlength="200" /></label>
 <div class="archive-filters">
