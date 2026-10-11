@@ -9,11 +9,20 @@ test.afterEach(async ({ page }) => expect(page.__buddyErrors).toEqual([]));
 
 async function tapBuddy(page, buddy) {
   await buddy.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
-  await page.waitForTimeout(220); // Let the companions yield to scrolling, then reappear.
+  await expect(page.locator('[data-buddy-scene]')).not.toHaveClass(/is-scrolling/);
   await expect(buddy).toBeVisible();
-  // Wait for a stable, hittable target instead of tapping a cached coordinate.
-  // Late font/layout updates can move a companion between two protocol calls.
-  await buddy.tap();
+  // Locator.tap may scroll again in WebKit, hiding companions while scrolling.
+  // Check the real hit target, then use a touch without another automatic scroll.
+  let point;
+  await expect.poll(async () => {
+    point = await buddy.evaluate(el => {
+      const box = el.getBoundingClientRect();
+      const x = box.left + box.width / 2, y = box.top + box.height / 2;
+      return { x, y, hittable: el.contains(document.elementFromPoint(x, y)) };
+    });
+    return point.hittable;
+  }).toBe(true);
+  await page.touchscreen.tap(point.x, point.y);
 }
 
 async function unobstructed(page) {
