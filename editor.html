@@ -17,8 +17,25 @@ script: /editor.js
 <section class="archive editor-settings" aria-label="文章信息"><div class="editor-fields"><label>标题<input id="post-title" placeholder="给这段记录起个名字" required /></label><label>栏目<select id="post-category"><option value="blog">碎碎念</option><option value="competitive-programming">博客 · 算法与竞赛</option><option value="projects">作品 · 项目 / AI 工作流</option><option value="game-jam">作品 · 游戏开发</option><option value="art">作品 · 绘画创作</option></select></label><label>日期<input id="post-date" type="date" required /></label></div>
 <div id="work-fields" class="editor-fields work-fields" hidden><label>作品分类<select id="work-type"><option value="creative">创作</option><option value="game">小游戏 / 互动</option><option value="ai">AI 工作流</option></select></label><label>作品链接<input id="work-url" placeholder="https://… 或 /games/…" /></label><label>一句话介绍<input id="work-description" placeholder="作品做了什么，有什么有趣的地方" /></label><label>封面地址（可选）<input id="work-cover" placeholder="/picture/… 或 https://…" /></label></div></section>
 <section class="editor-workspace" aria-label="写作与预览"><div class="editor-toolbar" role="group" aria-label="Markdown 工具"><button type="button" data-format="bold">粗体</button><button type="button" data-format="italic">斜体</button><button type="button" data-format="heading">标题</button><button type="button" data-format="list">列表</button><button type="button" data-format="code">代码</button><button type="button" data-format="link">链接</button><button type="button" data-format="image">图片</button></div><div class="editor-columns"><div class="editor-panel"><label for="markdown-input" class="editor-panel-title">写下灵感 <span id="word-count">0 字</span></label><textarea id="markdown-input" placeholder="在这里写 Markdown…&#10;&#10;# 今天的小事&#10;&#10;把想说的话留在这里。"></textarea></div><div class="editor-preview"><h2 class="editor-panel-title">看看效果</h2><div id="preview-content" class="prose"></div></div></div></section>
-<div class="editor-actions"><div><button class="primary-link" type="submit">导出 Markdown ↓</button><button type="button" id="restore-draft">恢复草稿</button><button type="button" id="clear-editor">清空</button></div><p id="draft-status" role="status" aria-live="polite">草稿保存在当前浏览器。</p></div>
+<div class="editor-actions"><div><button class="primary-link" type="button" id="prepare-publish">复制并准备发布</button><button type="submit">导出 Markdown ↓</button><button type="button" id="restore-draft">恢复草稿</button><button type="button" id="clear-editor">清空</button></div><p id="draft-status" role="status" aria-live="polite">草稿保存在当前浏览器。</p></div>
 <p id="export-status" class="export-status" role="status" aria-live="polite" hidden></p>
-<details class="publish-help"><summary>怎么把内容发布到网站？</summary><p>导出后，把文件上传到 GitHub 仓库对应文件夹并提交。Pages 部署完成后，网站会自动展示这篇内容。</p><ul><li>碎碎念 → <code>_posts/</code></li><li>博客 → <code>_cp/</code></li><li>项目、AI 工作流 → <code>_projects/</code></li><li>游戏开发 → <code>_gamejam/</code></li><li>绘画 → <code>_art/</code></li></ul><a class="quiet-link" href="https://github.com/Fexas25/Fexas25.github.io">打开网站仓库 ↗</a></details>
+<section id="publish-panel" class="publish-panel" aria-labelledby="publish-heading" hidden>
+<h2 id="publish-heading">再一步，把内容放到网站上。</h2>
+<p id="publish-status" role="status" aria-live="polite"></p>
+<p>发布位置：<code id="publish-path"></code></p>
+<div id="manual-copy" hidden><label for="publish-source">完整发布内容（包含文章信息，请全部复制）</label><textarea id="publish-source" readonly rows="8"></textarea></div>
+<ol><li>打开下面的 GitHub 页面，用 <strong>Fexas25</strong> 登录，确认文件名。</li><li>在正文编辑区粘贴完整内容，点击 <strong>Commit changes…</strong>，填写说明，例如“新增一篇碎碎念”，选择直接提交到 <strong>main</strong>，再确认提交。</li><li>等待 <a href="https://github.com/Fexas25/Fexas25.github.io/actions" target="_blank" rel="noopener noreferrer">网站部署</a>显示绿色成功标记，再刷新网站。</li></ol>
+<div class="publish-links"><a id="publish-new" class="primary-link" target="_blank" rel="noopener noreferrer">去 GitHub 粘贴发布 ↗</a><a id="publish-upload" class="quiet-link" target="_blank" rel="noopener noreferrer">上传已导出的文件 ↗</a></div>
+<p class="publish-note">这里准备的是新内容。若 GitHub 提示文件已存在，请从下方“管理当前栏目”打开原文件修改，避免重复发布。</p>
+</section>
+<details class="publish-help"><summary>发布、修改和配图操作指南</summary>
+<p><strong>新增内容：</strong>填写标题、栏目、日期和正文，点击“复制并准备发布”，再按上方提示粘贴到 GitHub。也可以“导出 Markdown”，点击出现的上传入口，拖入下载的文件，等上传完成后提交。保留生成的文件名和开头两行 <code>---</code> 之间的文章信息。</p>
+<p><strong>更新作品：</strong>选择作品栏目，填写分类、作品链接和介绍；正文可以写使用说明，也可以只填链接。发布后，作品卡片会自动显示在对应分类与首页最近作品中。</p>
+<p><strong>修改已有内容：</strong>点击“管理当前栏目”，打开原来的 <code>.md</code> 文件，点击铅笔图标（Edit），修改正文或作品链接，再点“Commit changes…”提交。修改旧内容时保留原文件名，这样原来的文章地址也能继续使用。</p>
+<p><strong>插入图片：</strong>先把图片上传到 <a href="https://github.com/Fexas25/Fexas25.github.io/upload/main/picture" target="_blank" rel="noopener noreferrer">picture 图片文件夹</a>并提交，建议使用简单英文文件名，例如 <code>my-drawing.jpg</code>。正文写 <code>![图片说明](/picture/my-drawing.jpg)</code>；作品封面填 <code>/picture/my-drawing.jpg</code>。</p>
+<p><strong>草稿与上线：</strong>草稿只保存在当前浏览器，清理浏览器数据后可能丢失，长文建议额外导出备份。提交后通常需要几分钟部署；如果没有更新，先检查“查看部署状态”是否成功，再强制刷新。碎碎念请使用今天或过去的日期，未来日期不会立即公开显示。</p>
+<p>文件夹由栏目自动选择：碎碎念 <code>_posts/</code>，博客 <code>_cp/</code>，项目与 AI <code>_projects/</code>，游戏开发 <code>_gamejam/</code>，绘画 <code>_art/</code>。</p>
+<div class="publish-links"><a id="manage-category" class="quiet-link" href="https://github.com/Fexas25/Fexas25.github.io/tree/main/_posts" target="_blank" rel="noopener noreferrer">管理当前栏目 ↗</a><a class="quiet-link" href="https://github.com/Fexas25/Fexas25.github.io/actions" target="_blank" rel="noopener noreferrer">查看部署状态 ↗</a></div>
+</details>
 </form>
 <noscript><p class="empty-note">请启用 JavaScript，使用预览、草稿和导出功能。</p></noscript>
