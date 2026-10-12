@@ -1,0 +1,38 @@
+const {test,expect}=require('@playwright/test');
+test('开屏语言选择，正文可翻译并恢复，动态小鱼清理',async({page})=>{
+ await page.route('**/translation-cache.json',route=>route.fulfill({json:{'算法、游戏开发、绘画、AI 工作流。':'Algorithms, game development, drawing and AI workflows.'}}));
+ await page.goto('/');
+ const english=page.locator('.intro-languages [data-language=en]');
+ await expect(english).toBeVisible();
+ const box=await english.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(780);
+ await english.click();
+ await expect(page.locator('html')).toHaveAttribute('lang','en');
+ await expect(page.getByText('Algorithms, game development, drawing and AI workflows.',{exact:true})).toBeVisible();
+ await page.locator('footer [data-language=zh]').click();
+ await expect(page.getByText('算法、游戏开发、绘画、AI 工作流。',{exact:true})).toBeVisible();
+ await page.locator('#fish-play').click();
+ await expect(page.locator('.play-fish')).toHaveCount(1);
+ await expect(page.locator('.play-fish')).toHaveCount(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+});
+test('留言未配置不可提交，配置后验证、保留失败内容和审核提示',async({page})=>{
+ await page.goto('/guestbook/');
+ await expect(page.locator('[type=submit]')).toBeDisabled();
+ await expect(page.locator('#guestbook-status')).toHaveText('留言板暂未开放。');
+ await page.route('**/community-config.js*',r=>r.fulfill({contentType:'text/javascript',body:'window.MX_COMMUNITY={origin:"https://community.test",siteKey:"test"}'}));
+ await page.route('https://challenges.cloudflare.com/**',r=>r.fulfill({contentType:'text/javascript',body:'window.turnstile={render:(s,o)=>{window.challenge=o;o.callback("verified");return 1},reset:()=>{}};window.mxGuestbookChallenge();'}));
+ let fail=true;
+ await page.route('https://community.test/**',r=>r.request().method()==='GET'?r.fulfill({json:{messages:[{name:'<img src=x>',message:'<script>alert(1)</script>',created:100}],next:''}}):r.fulfill({status:fail?503:201,json:fail?{error:'unavailable'}:{pending:true}}));
+ await page.reload();
+ await expect(page.locator('[type=submit]')).toBeEnabled();
+ await expect(page.locator('.guestbook-message img')).toHaveCount(0);
+ await page.locator('[name=name]').fill('MX');await page.locator('[name=message]').fill('一条留言');
+ await page.locator('[type=submit]').click();
+ await expect(page.locator('#guestbook-status')).toContainText('内容已保留');
+ await expect(page.locator('[name=message]')).toHaveValue('一条留言');
+ fail=false;await page.evaluate(()=>window.challenge.callback('verified-again'));
+ await page.locator('[type=submit]').click();
+ await expect(page.locator('#guestbook-status')).toHaveText('已提交，审核后显示。');
+ await expect(page.locator('[name=message]')).toHaveValue('');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+});

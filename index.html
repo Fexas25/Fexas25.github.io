@@ -31,6 +31,7 @@
         <button type="button" class="intro-swimmer" aria-label="摸摸领头小鱼，让它跳起来"><span class="fish" aria-hidden="true"></span></button>
         <button type="button" id="intro-enter" aria-label="开始摸鱼" autofocus><svg class="intro-paw" viewBox="0 0 120 110" aria-hidden="true" focusable="false"><g class="paw-shape"><ellipse cx="25" cy="43" rx="10" ry="14" transform="rotate(-28 25 43)"/><ellipse cx="47" cy="25" rx="10" ry="15" transform="rotate(-10 47 25)"/><ellipse cx="74" cy="25" rx="10" ry="15" transform="rotate(10 74 25)"/><ellipse cx="96" cy="43" rx="10" ry="14" transform="rotate(28 96 43)"/><path d="M60 49C47 49 44 62 34 71C22 83 30 99 43 96Q60 89 77 96C91 99 99 83 86 71C76 62 73 49 60 49Z"/></g></svg></button>
       </div>
+      <div class="intro-languages" aria-label="选择语言"><button type="button" data-language="zh" data-enter-zh>中文</button><button type="button" data-language="en" lang="en">English</button></div>
     </div>
   </dialog>
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -44,18 +45,16 @@
       <div class="hero-wash" aria-hidden="true"></div>
       <div class="hero-inner">
         <div class="hero-copy" id="about">
-          <p class="handwritten opening">一点日常，一点奇思妙想。</p>
-          <h1 id="hero-title" tabindex="-1">今天也在折腾<br />一些有趣的东西<span class="full-stop">。</span></h1>
-          <p class="intro">我是 MX。写点日常，记录学习，<br class="desktop-break" />偶尔把脑洞做成能玩的东西。</p>
-          <div class="fish-corner" hidden><button id="fish-play" type="button" aria-label="摸一下小鱼，看看它想说什么"><span class="fish" aria-hidden="true"></span><span>摸一下小鱼</span></button><p id="fish-message" role="status" aria-live="polite">工作室的小鱼，正在等你打招呼。</p></div>
-          <p class="handwritten signature">做喜欢的事，<br />让平凡的日子也闪闪发光！<span>— MX ♡</span></p>
+          <h1 id="hero-title" tabindex="-1">MX 的摸鱼工作室<span class="full-stop">。</span></h1>
+          <p class="intro">算法、游戏开发、绘画、AI 工作流。</p>
+          <div class="fish-corner" hidden><button id="fish-play" type="button" aria-label="摸一下小鱼，让它游起来"><span class="fish" aria-hidden="true"></span><span>摸一下小鱼</span></button><p id="fish-message" role="status" aria-live="polite"></p></div>
         </div>
         <div class="character-stage" aria-label="角色导航与今日抽签">
           <a class="character character-moments" href="blog/" aria-label="花里实乃理（花花）：前往碎碎念"><img src="assets/optimized/portrait-orange.webp" alt="" width="360" height="360" decoding="async" /><span class="character-label">碎碎念 <span aria-hidden="true">›</span></span><span class="character-hint">今天过得开心吗？</span></a>
           <a class="character character-blog" href="competitive-programming/" aria-label="桃井爱莉（桃桃）：前往博客"><img src="assets/optimized/portrait-pink.webp" alt="" width="360" height="360" decoding="async" /><span class="character-label">博客 <span aria-hidden="true">›</span></span><span class="character-hint">写点什么吧 QWQ</span></a>
           <a class="character character-works" href="projects/" aria-label="芙宁娜（芙芙）：前往作品"><span class="character-portrait"><img src="assets/optimized/portrait-blue.webp" alt="" width="1200" height="558" decoding="async" /></span><span class="character-label">作品 <span aria-hidden="true">›</span></span><span class="character-hint">来玩点有趣的！</span></a>
           <p class="welcome-bubble">QWQ，欢迎来摸鱼！<span>(´･ω･`) ♡</span></p>
-          <a class="desk-computer" href="#blog" aria-label="工作台电脑：前往博客"><span class="computer-screen"><span aria-hidden="true">&lt; / &gt;</span><small>MX's workspace</small></span><span class="computer-base" aria-hidden="true"></span></a>
+          <a class="desk-computer" href="competitive-programming/" aria-label="工作台电脑：前往博客"><span class="computer-screen"><span aria-hidden="true">&lt; / &gt;</span><small>MX's workspace</small></span><span class="computer-base" aria-hidden="true"></span></a>
           <button class="draw-box" type="button" data-draw aria-haspopup="dialog" aria-controls="fortune-dialog"><span class="draw-sticks" aria-hidden="true"><i></i><i></i><i></i></span><span class="draw-face"><strong>今日抽签</strong><span data-draw-label>看看今天的小惊喜</span><span class="draw-flower" aria-hidden="true">✿</span></span></button>
           <noscript><a class="no-script-draw" href="daily-checkin/">前往每日签到抽签 →</a></noscript>
         </div>
@@ -65,14 +64,14 @@
     <div class="content-wrap">
       <div class="writing-grid">
         <section id="moments" class="writing-section" aria-labelledby="moments-title">
-          <div class="section-heading"><div><h2 id="moments-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="paw" %}</span>碎碎念</h2><p>今天又在念叨什么</p></div><a class="quiet-link" href="blog/">更多碎碎念 →</a></div>
+          <div class="section-heading"><div><h2 id="moments-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="paw" %}</span>碎碎念</h2></div><a class="quiet-link" href="blog/">更多碎碎念 →</a></div>
           {% for post in site.posts limit: 2 %}
           <article class="moment"><time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%Y.%m.%d" }}</time><a href="{{ post.url | relative_url }}"><h3>{{ post.title | escape }}</h3><p>{{ post.content | strip_html | truncate: 92 | escape }}</p></a></article>
           {% endfor %}
           <span class="doodle" aria-hidden="true">/ᐠ｡ꞈ｡ᐟ\</span>
         </section>
         <section id="blog" class="writing-section" aria-labelledby="blog-title">
-          <div class="section-heading"><div><h2 id="blog-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="clover" %}</span>博客</h2><p>认真写点东西</p></div><a class="quiet-link" href="competitive-programming/">更多博客 →</a></div>
+          <div class="section-heading"><div><h2 id="blog-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="clover" %}</span>博客</h2></div><a class="quiet-link" href="competitive-programming/">更多博客 →</a></div>
           {% assign latest_cp = site.cp | sort: 'date' | reverse %}
           {% for post in latest_cp limit: 3 %}
           {% include blog-topic.html entry=post %}<a class="blog-row" href="{{ post.url | relative_url }}"><div><h3>{{ post.title | escape }}</h3><p>{{ blog_topic_label }} · <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%Y.%m.%d" }}</time></p></div><span class="row-arrow" aria-hidden="true">›</span></a>
@@ -80,11 +79,11 @@
         </section>
       </div>
       <section id="works" class="works-section" aria-labelledby="works-title">
-        <div class="section-heading"><div><h2 id="works-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="fish" %}</span>作品</h2><p>做出来的奇怪东西</p></div><a class="quiet-link" href="projects/">所有作品 →</a></div>
+        <div class="section-heading"><div><h2 id="works-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="fish" %}</span>作品</h2></div><a class="quiet-link" href="projects/">所有作品 →</a></div>
         <div class="works-grid">
-          <article class="work-card" data-kind="game"><button class="work-cover fortune-cover" data-draw type="button" aria-label="每日占卜：抽取今日签" aria-haspopup="dialog" aria-controls="fortune-dialog"><span class="mini-slip"><small>今日签</small><strong>大吉</strong><span>宜 · 开心</span></span><span class="cover-caption">每天一点小幸运</span></button><div class="work-info"><h3>每日占卜</h3><p>每天抽一支签，看看会有什么小惊喜？</p><a class="quiet-link" href="daily-checkin/">签到记录 →</a></div></article>
-          {% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="work-card upcoming" data-kind="ai"><div class="work-cover workflow-cover" aria-hidden="true"><span class="workflow-node">想法</span><span class="workflow-line">→</span><span class="workflow-node main-node">AI</span><span class="workflow-line">→</span><span class="workflow-node">作品</span></div><div class="work-info"><h3>AI 工作流 <span class="coming-label">筹备中</span></h3><p>这里会放我的 AI 工具与工作流尝试。</p></div></article>{% endif %}
-          <article class="work-card" data-kind="creative"><a class="work-cover birthday-cover" href="dad-birthday.html" aria-label="打开生日祝福页"><span class="firework firework-one" aria-hidden="true">✳</span><span class="firework firework-two" aria-hidden="true">✳</span><span class="birthday-title">把祝福交给烟花<span>HAPPY BIRTHDAY</span></span></a><div class="work-info"><h3><a href="dad-birthday.html">生日祝福页 <span aria-hidden="true">↗</span></a></h3><p>用一些小小的创意，收藏重要的日子。</p></div></article>
+          <article class="work-card" data-kind="game"><button class="work-cover fortune-cover" data-draw type="button" aria-label="每日占卜：抽取今日签" aria-haspopup="dialog" aria-controls="fortune-dialog"><span class="mini-slip"><small>今日签</small><strong>大吉</strong><span>宜 · 开心</span></span><span class="cover-caption">每天一点小幸运</span></button><div class="work-info"><h3>每日占卜</h3><p>每日一签，保留签到记录。</p><a class="quiet-link" href="daily-checkin/">签到记录 →</a></div></article>
+          {% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="work-card upcoming" data-kind="ai"><div class="work-cover workflow-cover" aria-hidden="true"><span class="workflow-node">想法</span><span class="workflow-line">→</span><span class="workflow-node main-node">AI</span><span class="workflow-line">→</span><span class="workflow-node">作品</span></div><div class="work-info"><h3>AI 工作流 <span class="coming-label">筹备中</span></h3><p></p></div></article>{% endif %}
+          <article class="work-card" data-kind="creative"><a class="work-cover birthday-cover" href="dad-birthday.html" aria-label="打开生日祝福页"><span class="firework firework-one" aria-hidden="true">✳</span><span class="firework firework-two" aria-hidden="true">✳</span><span class="birthday-title">把祝福交给烟花<span>HAPPY BIRTHDAY</span></span></a><div class="work-info"><h3><a href="dad-birthday.html">生日祝福页 <span aria-hidden="true">↗</span></a></h3><p>给爸爸的生日祝福。</p></div></article>
           {% assign published_works = site.projects | concat: site.gamejam | concat: site.art | sort: 'date' | reverse %}{% for post in published_works limit: 3 %}{% include home-work-card.html %}{% endfor %}
         </div>
       </section>
@@ -92,7 +91,7 @@
   </main>
   {% include studio-buddies.html %}
   {% include studio-ornaments.html %}
-  <footer class="site-footer"><p><span class="fish" aria-hidden="true"></span>QWQ，很高兴见到你。</p><div><a href="https://github.com/Fexas25">GitHub</a><span>·</span><a href="https://atcoder.jp/users/Fexas_01">AtCoder</a><span>·</span><a href="feed.xml">RSS</a><span>·</span><a href="editor.html">写点什么</a></div><small>© <span id="year">2026</span> MX · Built with GitHub Pages</small></footer>
+  <footer class="site-footer"><div><a href="/guestbook/">留言</a><button type="button" data-language="en" lang="en">English</button><a href="https://github.com/Fexas25">GitHub</a><span>·</span><a href="https://atcoder.jp/users/Fexas_01">AtCoder</a><span>·</span><a href="feed.xml">RSS</a><span>·</span><a href="editor.html">写点什么</a></div><small>© <span id="year">2026</span> MX · Built with GitHub Pages</small></footer>
   <dialog id="fortune-dialog" aria-labelledby="fortune-title" aria-describedby="fortune-description">
     <button type="button" class="dialog-close" aria-label="关闭今日签">×</button>
     <p class="fortune-eyebrow">MX 的今日签 <time id="fortune-date"></time></p>

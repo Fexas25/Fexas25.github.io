@@ -33,3 +33,8 @@
 @media(max-width:600px){.studio-ornaments{gap:20px;margin-top:12px}.studio-ornaments .studio-mark{width:26px;height:26px}.studio-click-spark{width:25px;height:25px}}
 @media(prefers-reduced-motion:reduce){@view-transition{navigation:none}.studio-ornaments>span,.shelf-character .portrait,.studio-click-spark,.inner-main{animation:none!important}::view-transition-old(root),::view-transition-new(root){animation:none!important}.studio-click-effects{display:none}}
 @media print{.studio-ornaments,.studio-click-effects{display:none}.inner-main{animation:none}}
+
+.site-footer button[data-language],.inner-footer button[data-language]{border:0;background:none;padding:0;font:inherit;color:inherit;min-height:32px}
+.site-footer>div,.inner-footer>div{flex-wrap:wrap}
+.translation-status{font-size:11px;line-height:1.6;text-align:center;color:#7c808d;margin:0 16px 16px;pointer-events:none}.translation-status:empty{display:none}
+.guestbook-form{display:grid;gap:14px;max-width:620px}.guestbook-form label{display:grid;gap:7px;font-size:14px}.guestbook-form input,.guestbook-form textarea{width:100%;font:inherit;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.guestbook-form textarea{min-height:140px;resize:vertical}.guestbook-form button{justify-self:start}.guestbook-form button:disabled{opacity:.55;cursor:not-allowed}.guestbook-note{font-size:12px;color:var(--muted)}.guestbook-message{padding:20px 0;border-top:1px solid var(--line)}.guestbook-message p{white-space:pre-wrap;overflow-wrap:anywhere}.guestbook-message time{font-size:12px;color:var(--muted);margin-left:14px}.guestbook-list{margin-top:32px}.guestbook-trap{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}

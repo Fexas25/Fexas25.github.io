@@ -133,3 +133,16 @@ html:has(dialog[open]){overflow:hidden}
 @keyframes doodle-drift{from{translate:0 0}to{translate:3px -7px}}
 @media(max-width:600px){.doodle-1{top:12%;left:9%}.doodle-2{top:17%;right:9%}.doodle-3{bottom:16%;left:13%}.doodle-4{bottom:10%;right:13%}.intro-doodle{opacity:.35}}
 @media(max-height:560px){.intro-doodle{opacity:.25}}
+
+.intro-languages{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:4px}
+.intro-card .intro-languages button,.intro-languages a{font:inherit;font-size:12px;letter-spacing:1px;background:transparent;color:#557f91;border:1px solid #a8c7cf55;border-radius:18px;padding:8px 15px;min-height:36px;display:inline-flex;align-items:center;justify-content:center}
+.intro-languages a:hover,.intro-languages button:hover{background:#c8e4e733}
+.fish-corner{position:relative;isolation:isolate}.fish-corner p:empty{display:none}
+.fish-play-trail{position:absolute;inset:-35px -5px 0;overflow:visible;pointer-events:none;z-index:2}
+.play-fish{position:absolute;left:18px;top:45px;opacity:0;animation:fish-play-leap .85s var(--delay) ease-in-out both}
+.fish-play-trail::after{content:"";position:absolute;left:30px;top:63px;width:80px;height:15px;border-bottom:2px solid #8fbcc277;border-radius:50%;opacity:0}
+.fish-play-trail:has(i)::after{animation:fish-play-wake 1.05s ease-out}
+@keyframes fish-play-leap{0%{opacity:0;transform:translate(0,0) rotate(180deg) scale(.6)}20%{opacity:.85}50%{transform:translate(95px,-36px) rotate(205deg)}85%{opacity:.8;transform:translate(175px,3px) rotate(255deg)}100%{opacity:0;transform:translate(182px,12px) rotate(270deg) scale(.5)}}
+@keyframes fish-play-wake{20%{opacity:.7;transform:scale(.4)}100%{opacity:0;transform:translateX(115px) scale(1.4)}}
+@media(max-height:650px){.intro-pond{width:min(calc(100% + 16px),520px,max(150px,calc(100svh - 265px)))}}
+@media(prefers-reduced-motion:reduce){.fish-play-trail{display:none}}

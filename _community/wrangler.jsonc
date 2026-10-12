@@ -1,0 +1,8 @@
+{
+  "name": "mx-community",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-12",
+  "vars": {"SITE_ORIGIN": "https://fexas25.github.io", "DAILY_TRANSLATIONS": "200"},
+  "ai": {"binding": "AI"},
+  "d1_databases": [{"binding": "DB", "database_name": "mx-community", "database_id": "REPLACE_AFTER_CREATION"}]
+}

@@ -27,6 +27,7 @@
       reduced.addEventListener('change',done);
     }
   };
+  document.querySelector('[data-enter-zh]')?.addEventListener('click', () => document.getElementById('intro-enter')?.click());
   const intro = document.getElementById('studio-intro');
   if (!intro) return;
   function startPond() {
@@ -216,13 +217,24 @@
   document.addEventListener('visibilitychange',() => { if (document.hidden) reset(); });
   const fishButton = document.getElementById('fish-play');
   fishButton.closest('.fish-corner').hidden = false;
-  const messages = ['摸鱼成功！今天也给自己留一点空白。','灵感还没来？先伸个懒腰吧。','小鱼说：慢慢来，也是在往前走。','捕获一条灵感！去写点什么吧。'];
+  const messages = document.documentElement.lang === 'en' ? ['Splash!', 'Loop complete!', 'A little school of fish!'] : ['摸鱼成功！', '转个圈！', '鱼群来了！'];
   let message = 0, fishTimer;
+  const corner = fishButton.closest('.fish-corner');
+  const trail = document.createElement('span');
+  trail.className = 'fish-play-trail'; trail.setAttribute('aria-hidden','true'); corner.append(trail);
   fishButton.addEventListener('click',() => {
-    document.getElementById('fish-message').textContent = messages[message++ % messages.length];
-    if (reduced.matches || fishButton.classList.contains('fish-swimming')) return;
+    if (fishButton.classList.contains('fish-swimming')) return;
+    const count = message++ % 3 + 1;
+    document.getElementById('fish-message').textContent = messages[count-1];
+    if (reduced.matches) return;
+    trail.replaceChildren();
+    for(let i=0;i<count;i++) {
+      const fish = document.createElement('i'); fish.className = 'fish play-fish';
+      fish.style.setProperty('--delay', `${i*90}ms`); trail.append(fish);
+    }
     fishButton.classList.add('fish-swimming');
     clearTimeout(fishTimer);
-    fishTimer = setTimeout(() => fishButton.classList.remove('fish-swimming'),650);
+    fishTimer = setTimeout(() => { fishButton.classList.remove('fish-swimming'); trail.replaceChildren(); },1100);
   });
+  reduced.addEventListener('change', () => { if(reduced.matches) { clearTimeout(fishTimer); trail.replaceChildren(); fishButton.classList.remove('fish-swimming'); } });
 })();

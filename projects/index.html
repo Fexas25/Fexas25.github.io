@@ -3,22 +3,22 @@ layout: default
 title: 作品
 section: works
 eyebrow: MADE WITH CURIOSITY
-description: 把脑洞变成能玩的东西。小游戏、小实验，还有偶尔的认真创作。
+description: 小游戏、AI 工作流与绘画。
 portrait: /assets/optimized/portrait-blue.webp
 bubble: 来玩点有趣的！
 ---
 {% include section-intro.html %}
 <section class="archive portfolio" data-browser aria-label="作品收藏">
-<div class="archive-heading"><div><h2>我的小小实验室</h2><p>随手点开看看，说不定有小惊喜。</p></div><a class="quiet-link" href="{{ '/editor.html?category=projects' | relative_url }}">记录新作品 →</a></div>
+<div class="archive-heading"><div><h2>作品</h2></div><a class="quiet-link" href="{{ '/editor.html?category=projects' | relative_url }}">记录新作品 →</a></div>
 <details class="simple-disclosure archive-disclosure"><summary>筛选<span data-filter-summary></span></summary><div class="archive-tools"><div class="category-tabs" role="group" aria-label="作品分类"><button type="button" data-category-filter="all" aria-pressed="true">全部</button><button type="button" data-category-filter="game" aria-pressed="false">小游戏 / 互动</button><button type="button" data-category-filter="ai" aria-pressed="false">AI 工作流</button><button type="button" data-category-filter="creative" aria-pressed="false">创作</button></div></div>
 {% include archive-filters.html %}</details>
 <div class="portfolio-grid">
-<article class="portfolio-card" data-entry data-category="game" data-tags="[&quot;互动&quot;]"><div class="portfolio-art art-game" aria-hidden="true"><span>✧</span><i>今日小幸运</i></div><div class="portfolio-copy"><span class="tag">互动小实验</span><h2><a href="{{ '/daily-checkin/' | relative_url }}">今日抽签</a></h2><p>抽一支今日签，收下一点好运。原来的签到记录也会继续保留。</p><a class="quiet-link" href="{{ '/daily-checkin/' | relative_url }}">去抽一签 →</a></div></article>
-<article class="portfolio-card" data-entry data-category="creative" data-tags="[&quot;创作&quot;]"><div class="portfolio-art art-creative" aria-hidden="true"><span>♡</span><i>Happy Birthday</i></div><div class="portfolio-copy"><span class="tag">特别的创作</span><h2><a href="{{ '/dad-birthday.html' | relative_url }}">爸爸，生日快乐</a></h2><p>把照片、音乐和祝福，装进一个小小的网页里。</p><a class="quiet-link" href="{{ '/dad-birthday.html' | relative_url }}">打开这份祝福 →</a></div></article>
+<article class="portfolio-card" data-entry data-category="game" data-tags="[&quot;互动&quot;]"><div class="portfolio-art art-game" aria-hidden="true"><span>✧</span><i>今日小幸运</i></div><div class="portfolio-copy"><span class="tag">互动小实验</span><h2><a href="{{ '/daily-checkin/' | relative_url }}">今日抽签</a></h2><p>每天一签，记录保存在当前浏览器。</p><a class="quiet-link" href="{{ '/daily-checkin/' | relative_url }}">去抽一签 →</a></div></article>
+<article class="portfolio-card" data-entry data-category="creative" data-tags="[&quot;创作&quot;]"><div class="portfolio-art art-creative" aria-hidden="true"><span>♡</span><i>Happy Birthday</i></div><div class="portfolio-copy"><span class="tag">特别的创作</span><h2><a href="{{ '/dad-birthday.html' | relative_url }}">爸爸，生日快乐</a></h2><p>给爸爸的生日祝福。</p><a class="quiet-link" href="{{ '/dad-birthday.html' | relative_url }}">打开这份祝福 →</a></div></article>
 {% assign entries = site.projects | sort: 'date' | reverse %}{% for post in entries %}{% assign kind = post.type | default: 'creative' %}{% include work-card.html category=kind label='项目' %}{% endfor %}
 {% assign entries = site.gamejam | sort: 'date' | reverse %}{% for post in entries %}{% include work-card.html category='game' label='游戏开发' %}{% endfor %}
 {% assign entries = site.art | sort: 'date' | reverse %}{% for post in entries %}{% include work-card.html category='creative' label='绘画创作' %}{% endfor %}
-{% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="portfolio-card upcoming" data-entry data-category="ai"><div class="portfolio-art art-ai" aria-hidden="true"><span>✦</span><i>Idea → Workflow</i></div><div class="portfolio-copy"><span class="tag">筹备中</span><h2>AI 工作流</h2><p>给自动化、AI 小工具和工作流留个位置。做完后就放在这里。</p><span class="quiet-link">灵感正在加载…</span></div></article>{% endif %}
-</div><p class="empty-note" data-no-results hidden>这个分类还没有作品，正在慢慢积攒灵感。</p><p class="result-status" data-result-status role="status" aria-live="polite"></p>
+{% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="portfolio-card upcoming" data-entry data-category="ai"><div class="portfolio-art art-ai" aria-hidden="true"><span>✦</span><i>Idea → Workflow</i></div><div class="portfolio-copy"><span class="tag">筹备中</span><h2>AI 工作流</h2><p></p></div></article>{% endif %}
+</div><p class="empty-note" data-no-results hidden>暂无作品。</p><p class="result-status" data-result-status role="status" aria-live="polite"></p>
 <div class="collection-links"><span>继续翻翻</span><a href="{{ '/game-jam/' | relative_url }}">游戏开发 →</a><a href="{{ '/art/' | relative_url }}">绘画创作 →</a></div>
 </section>

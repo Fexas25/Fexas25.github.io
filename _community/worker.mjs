@@ -1,0 +1,52 @@
+const encoder=new TextEncoder();
+async function digest(value){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(value)))].map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function body(request){
+  if(!request.headers.get('Content-Type')?.startsWith('application/json'))throw new Error('type');
+  const reader=request.body?.getReader();if(!reader)throw Error('body');let size=0,chunks=[];
+  while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>8192){await reader.cancel();throw Error('size');}chunks.push(value);}
+  const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+export default {async fetch(request,env){
+  const origin=env.SITE_ORIGIN||'https://fexas25.github.io';
+  const headers={'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Vary':'Origin','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
+  const reply=(value,status=200)=>new Response(JSON.stringify(value),{status,headers});
+  if(request.headers.get('Origin')&&request.headers.get('Origin')!==origin)return reply({error:'origin'},403);
+  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type'}});
+  if(!env.DB)return reply({error:'not configured'},503);
+  const path=new URL(request.url).pathname, now=Math.floor(Date.now()/1000);
+  try{
+    if(path==='/messages'&&request.method==='GET'){
+      const raw=new URL(request.url).searchParams.get('before');const before=raw&&/^\d+$/.test(raw)?Number(raw):Number.MAX_SAFE_INTEGER;
+      const {results}=await env.DB.prepare('SELECT id,name,message,created FROM messages WHERE approved=1 AND id<? ORDER BY id DESC LIMIT 31').bind(before).all();
+      return reply({messages:results.slice(0,30),next:results.length>30?String(results[29].id):''});
+    }
+    if(request.method!=='POST'||!['/messages','/translate'].includes(path))return reply({error:'not found'},404);
+    if(request.headers.get('Origin')!==origin)return reply({error:'origin required'},403);
+    if(!env.RATE_SECRET)return reply({error:'not configured'},503);
+    const data=await body(request);if(!data||typeof data!=='object'||Array.isArray(data))return reply({error:'invalid'},400);const day=new Date().toISOString().slice(0,10);
+    const ip=request.headers.get('CF-Connecting-IP');if(!ip)return reply({error:'client'},400);
+    const visitor=await digest(env.RATE_SECRET+':'+day+':'+ip);
+    if(path==='/messages'){
+      if(!env.TURNSTILE_SECRET)return reply({error:'not configured'},503);
+      if(typeof data.name!=='string'||typeof data.message!=='string'||!data.name.trim()||!data.message.trim()||data.name.length>32||data.message.length>1000||data.website||typeof data.token!=='string'||data.token.length>2048)return reply({error:'invalid'},400);
+      const check=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',signal:AbortSignal.timeout(10000),body:new URLSearchParams({secret:env.TURNSTILE_SECRET,response:data.token,remoteip:ip})}).then(r=>r.json());
+      if(!check.success||check.hostname!==new URL(origin).hostname||check.action!=='guestbook')return reply({error:'verification'},403);
+      const result=await env.DB.prepare('INSERT INTO messages(name,message,created,visitor) SELECT ?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM messages WHERE visitor=? AND created>?) AND (SELECT COUNT(*) FROM messages WHERE visitor=?)<5').bind(data.name.trim(),data.message.trim(),now,visitor,visitor,now-60,visitor).run();
+      return result.meta.changes?reply({pending:true},201):reply({error:'rate limit'},429);
+    }
+    if(typeof data.text!=='string'||!data.text.trim()||data.text.length>400)return reply({error:'invalid'},400);
+    const hash=await digest('zh-en-v1:'+data.text),cached=await env.DB.prepare('SELECT text FROM translations WHERE hash=?').bind(hash).first();
+    if(cached)return reply({text:cached.text});
+    if(!env.AI)return reply({error:'not configured'},503);
+    const cap=Math.max(1,Math.min(1000,Number(env.DAILY_TRANSLATIONS)||200));
+    for(const [bucket,limit] of [[day+':'+visitor,80],[day+':all',cap]]){
+      const quota=await env.DB.prepare('INSERT INTO quotas(bucket,used) VALUES (?,1) ON CONFLICT(bucket) DO UPDATE SET used=used+1 WHERE used<?').bind(bucket,limit).run();
+      if(!quota.meta.changes)return reply({error:'daily limit'},429);
+    }
+    const translated=await env.AI.run('@cf/meta/m2m100-1.2b',{text:data.text,source_lang:'zh',target_lang:'en'});
+    if(typeof translated.translated_text!=='string'||!translated.translated_text.trim())return reply({error:'translation failed'},502);
+    await env.DB.prepare('INSERT OR REPLACE INTO translations(hash,text,created) VALUES (?,?,?)').bind(hash,translated.translated_text,now).run();
+    return reply({text:translated.translated_text});
+  }catch(error){return reply({error:['type','body','size'].includes(error.message)||error instanceof SyntaxError?'invalid request':'service unavailable'},['type','body','size'].includes(error.message)||error instanceof SyntaxError?400:503);}
+}};
