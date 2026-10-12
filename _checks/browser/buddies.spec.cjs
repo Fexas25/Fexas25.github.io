@@ -88,10 +88,21 @@ test('自由拖动支持横向和纵向，落在按钮上会让开', async ({ pa
   await page.goto('/');
   const buddy = page.locator('[data-buddy]').first();
   await expect(buddy).toBeVisible();
+  // Fonts/images can trigger the companion's delayed layout refresh in WebKit.
+  // Start the drag only after its actual position has settled.
+  await page.evaluate(() => document.fonts.ready);
+  let lastBox = '', stableSince = 0;
+  await expect.poll(async () => {
+    const box = await buddy.boundingBox();
+    const signature = JSON.stringify(box);
+    if (!box || signature !== lastBox) { lastBox = signature; stableSince = Date.now(); }
+    return !!box && Date.now() - stableSince >= 400;
+  }).toBe(true);
   const from = await buddy.boundingBox();
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
   await page.mouse.down();
   await page.mouse.move(from.x + from.width / 2 - 100, from.y + from.height / 2 + 90, { steps: 8 });
+  await expect(buddy).toHaveClass(/is-picked/);
   const during = await buddy.boundingBox();
   expect(during.x).toBeCloseTo(from.x - 100, 0);
   expect(during.y).toBeCloseTo(from.y + 90, 0);
