@@ -1,7 +1,7 @@
 (() => {
   const skip='script,style,code,pre,kbd,textarea,input,select,option,[contenteditable],.notranslate,[translate="no"],[data-translation-status],.intro-bouncy,.intro-languages,[data-language],.writing-form,.draft-library,#preview-content,[data-guestbook-list]';
   const records=new Map(), cache=new Map();
-  let active=false, generation=0, debounce=0, busy=false, controller;
+  let active=false, generation=0, debounce=0, busy=false, controller, retryAfter=0;
   const notice=document.createElement('p');notice.dataset.translationStatus='';notice.className='translation-status';notice.setAttribute('role','status');document.body.append(notice);
   const ready=fetch('/translation-cache.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>Object.entries(data).forEach(([k,v])=>cache.set(k,v))).catch(()=>{});
   function status(text){if(notice.textContent!==text)notice.textContent=text;}
@@ -30,7 +30,7 @@
         if(cache.has(item.text))apply(item.node,item.text,cache.get(item.text));else pending.push(item);
       }
       const origin=window.MX_COMMUNITY?.origin;
-      if(pending.length&&!origin){missing=true;return;}
+      if(pending.length&&(!origin||Date.now()<retryAfter)){missing=true;return;}
       for(const item of pending){
         if(!active||version!==generation)return;
         if(!cache.has(item.text)){
@@ -48,7 +48,7 @@
         }
         apply(item.node,item.text,cache.get(item.text));
       }
-    }catch{missing=true;}finally{
+    }catch{missing=true;if(version===generation)retryAfter=Date.now()+30000;}finally{
       if(version===generation)busy=false;
       if(active&&version===generation)status(missing?'部分内容保留原文 · Translation unavailable for some text.':'自动翻译 · Machine translation');
     }
