@@ -143,7 +143,11 @@ test('自动散步、减少动态效果与休息开关', async ({ page }) => {
 test('键盘自由移动、编辑时让开、窗口改变后不遮挡', async ({ page }) => {
   await page.goto('/projects/');
   const buddy = page.locator('[data-buddy]');
-  await buddy.press('Enter');
+  await page.evaluate(() => document.fonts.ready);
+  await expect(buddy).toBeVisible();
+  await buddy.focus();
+  await expect(buddy).toBeFocused();
+  await page.keyboard.press('Enter');
   await expect(page.locator('.buddy-message')).toContainText('芙芙：');
   for (const key of ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home']) await buddy.press(key);
   await expect(buddy).toBeFocused();
