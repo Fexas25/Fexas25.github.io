@@ -2,6 +2,7 @@
 import argparse
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--directory', required=True)
@@ -13,5 +14,20 @@ class TestServer(ThreadingHTTPServer):
     request_queue_size = 128
 
 
-with TestServer(('127.0.0.1', 4173), partial(SimpleHTTPRequestHandler, directory=args.directory)) as server:
+class TestHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        # Local browser checks must never use production comments, CAPTCHA or AI quota.
+        # Configured-service scenarios supply their own mocked route in Playwright.
+        if urlsplit(self.path).path == '/community-config.js':
+            content = b'window.MX_COMMUNITY = Object.freeze({origin:"",siteKey:""});'
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/javascript; charset=utf-8')
+            self.send_header('Content-Length', str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
+            return
+        super().do_GET()
+
+
+with TestServer(('127.0.0.1', 4173), partial(TestHandler, directory=args.directory)) as server:
     server.serve_forever()

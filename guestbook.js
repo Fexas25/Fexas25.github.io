@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const config=window.MX_COMMUNITY,form=document.getElementById('guestbook-form'),status=document.getElementById('guestbook-status'),list=document.querySelector('[data-guestbook-list]'),more=document.getElementById('guestbook-more'),submit=form.querySelector('[type=submit]');
   if(!config?.origin||!config.siteKey)return;
   let token='',cursor='',widget,busy=false;
-  window.mxGuestbookChallenge=()=>{widget=turnstile.render('#guestbook-challenge',{sitekey:config.siteKey,action:'guestbook',callback:value=>{token=value;submit.disabled=false;},'expired-callback':()=>{token='';submit.disabled=true;},'error-callback':()=>{status.textContent='验证暂不可用，请刷新后重试。';submit.disabled=true;}});};
+  window.mxGuestbookChallenge=()=>{widget=turnstile.render('#guestbook-challenge',{sitekey:config.siteKey,size:form.clientWidth<300?'compact':'normal',action:'guestbook',callback:value=>{token=value;submit.disabled=false;},'expired-callback':()=>{token='';submit.disabled=true;},'error-callback':()=>{status.textContent='验证暂不可用，请刷新后重试。';submit.disabled=true;}});};
   const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?onload=mxGuestbookChallenge&render=explicit';script.async=true;script.onerror=()=>{status.textContent='验证加载失败，请刷新重试。';};document.head.append(script);
   async function load(){
     more.disabled=true;

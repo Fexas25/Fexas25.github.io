@@ -1,2 +1,2 @@
-// Public settings only. Add the deployed Worker URL and Turnstile site key after setup.
-window.MX_COMMUNITY = Object.freeze({ origin: '', siteKey: '' });
+// Public settings only. Secrets are stored in Cloudflare Worker bindings.
+window.MX_COMMUNITY = Object.freeze({ origin: "https://mx-community.liuwanting830.workers.dev", siteKey: "0x4AAAAAAFUrupPkAUgQFvDq" });

@@ -2,7 +2,29 @@
   "name": "mx-community",
   "main": "worker.mjs",
   "compatibility_date": "2026-10-12",
-  "vars": {"SITE_ORIGIN": "https://fexas25.github.io", "DAILY_TRANSLATIONS": "200"},
-  "ai": {"binding": "AI"},
-  "d1_databases": [{"binding": "DB", "database_name": "mx-community", "database_id": "REPLACE_AFTER_CREATION"}]
+  "vars": {
+    "SITE_ORIGIN": "https://fexas25.github.io",
+    "DAILY_TRANSLATIONS": "200"
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mx-community",
+      "database_id": "921bdb6c-a4f1-494b-a517-034d76ab7012"
+    }
+  ],
+  "account_id": "3f4c9bdb6fb5bb5578dddf9d264fab2b",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1,
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.1
+    }
+  }
 }
