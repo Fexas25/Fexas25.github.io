@@ -547,8 +547,9 @@ description: 为爸爸准备的一份生日祝福，收藏照片、回忆和想�
   @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.fadeIn{opacity:1;transform:none}}
   </style>
 <link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
+{% include studio-playful.html %}
 </head>
-<body>
+<body data-native-effects="true">
   <canvas id="fx"></canvas>
   <canvas id="dust"></canvas>
 
@@ -576,6 +577,7 @@ description: 为爸爸准备的一份生日祝福，收藏照片、回忆和想�
             点击“开始”，我们一张一张回忆过去的温暖时刻。<br>
             （轻点屏幕有烟花；文字播完后再点一下可继续）
           </p>
+          {% include studio-ornaments.html %}
           <div class="actions">
             <button class="btn primary" id="btnStart">开始 🎞️</button>
             <button class="btn ghost" id="btnWarm">先放一朵烟花 🎆</button>

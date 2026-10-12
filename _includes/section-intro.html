@@ -1,4 +1,4 @@
 <header class="shelf-intro shelf-{{ page.section }}">
 <div><a class="crumb" href="{{ '/' | relative_url }}">← 回到工作室</a><p class="shelf-eyebrow">{{ page.eyebrow }}</p><h1>{{ page.title }}<span>。</span></h1><p class="shelf-description">{{ page.description }}</p></div>
-<div class="shelf-character" aria-hidden="true"><span class="portrait"><img src="{{ page.portrait | relative_url }}" alt="" width="154" height="154" decoding="async" /></span><span class="shelf-bubble">{{ page.bubble }}</span><span class="shelf-spark">✧</span></div>
+<div class="shelf-character" aria-hidden="true"><span class="portrait"><img src="{{ page.portrait | relative_url }}" alt="" width="154" height="154" decoding="async" /></span><span class="shelf-bubble">{{ page.bubble }}</span><span class="shelf-spark">{% if page.section == "moments" %}{% include studio-mark.html kind="paw" %}{% elsif page.section == "works" %}{% include studio-mark.html kind="fish" %}{% else %}{% include studio-mark.html kind="clover" %}{% endif %}</span></div>
 </header>

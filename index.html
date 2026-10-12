@@ -15,12 +15,13 @@
   <link rel="stylesheet" href="studio-buddies.css?v={{ asset_version }}" />
   <script src="studio-buddies.js?v={{ asset_version }}" defer></script>
 <link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
+{% include studio-playful.html %}
 </head>
 <body>
   <dialog id="studio-intro" class="studio-intro" aria-labelledby="intro-title">
     <div class="intro-doodles" aria-hidden="true"><span class="intro-doodle doodle-1"><svg viewBox="0 0 80 80" fill="none"><path d="M16 33 13 13 30 24Q40 20 50 24L67 13 64 33Q75 53 60 64Q40 77 20 64Q5 53 16 33Z"/><path d="M24 43q5-5 10 0m12 0q5-5 10 0M36 51l4 3 4-3m-4 3v4m-7 0q7 7 14 0M8 48l13 3m-11 8 12-2m50-9-13 3m11 8-12-2"/></svg></span><span class="intro-doodle doodle-2"><svg viewBox="0 0 80 80" fill="none"><path d="M40 38C10 34 16 8 30 15Q40 5 40 38ZM42 40C46 10 72 16 65 30Q75 40 42 40ZM40 42C70 46 64 72 50 65Q40 75 40 42ZM38 40C34 70 8 64 15 50Q5 40 38 40ZM40 43q2 21 16 28"/></svg></span><span class="intro-doodle doodle-3"><svg viewBox="0 0 80 80" fill="none"><path d="M40 38C10 34 16 8 30 15Q40 5 40 38ZM42 40C46 10 72 16 65 30Q75 40 42 40ZM40 42C70 46 64 72 50 65Q40 75 40 42ZM38 40C34 70 8 64 15 50Q5 40 38 40ZM40 43q2 21 16 28"/></svg></span><span class="intro-doodle doodle-4"><svg viewBox="0 0 80 80" fill="none"><path d="M16 33 13 13 30 24Q40 20 50 24L67 13 64 33Q75 53 60 64Q40 77 20 64Q5 53 16 33Z"/><path d="M24 43q5-5 10 0m12 0q5-5 10 0M36 51l4 3 4-3m-4 3v4m-7 0q7 7 14 0M8 48l13 3m-11 8 12-2m50-9-13 3m11 8-12-2"/></svg></span></div>
     <div class="intro-card">
-      <p class="intro-brand intro-bouncy" aria-label="摸鱼工作室"><span aria-hidden="true">摸</span><span aria-hidden="true">鱼</span><span aria-hidden="true">工</span><span aria-hidden="true">作</span><span aria-hidden="true">室</span></p>
+      <p class="intro-brand intro-bouncy" aria-label="MX 摸鱼工作室"><span aria-hidden="true">M</span><span aria-hidden="true">X</span><span aria-hidden="true"> </span><span aria-hidden="true">摸</span><span aria-hidden="true">鱼</span><span aria-hidden="true">工</span><span aria-hidden="true">作</span><span aria-hidden="true">室</span></p>
       <h2 id="intro-title" class="intro-bouncy" aria-label="现在是摸鱼时间"><span aria-hidden="true">现</span><span aria-hidden="true">在</span><span aria-hidden="true">是</span><span aria-hidden="true">摸</span><span aria-hidden="true">鱼</span><span aria-hidden="true">时</span><span aria-hidden="true">间</span></h2>
       <div class="intro-pond">
         <button type="button" class="pond-water" aria-label="轻点水面，种一片四叶草"><svg class="pond-caustics" viewBox="0 0 400 400" aria-hidden="true" focusable="false"><path d="M38 134C104 102 116 161 184 137S267 111 326 135"/><path d="M82 240C135 211 166 252 223 223S290 213 354 194"/><path d="M134 55C103 114 157 161 127 204S94 266 117 313"/></svg></button>
@@ -50,9 +51,9 @@
           <p class="handwritten signature">做喜欢的事，<br />让平凡的日子也闪闪发光！<span>— MX ♡</span></p>
         </div>
         <div class="character-stage" aria-label="角色导航与今日抽签">
-          <a class="character character-moments" href="#moments" aria-label="花里实乃理（花花）：前往碎碎念"><img src="assets/optimized/portrait-orange.webp" alt="" width="360" height="360" decoding="async" /><span class="character-label">碎碎念 <span aria-hidden="true">›</span></span><span class="character-hint">今天过得开心吗？</span></a>
-          <a class="character character-blog" href="#blog" aria-label="桃井爱莉（桃桃）：前往博客"><img src="assets/optimized/portrait-pink.webp" alt="" width="360" height="360" decoding="async" /><span class="character-label">博客 <span aria-hidden="true">›</span></span><span class="character-hint">写点什么吧 QWQ</span></a>
-          <a class="character character-works" href="#works" aria-label="芙宁娜（芙芙）：前往作品"><span class="character-portrait"><img src="assets/optimized/portrait-blue.webp" alt="" width="1200" height="558" decoding="async" /></span><span class="character-label">作品 <span aria-hidden="true">›</span></span><span class="character-hint">来玩点有趣的！</span></a>
+          <a class="character character-moments" href="blog/" aria-label="花里实乃理（花花）：前往碎碎念"><img src="assets/optimized/portrait-orange.webp" alt="" width="360" height="360" decoding="async" /><span class="character-label">碎碎念 <span aria-hidden="true">›</span></span><span class="character-hint">今天过得开心吗？</span></a>
+          <a class="character character-blog" href="competitive-programming/" aria-label="桃井爱莉（桃桃）：前往博客"><img src="assets/optimized/portrait-pink.webp" alt="" width="360" height="360" decoding="async" /><span class="character-label">博客 <span aria-hidden="true">›</span></span><span class="character-hint">写点什么吧 QWQ</span></a>
+          <a class="character character-works" href="projects/" aria-label="芙宁娜（芙芙）：前往作品"><span class="character-portrait"><img src="assets/optimized/portrait-blue.webp" alt="" width="1200" height="558" decoding="async" /></span><span class="character-label">作品 <span aria-hidden="true">›</span></span><span class="character-hint">来玩点有趣的！</span></a>
           <p class="welcome-bubble">QWQ，欢迎来摸鱼！<span>(´･ω･`) ♡</span></p>
           <a class="desk-computer" href="#blog" aria-label="工作台电脑：前往博客"><span class="computer-screen"><span aria-hidden="true">&lt; / &gt;</span><small>MX's workspace</small></span><span class="computer-base" aria-hidden="true"></span></a>
           <button class="draw-box" type="button" data-draw aria-haspopup="dialog" aria-controls="fortune-dialog"><span class="draw-sticks" aria-hidden="true"><i></i><i></i><i></i></span><span class="draw-face"><strong>今日抽签</strong><span data-draw-label>看看今天的小惊喜</span><span class="draw-flower" aria-hidden="true">✿</span></span></button>
@@ -64,14 +65,14 @@
     <div class="content-wrap">
       <div class="writing-grid">
         <section id="moments" class="writing-section" aria-labelledby="moments-title">
-          <div class="section-heading"><div><h2 id="moments-title"><span class="section-symbol" aria-hidden="true">···</span>碎碎念</h2><p>今天又在念叨什么</p></div><a class="quiet-link" href="blog/">更多碎碎念 →</a></div>
+          <div class="section-heading"><div><h2 id="moments-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="paw" %}</span>碎碎念</h2><p>今天又在念叨什么</p></div><a class="quiet-link" href="blog/">更多碎碎念 →</a></div>
           {% for post in site.posts limit: 2 %}
           <article class="moment"><time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%Y.%m.%d" }}</time><a href="{{ post.url | relative_url }}"><h3>{{ post.title | escape }}</h3><p>{{ post.content | strip_html | truncate: 92 | escape }}</p></a></article>
           {% endfor %}
           <span class="doodle" aria-hidden="true">/ᐠ｡ꞈ｡ᐟ\</span>
         </section>
         <section id="blog" class="writing-section" aria-labelledby="blog-title">
-          <div class="section-heading"><div><h2 id="blog-title"><span class="section-symbol paper-symbol" aria-hidden="true">≡</span>博客</h2><p>认真写点东西</p></div><a class="quiet-link" href="competitive-programming/">更多博客 →</a></div>
+          <div class="section-heading"><div><h2 id="blog-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="clover" %}</span>博客</h2><p>认真写点东西</p></div><a class="quiet-link" href="competitive-programming/">更多博客 →</a></div>
           {% assign latest_cp = site.cp | sort: 'date' | reverse %}
           {% for post in latest_cp limit: 3 %}
           {% include blog-topic.html entry=post %}<a class="blog-row" href="{{ post.url | relative_url }}"><div><h3>{{ post.title | escape }}</h3><p>{{ blog_topic_label }} · <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%Y.%m.%d" }}</time></p></div><span class="row-arrow" aria-hidden="true">›</span></a>
@@ -79,7 +80,7 @@
         </section>
       </div>
       <section id="works" class="works-section" aria-labelledby="works-title">
-        <div class="section-heading"><div><h2 id="works-title"><span class="section-symbol game-symbol" aria-hidden="true">＋</span>作品</h2><p>做出来的奇怪东西</p></div><a class="quiet-link" href="projects/">所有作品 →</a></div>
+        <div class="section-heading"><div><h2 id="works-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="fish" %}</span>作品</h2><p>做出来的奇怪东西</p></div><a class="quiet-link" href="projects/">所有作品 →</a></div>
         <div class="works-grid">
           <article class="work-card" data-kind="game"><button class="work-cover fortune-cover" data-draw type="button" aria-label="每日占卜：抽取今日签" aria-haspopup="dialog" aria-controls="fortune-dialog"><span class="mini-slip"><small>今日签</small><strong>大吉</strong><span>宜 · 开心</span></span><span class="cover-caption">每天一点小幸运</span></button><div class="work-info"><h3>每日占卜</h3><p>每天抽一支签，看看会有什么小惊喜？</p><a class="quiet-link" href="daily-checkin/">签到记录 →</a></div></article>
           {% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="work-card upcoming" data-kind="ai"><div class="work-cover workflow-cover" aria-hidden="true"><span class="workflow-node">想法</span><span class="workflow-line">→</span><span class="workflow-node main-node">AI</span><span class="workflow-line">→</span><span class="workflow-node">作品</span></div><div class="work-info"><h3>AI 工作流 <span class="coming-label">筹备中</span></h3><p>这里会放我的 AI 工具与工作流尝试。</p></div></article>{% endif %}
@@ -90,6 +91,7 @@
     </div>
   </main>
   {% include studio-buddies.html %}
+  {% include studio-ornaments.html %}
   <footer class="site-footer"><p><span class="fish" aria-hidden="true"></span>QWQ，很高兴见到你。</p><div><a href="https://github.com/Fexas25">GitHub</a><span>·</span><a href="https://atcoder.jp/users/Fexas_01">AtCoder</a><span>·</span><a href="feed.xml">RSS</a><span>·</span><a href="editor.html">写点什么</a></div><small>© <span id="year">2026</span> MX · Built with GitHub Pages</small></footer>
   <dialog id="fortune-dialog" aria-labelledby="fortune-title" aria-describedby="fortune-description">
     <button type="button" class="dialog-close" aria-label="关闭今日签">×</button>

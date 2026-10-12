@@ -8,9 +8,11 @@
 {% if page.script %}<script src="{{ page.script | relative_url }}?v={{ asset_version }}" defer></script>{% endif %}
 <link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
 <link rel="stylesheet" href="{{ '/studio-buddies.css' | relative_url }}?v={{ asset_version }}" /><script src="{{ '/studio-buddies.js' | relative_url }}?v={{ asset_version }}" defer></script>
+{% include studio-playful.html %}
 </head><body class="inner-page">
 {% include studio-header.html %}
 <main id="main" class="inner-main">{{ content }}</main>
 {% include studio-buddies.html compact=true %}
+{% include studio-ornaments.html %}
 <footer class="inner-footer"><a class="brand" href="{{ '/' | relative_url }}">MX · 摸鱼工作室</a><p>一点日常，一点奇思妙想。</p><div><a href="https://github.com/Fexas25">GitHub ↗</a><a href="https://atcoder.jp/users/Fexas_01">AtCoder ↗</a><a href="{{ '/feed.xml' | relative_url }}">RSS</a><a href="{{ '/editor.html' | relative_url }}">写点什么</a></div><small>© {{ site.time | date: '%Y' }} MX · Built with GitHub Pages</small></footer>
 </body></html>

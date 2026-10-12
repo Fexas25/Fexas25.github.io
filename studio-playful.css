@@ -1,0 +1,35 @@
+/* Shared, lightweight details: no images, overlay hit targets, or navigation delays. */
+.studio-mark{display:inline-block;width:32px;height:32px;vertical-align:middle;fill:#b9ddd522;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.mark-clover{color:#7baba0}.mark-paw{color:#a791b0;fill:#dcd0e92b}.mark-fish{color:#78a9bd;fill:#b9dce92b}
+.section-heading .section-symbol{background:transparent;width:34px;height:34px;border-radius:0}
+.shelf-spark .studio-mark,.reading-flower .studio-mark{width:38px;height:38px}
+.studio-ornaments{display:flex;justify-content:center;align-items:center;gap:24px;margin:22px auto 8px;max-width:100%;height:42px;pointer-events:none;opacity:.6}
+.studio-ornaments>span{display:block;animation:studio-bob 6s ease-in-out infinite;animation-play-state:paused}
+.studio-ornaments>span:nth-child(2){animation-delay:-2s}.studio-ornaments>span:nth-child(3){animation-delay:-4s}
+.studio-ornaments.is-drifting>span{animation-play-state:running}
+.shelf-character .portrait{animation:studio-bob 6.6s ease-in-out infinite;animation-play-state:paused}
+.shelf-character.is-drifting .portrait{animation-play-state:running}
+@keyframes studio-bob{0%,100%{translate:0 0}50%{translate:0 -4px}}
+.studio-click-effects{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:40;contain:strict}
+.studio-click-spark{position:absolute;left:var(--spark-x);top:var(--spark-y);width:30px;height:30px;pointer-events:none;animation:studio-pop .72s ease-out both}
+.studio-click-spark .studio-mark{width:100%;height:100%}
+@keyframes studio-pop{0%{opacity:0;transform:translate(-50%,-35%) scale(.5) rotate(-14deg)}18%{opacity:.75;transform:translate(-50%,-55%) scale(1.12) rotate(3deg)}50%{opacity:.6}100%{opacity:0;transform:translate(-50%,-115%) scale(.85) rotate(14deg)}}
+@media(hover:hover) and (pointer:fine){
+ .quiet-link,.crumb,.category-tabs button,.work-filters button{transition:color .2s,background .2s,translate .25s cubic-bezier(.2,.8,.3,1.4)}
+ .quiet-link:hover,.crumb:hover,.category-tabs button:hover,.work-filters button:hover{translate:0 -2px}
+ .shelf-character:hover .portrait{animation-play-state:paused}
+ .entry-card,.portfolio-card{transition:box-shadow .25s,border-color .25s}
+ .entry-card:hover,.portfolio-card:hover{border-color:#bfd4ce;box-shadow:0 5px 18px #88aaa80d}
+ .section-heading:hover .studio-mark{animation:mark-wiggle .55s ease-out}
+}
+@keyframes mark-wiggle{0%,100%{rotate:0deg}35%{rotate:-10deg}70%{rotate:6deg}}
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:studio-page-out .16s ease-out both}
+::view-transition-new(root){animation:studio-page-in .2s ease-out both}
+@keyframes studio-page-out{to{opacity:0}}
+@keyframes studio-page-in{from{opacity:0}to{opacity:1}}
+.inner-main{animation:studio-content-in .28s ease-out}
+@keyframes studio-content-in{from{opacity:.65}to{opacity:1}}
+@media(max-width:600px){.studio-ornaments{gap:20px;margin-top:12px}.studio-ornaments .studio-mark{width:26px;height:26px}.studio-click-spark{width:25px;height:25px}}
+@media(prefers-reduced-motion:reduce){@view-transition{navigation:none}.studio-ornaments>span,.shelf-character .portrait,.studio-click-spark,.inner-main{animation:none!important}::view-transition-old(root),::view-transition-new(root){animation:none!important}.studio-click-effects{display:none}}
+@media print{.studio-ornaments,.studio-click-effects{display:none}.inner-main{animation:none}}
