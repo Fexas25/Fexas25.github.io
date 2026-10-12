@@ -98,13 +98,16 @@ test('自由拖动支持横向和纵向，落在按钮上会让开', async ({ pa
     return !!box && Date.now() - stableSince >= 400;
   }).toBe(true);
   const from = await buddy.boundingBox();
+  // Shorter homepage copy may put the companion at the left edge. Drag inward.
+  const dx = from.x > 104 ? -100 : 100;
+  const dy = from.y + from.height + 90 < 900 ? 90 : -90;
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
   await page.mouse.down();
-  await page.mouse.move(from.x + from.width / 2 - 100, from.y + from.height / 2 + 90, { steps: 8 });
+  await page.mouse.move(from.x + from.width / 2 + dx, from.y + from.height / 2 + dy, { steps: 8 });
   await expect(buddy).toHaveClass(/is-picked/);
   const during = await buddy.boundingBox();
-  expect(during.x).toBeCloseTo(from.x - 100, 0);
-  expect(during.y).toBeCloseTo(from.y + 90, 0);
+  expect(during.x).toBeCloseTo(from.x + dx, 0);
+  expect(during.y).toBeCloseTo(from.y + dy, 0);
   const target = await page.locator('.draw-box').boundingBox();
   await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 8 });
   await page.mouse.up();
