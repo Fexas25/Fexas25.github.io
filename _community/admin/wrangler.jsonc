@@ -1,0 +1,15 @@
+{
+  "name": "mx-guestbook-admin",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-12",
+  "account_id": "3f4c9bdb6fb5bb5578dddf9d264fab2b",
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "ADMIN_ORIGIN": "https://mx-guestbook-admin.liuwanting830.workers.dev",
+    "ACCESS_ISSUER": "https://silent-darkness-412d.cloudflareaccess.com",
+    "ACCESS_AUD": "5ef1d4fa8e1c38cdea6f575e9c53b6760af92cb0deea322938d72e92c6a41634"
+  },
+  "d1_databases": [{"binding":"DB","database_name":"mx-community","database_id":"921bdb6c-a4f1-494b-a517-034d76ab7012"}],
+  "observability": {"enabled":true,"head_sampling_rate":0.1,"traces":{"enabled":true,"head_sampling_rate":0.1}}
+}

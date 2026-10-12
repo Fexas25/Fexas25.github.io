@@ -1,5 +1,7 @@
 _site/
 _checks/node_modules/
+_community/admin/node_modules/
+_community/admin/dist/
 _checks/test-results/
 _checks/playwright-report/
 _checks/*-run.log

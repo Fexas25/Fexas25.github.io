@@ -1,0 +1,11 @@
+{
+  "name": "mx-guestbook-admin",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild worker.mjs --bundle --format=esm --platform=browser --outfile=dist/worker.mjs",
+    "test": "node --test admin.test.mjs"
+  },
+  "dependencies": {"jose": "^6.1.0"},
+  "devDependencies": {"esbuild": "^0.25.0"}
+}
