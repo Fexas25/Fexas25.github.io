@@ -26,7 +26,7 @@ async function tapBuddy(page, buddy) {
 }
 
 async function unobstructed(page) {
-  const conflicts = await page.evaluate(() => {
+  await expect.poll(() => page.evaluate(() => {
     const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
     const actors = [...document.querySelectorAll('[data-buddy]')].filter(el => !el.hidden && getComputedStyle(el).visibility !== 'hidden');
     const protectedRects = [];
@@ -45,8 +45,7 @@ async function unobstructed(page) {
       const box = actor.getBoundingClientRect();
       return protectedRects.filter(other => overlaps(box, other.box)).map(other => `${actor.dataset.buddy}: ${other.label}`);
     });
-  });
-  expect(conflicts, '小人不能盖住原有角色、正文或按钮').toEqual([]);
+  }), {message:'布局稳定后，小人不能盖住原有角色、正文或按钮'}).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
 }
 
@@ -162,11 +161,19 @@ test('拖到伙伴旁边会贴贴，放手后不互相遮挡', async ({ page }) 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const buddies = page.locator('[data-buddy]');
+  await page.evaluate(() => document.fonts.ready);
+  let previous = '', stableAt = 0;
+  await expect.poll(async () => {
+    const positions = JSON.stringify(await Promise.all([buddies.nth(0).boundingBox(), buddies.nth(1).boundingBox()]));
+    if (positions !== previous) { previous = positions; stableAt = Date.now(); }
+    return Date.now() - stableAt >= 400;
+  }).toBe(true);
   const from = await buddies.nth(0).boundingBox();
   const to = await buddies.nth(1).boundingBox();
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
   await page.mouse.down();
   await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+  await expect(buddies.nth(0)).toHaveClass(/is-picked/);
   await page.mouse.up();
   await expect(page.locator('.buddy-message')).toContainText('花花和桃桃：贴贴');
   const a = await buddies.nth(0).boundingBox(), b = await buddies.nth(1).boundingBox();

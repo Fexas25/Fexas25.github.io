@@ -22,7 +22,8 @@ test('留言未配置不可提交，配置后验证、保留失败内容和审�
  await page.route('**/community-config.js*',r=>r.fulfill({contentType:'text/javascript',body:'window.MX_COMMUNITY={origin:"https://community.test",siteKey:"test"}'}));
  await page.route('https://challenges.cloudflare.com/**',r=>r.fulfill({contentType:'text/javascript',body:'window.turnstile={render:(s,o)=>{window.challenge=o;o.callback("verified");return 1},reset:()=>{}};window.mxGuestbookChallenge();'}));
  let fail=true;
- await page.route('https://community.test/**',r=>r.request().method()==='GET'?r.fulfill({json:{messages:[{name:'<img src=x>',message:'<script>alert(1)</script>',created:100}],next:''}}):r.fulfill({status:fail?503:201,json:fail?{error:'unavailable'}:{pending:true}}));
+ const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
+ await page.route('https://community.test/**',r=>r.request().method()==='OPTIONS'?r.fulfill({status:204,headers}):r.request().method()==='GET'?r.fulfill({headers,json:{messages:[{name:'<img src=x>',message:'<script>alert(1)</script>',created:100}],next:''}}):r.fulfill({headers,status:fail?503:201,json:fail?{error:'unavailable'}:{pending:true}}));
  await page.reload();
  await expect(page.locator('[type=submit]')).toBeEnabled();
  await expect(page.locator('.guestbook-message img')).toHaveCount(0);

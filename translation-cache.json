@@ -83,5 +83,10 @@
   "提交留言": "Send message",
   "摸鱼成功！": "Splash!",
   "转个圈！": "Loop complete!",
-  "鱼群来了！": "A little school of fish!"
+  "鱼群来了！": "A little school of fish!",
+  "无需登录。留言审核后公开，请勿填写私人信息。": "No login needed. Messages appear after review. Please leave out private information.",
+  "留言板暂未开放。": "The guestbook is not open yet.",
+  "给 MX 留言。": "Leave MX a message.",
+  "已提交，审核后显示。": "Sent. Your message will appear after review.",
+  "更多留言": "More messages"
 }
