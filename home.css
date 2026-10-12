@@ -31,7 +31,6 @@ html:has(dialog[open]){overflow:hidden}
 .studio-intro .intro-card{width:min(100%,580px);padding:8px 0;position:relative;z-index:1}
 .intro-card .intro-brand{font-size:12px;letter-spacing:3px;margin:0 0 18px}
 .studio-intro .intro-card h2{font-size:clamp(25px,6vw,34px);font-weight:600;letter-spacing:1px;margin:12px 0}
-.intro-card #intro-description{letter-spacing:1px;font-size:13px;line-height:1.8;margin:0}
 .intro-pond{width:min(calc(100% + 16px),520px,max(180px,calc(100svh - 230px)));aspect-ratio:1;height:auto;position:relative;left:50%;translate:-50% 0;margin:16px 0 0;isolation:isolate}
 .intro-card .pond-water{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:radial-gradient(circle closest-side,#f7fffd14 0%,#d5f1ea45 22%,#9ed7ca70 44%,#92cfc255 60%,#b7dfd82b 74%,#d7e8e310 83%,transparent 91%);cursor:crosshair;touch-action:manipulation}
 .pond-orbit{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle closest-side,transparent 65%,#8eada71c calc(65% + 1px),transparent calc(65% + 2px),transparent 76%,#8eada736 calc(76% + 1px),transparent calc(76% + 2px),transparent 87%,#8eada750 calc(87% + 1px),transparent calc(87% + 2px),transparent 98%,#8eada728 calc(98% + 1px),transparent calc(98% + 2px))}
@@ -58,14 +57,11 @@ html:has(dialog[open]){overflow:hidden}
 .intro-swimmer .fish:after{top:6px}
 .intro-swimmer.is-jumping .fish{animation:pond-jump .7s ease-in-out}
 .intro-card #intro-enter{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:4;background:transparent;border:0;color:#557f91;font:inherit;font-size:12px;font-weight:500;padding:0;width:108px;height:108px;border-radius:24px;min-height:108px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:none;transition:transform .25s ease}
-.intro-cat{display:block;width:96%;height:auto;overflow:visible;pointer-events:none;animation:cat-breathe 4.8s ease-in-out infinite}
-.cat-shape{fill:#9acbe82e;stroke:#739cad;stroke-width:1.5;stroke-linejoin:round;transition:fill .3s,stroke .3s}
-.cat-face{fill:none;stroke:#658ea4;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
-.intro-card #intro-enter span{display:block;font-size:11px;line-height:1.4;letter-spacing:2px;pointer-events:none}
+.intro-paw{display:block;width:96%;height:auto;overflow:visible;pointer-events:none;animation:cat-breathe 4.8s ease-in-out infinite}
+.paw-shape{fill:#9acbe82e;stroke:#739cad;stroke-width:1.5;stroke-linejoin:round;transition:fill .3s,stroke .3s}
 .intro-card #intro-enter:hover{transform:translateY(-2px)}
-.intro-card #intro-enter:hover .cat-shape{fill:#a5d8ec48;stroke:#5c91a6}
+.intro-card #intro-enter:hover .paw-shape{fill:#a5d8ec48;stroke:#5c91a6}
 .intro-card #intro-enter:active{transform:scale(.97)}
-.intro-card .pond-hint{font-size:11px;letter-spacing:1px;color:#918e85;margin:6px 0 0}
 .pond-effect{position:absolute;pointer-events:none}
 .pond-splash{width:28px;height:28px;border:1px solid #7cae9e80;border-radius:50%;animation:pond-wake 1.2s ease-out forwards}
 .pond-splash{width:42px;height:42px;border-color:#94b79b;box-shadow:0 0 0 7px #adcbb329}
@@ -118,5 +114,22 @@ html:has(dialog[open]){overflow:hidden}
 @keyframes cat-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
 .intro-card #intro-enter:focus-visible{outline:none}
-#intro-enter:focus-visible .cat-shape{stroke:#567f93;stroke-width:2}
-#intro-enter:focus-visible span{text-decoration:underline;text-underline-offset:4px}
+#intro-enter:focus-visible .paw-shape{stroke:#567f93;stroke-width:2}
+
+/* Rounded lettering and a few quiet pond-side sketches. */
+.studio-intro .intro-bouncy{font-family:"Arial Rounded MT Bold","幼圆","YouYuan","Hiragino Maru Gothic ProN",system-ui,sans-serif;font-weight:750;color:#617786}
+.studio-intro .intro-brand{font-size:14px;letter-spacing:3px}
+.studio-intro #intro-title{font-weight:800;letter-spacing:2px;-webkit-text-stroke:.45px currentColor;text-shadow:0 2px 0 #fff8}
+.intro-bouncy>span{display:inline-block;transform-origin:50% 85%;transition:color .25s;cursor:default}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){.intro-bouncy>span:hover{animation:letter-boing .65s ease both;color:#7dabb5}}
+@keyframes letter-boing{0%,100%{transform:translateY(0) scale(1)}20%{transform:translateY(2px) scale(1.16,.8)}46%{transform:translateY(-9px) scale(.88,1.17) rotate(-4deg)}70%{transform:translateY(1px) scale(1.07,.94)}85%{transform:translateY(-3px) scale(.98,1.03)}}
+.intro-doodles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.intro-doodle{position:absolute;width:clamp(34px,5vw,62px);color:#91b5b0;opacity:.45;animation:doodle-drift 9s ease-in-out infinite alternate}
+.intro-doodle svg{width:100%;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;fill:#d5ece91c}
+.doodle-1{left:calc(50% - min(39vw,390px));top:25%;rotate:-13deg}
+.doodle-2{right:calc(50% - min(39vw,390px));top:34%;rotate:16deg;animation-delay:-3s}
+.doodle-3{left:calc(50% - min(35vw,350px));bottom:20%;rotate:-20deg;animation-delay:-5s}
+.doodle-4{right:calc(50% - min(34vw,340px));bottom:15%;rotate:12deg;animation-delay:-7s}
+@keyframes doodle-drift{from{translate:0 0}to{translate:3px -7px}}
+@media(max-width:600px){.doodle-1{top:12%;left:9%}.doodle-2{top:17%;right:9%}.doodle-3{bottom:16%;left:13%}.doodle-4{bottom:10%;right:13%}.intro-doodle{opacity:.35}}
+@media(max-height:560px){.intro-doodle{opacity:.25}}

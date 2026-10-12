@@ -277,13 +277,13 @@ test('开屏小鱼跳跃、水面四叶草和进入按钮互不干扰', async ({
 });
 
 
-test('开屏正圆水池、猫咪入口与自主跃鱼落水波纹', async ({ page }) => {
+test('开屏正圆水池、猫爪入口与自主跃鱼落水波纹', async ({ page }) => {
   // Advance animation frames deterministically, even on busy CI machines.
   await page.clock.install();
   await page.goto('/');
   const pond = await page.locator('.intro-pond').boundingBox();
   expect(Math.abs(pond.width - pond.height)).toBeLessThan(1);
-  await expect(page.getByRole('button', { name: '开始摸鱼', exact: true }).locator('.intro-cat')).toBeVisible();
+  await expect(page.getByRole('button', { name: '开始摸鱼', exact: true }).locator('.intro-paw')).toBeVisible();
   await page.clock.runFor(5000);
   await expect(page.locator('.pond-droplets')).toHaveCount(1);
   await page.clock.runFor(750);

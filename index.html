@@ -17,20 +17,19 @@
 <link rel="icon" type="image/webp" href="/assets/optimized/portrait-orange.webp" />
 </head>
 <body>
-  <dialog id="studio-intro" class="studio-intro" aria-labelledby="intro-title" aria-describedby="intro-description">
+  <dialog id="studio-intro" class="studio-intro" aria-labelledby="intro-title">
+    <div class="intro-doodles" aria-hidden="true"><span class="intro-doodle doodle-1"><svg viewBox="0 0 80 80" fill="none"><path d="M16 33 13 13 30 24Q40 20 50 24L67 13 64 33Q75 53 60 64Q40 77 20 64Q5 53 16 33Z"/><path d="M24 43q5-5 10 0m12 0q5-5 10 0M36 51l4 3 4-3m-4 3v4m-7 0q7 7 14 0M8 48l13 3m-11 8 12-2m50-9-13 3m11 8-12-2"/></svg></span><span class="intro-doodle doodle-2"><svg viewBox="0 0 80 80" fill="none"><path d="M40 38C10 34 16 8 30 15Q40 5 40 38ZM42 40C46 10 72 16 65 30Q75 40 42 40ZM40 42C70 46 64 72 50 65Q40 75 40 42ZM38 40C34 70 8 64 15 50Q5 40 38 40ZM40 43q2 21 16 28"/></svg></span><span class="intro-doodle doodle-3"><svg viewBox="0 0 80 80" fill="none"><path d="M40 38C10 34 16 8 30 15Q40 5 40 38ZM42 40C46 10 72 16 65 30Q75 40 42 40ZM40 42C70 46 64 72 50 65Q40 75 40 42ZM38 40C34 70 8 64 15 50Q5 40 38 40ZM40 43q2 21 16 28"/></svg></span><span class="intro-doodle doodle-4"><svg viewBox="0 0 80 80" fill="none"><path d="M16 33 13 13 30 24Q40 20 50 24L67 13 64 33Q75 53 60 64Q40 77 20 64Q5 53 16 33Z"/><path d="M24 43q5-5 10 0m12 0q5-5 10 0M36 51l4 3 4-3m-4 3v4m-7 0q7 7 14 0M8 48l13 3m-11 8 12-2m50-9-13 3m11 8-12-2"/></svg></span></div>
     <div class="intro-card">
-      <p class="intro-brand">MX · 摸鱼工作室</p>
-      <h2 id="intro-title">现在是，摸鱼时间。</h2>
-      <p id="intro-description">把忙碌放一边，来这里游一会儿。</p>
+      <p class="intro-brand intro-bouncy" aria-label="摸鱼工作室"><span aria-hidden="true">摸</span><span aria-hidden="true">鱼</span><span aria-hidden="true">工</span><span aria-hidden="true">作</span><span aria-hidden="true">室</span></p>
+      <h2 id="intro-title" class="intro-bouncy" aria-label="现在是摸鱼时间"><span aria-hidden="true">现</span><span aria-hidden="true">在</span><span aria-hidden="true">是</span><span aria-hidden="true">摸</span><span aria-hidden="true">鱼</span><span aria-hidden="true">时</span><span aria-hidden="true">间</span></h2>
       <div class="intro-pond">
         <button type="button" class="pond-water" aria-label="轻点水面，种一片四叶草"><svg class="pond-caustics" viewBox="0 0 400 400" aria-hidden="true" focusable="false"><path d="M38 134C104 102 116 161 184 137S267 111 326 135"/><path d="M82 240C135 211 166 252 223 223S290 213 354 194"/><path d="M134 55C103 114 157 161 127 204S94 266 117 313"/></svg></button>
         <div class="pond-surface-effects" aria-hidden="true"></div>
         <span class="pond-orbit" aria-hidden="true"></span>
         <div class="pond-effects" aria-hidden="true"></div>
         <button type="button" class="intro-swimmer" aria-label="摸摸领头小鱼，让它跳起来"><span class="fish" aria-hidden="true"></span></button>
-        <button type="button" id="intro-enter" aria-label="开始摸鱼" autofocus><svg class="intro-cat" viewBox="0 0 120 110" aria-hidden="true" focusable="false"><path class="cat-shape" d="M24 39 20 17Q19 10 26 14L43 27Q60 21 77 27L94 14Q101 10 100 17L96 39Q109 55 100 75Q92 94 60 94Q28 94 20 75Q11 55 24 39Z"/><g class="cat-face"><path d="m29 28 3 13m59-13-3 13M34 56q7-7 14 0m24 0q7-7 14 0M56 65q4 4 8 0m-4 3v5m0 0q-6 6-11 0m11 0q6 6 11 0M17 61l17 4m-15 8 15-2m69-10-17 4m15 8-15-2"/></g></svg><span>开始摸鱼</span></button>
+        <button type="button" id="intro-enter" aria-label="开始摸鱼" autofocus><svg class="intro-paw" viewBox="0 0 120 110" aria-hidden="true" focusable="false"><g class="paw-shape"><ellipse cx="25" cy="43" rx="10" ry="14" transform="rotate(-28 25 43)"/><ellipse cx="47" cy="25" rx="10" ry="15" transform="rotate(-10 47 25)"/><ellipse cx="74" cy="25" rx="10" ry="15" transform="rotate(10 74 25)"/><ellipse cx="96" cy="43" rx="10" ry="14" transform="rotate(28 96 43)"/><path d="M60 49C47 49 44 62 34 71C22 83 30 99 43 96Q60 89 77 96C91 99 99 83 86 71C76 62 73 49 60 49Z"/></g></svg></button>
       </div>
-      <p class="pond-hint">摸摸小鱼 · 轻点水面，捡一点幸运</p>
     </div>
   </dialog>
   <a class="skip-link" href="#main">跳到主要内容</a>
