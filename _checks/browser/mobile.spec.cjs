@@ -291,7 +291,7 @@ test('开屏正圆水池、猫爪入口与自主跃鱼落水波纹', async ({ pa
   await expect(page.locator('.pond-surface-effects .pond-water-wave').first()).toBeVisible();
   await noOverflow(page);
   await page.locator('#intro-enter').click();
-  await page.clock.runFor(400);
+  await page.clock.runFor(850);
   await expect(page.locator('#studio-intro')).not.toBeVisible();
   await expect(page.locator('.pond-effect')).toHaveCount(0);
 });

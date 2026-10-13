@@ -58,13 +58,24 @@
     try{sessionStorage.setItem('mx-language',english?'en':'zh');}catch{}
     document.documentElement.lang=english?'en':'zh-CN';
     document.querySelectorAll('[data-language]:not(.intro-languages *)').forEach(button=>{button.dataset.language=english?'zh':'en';button.textContent=english?'中文':'English';});
-    if(english){status('Translating…');translate();document.getElementById('intro-enter')?.click();}
+    if(english){status('Translating…');translate();}
     else{for(const [node,{original,output}]of records){if(node.isConnected&&node.textContent===output)node.textContent=original;}records.clear();status('');}
   }
-  document.addEventListener('click',event=>{const button=event.target.closest('[data-language]');if(button)setLanguage(button.dataset.language==='en');});
+  let selected='zh';
+  const intro=document.getElementById('studio-intro');
+  const selection=()=>document.querySelectorAll('.intro-languages [data-language]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.language===selected)));
+  document.addEventListener('click',event=>{
+    const button=event.target.closest('[data-language]');if(!button)return;
+    selected=button.dataset.language;
+    if(button.closest('.intro-languages')){selection();try{sessionStorage.setItem('mx-language',selected);}catch{};return;}
+    setLanguage(selected==='en');
+  });
   new MutationObserver(changes=>{
     if(!active||busy||!changes.some(c=>!(c.target.nodeType===1?c.target:c.target.parentElement)?.closest(skip)))return;
     clearTimeout(debounce);debounce=setTimeout(translate,300);
   }).observe(document.body,{subtree:true,childList:true,characterData:true});
-  try{if(sessionStorage.getItem('mx-language')==='en')setLanguage(true);}catch{}
+  try{if(sessionStorage.getItem('mx-language')==='en')selected='en';}catch{}
+  selection();
+  if(intro?.open)intro.addEventListener('close',()=>setLanguage(selected==='en'),{once:true});
+  else if(selected==='en')setLanguage(true);
 })();

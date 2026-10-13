@@ -27,7 +27,6 @@
       reduced.addEventListener('change',done);
     }
   };
-  document.querySelector('[data-enter-zh]')?.addEventListener('click', () => document.getElementById('intro-enter')?.click());
   const intro = document.getElementById('studio-intro');
   if (!intro) return;
   function startPond() {
@@ -166,6 +165,7 @@
     const previousOverflow = document.body.style.overflow;
     let leaving = false, exitTimer;
     intro.showModal();
+    intro.addEventListener('cancel', event => event.preventDefault());
     const stopPond = startPond();
     document.body.style.overflow = 'hidden';
     const finish = () => { if (intro.open) intro.close(); };
@@ -176,8 +176,9 @@
       enter.disabled = true;
       enter.setAttribute('aria-busy', 'true');
       intro.classList.add('intro-leaving');
+      intro.querySelector('.intro-go').hidden = false;
       if (reduced.matches) finish();
-      else exitTimer = setTimeout(finish, 380);
+      else exitTimer = setTimeout(finish, 800);
     };
     const motionChange = () => { if (reduced.matches && leaving) finish(); };
     enter.addEventListener('click', enterStudio);

@@ -5,6 +5,7 @@ layout: default
 {% if page.collection == 'cp' or page.category == 'competitive-programming' %}{% assign back_url = '/competitive-programming/' %}{% assign label = '博客' %}{% elsif page.collection == 'gamejam' or page.category == 'game-jam' %}{% assign back_url = '/game-jam/' %}{% assign label = '游戏开发' %}{% elsif page.collection == 'art' or page.category == 'art' %}{% assign back_url = '/art/' %}{% assign label = '绘画创作' %}{% elsif page.collection == 'projects' or page.category == 'projects' %}{% assign back_url = '/projects/' %}{% assign label = '作品' %}{% endif %}
 <div class="reading-shell"><a class="crumb" href="{{ back_url | relative_url }}">← 返回{{ label }}</a>
 <header class="reading-header" id="article-top" tabindex="-1"><p class="shelf-eyebrow">MX / {{ label }}{% if page.collection == 'cp' %}{% include blog-topic.html entry=page %} / {{ blog_topic_label }}{% endif %}</p><h1>{{ page.title | escape }}</h1><time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: '%Y.%m.%d' }}</time>{% include entry-tags.html tags=page.tags %}<a class="year-link" href="{{ '/search/' | relative_url }}?year={{ page.date | date: '%Y' }}">查看 {{ page.date | date: '%Y' }} 年归档 →</a><span class="reading-flower" aria-hidden="true">{% if page.collection == "cp" %}{% include studio-mark.html kind="clover" %}{% elsif page.collection == "posts" %}{% include studio-mark.html kind="paw" %}{% else %}{% include studio-mark.html kind="fish" %}{% endif %}</span></header>
+<div class="reading-mail"><a href="/guestbook/" data-mail-open aria-haspopup="dialog" aria-controls="quick-guestbook">给 Meow 留言</a></div>
 <details class="article-toc" data-article-toc hidden><summary>本文目录</summary><ol></ol></details>
 <article class="prose" data-reading-content>{{ content }}</article>
 {% assign reading_collection = page.collection | default: 'posts' %}
@@ -20,4 +21,4 @@ layout: default
 </nav>{% endif %}{% endif %}
 {% include related-posts.html %}
 <a class="reading-top" href="#article-top" data-reading-top hidden>↑ 回到标题</a>
-<div class="reading-end"><span aria-hidden="true">✧</span><p>写到这里，下次再见。</p><a class="quiet-link" href="{{ back_url | relative_url }}">继续看看{{ label }} →</a></div></div>
+<div class="reading-end"><span aria-hidden="true">✧</span><p><a href="/guestbook/" data-mail-open aria-haspopup="dialog" aria-controls="quick-guestbook">Meow，想说两句？</a></p><a class="quiet-link" href="{{ back_url | relative_url }}">继续看看{{ label }} →</a></div></div>

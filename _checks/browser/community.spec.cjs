@@ -1,15 +1,22 @@
 const {test,expect}=require('@playwright/test');
 test('开屏语言选择，正文可翻译并恢复，动态小鱼清理',async({page})=>{
- await page.route('**/translation-cache.json',route=>route.fulfill({json:{'算法、游戏开发、绘画、AI 工作流。':'Algorithms, game development, drawing and AI workflows.'}}));
+ await page.route('**/translation-cache.json',route=>route.fulfill({json:{'快来一起摸鱼吧！':'Come relax with Meow!'}}));
  await page.goto('/');
  const english=page.locator('.intro-languages [data-language=en]');
  await expect(english).toBeVisible();
  const box=await english.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(780);
  await english.click();
+ await expect(english).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#studio-intro')).toBeVisible();
+ await page.locator('.intro-languages [data-language=zh]').click();
+ await expect(page.locator('#studio-intro')).toBeVisible();
+ await english.click();
+ await page.locator('#intro-enter').click();
+ await expect(page.locator('#studio-intro')).not.toBeVisible();
  await expect(page.locator('html')).toHaveAttribute('lang','en');
- await expect(page.getByText('Algorithms, game development, drawing and AI workflows.',{exact:true})).toBeVisible();
- await page.locator('footer [data-language=zh]').click();
- await expect(page.getByText('算法、游戏开发、绘画、AI 工作流。',{exact:true})).toBeVisible();
+ await expect(page.getByText('Come relax with Meow!',{exact:true})).toBeVisible();
+ await page.locator('.header-tools [data-language=zh]').click();
+ await expect(page.getByText('快来一起摸鱼吧！',{exact:true})).toBeVisible();
  await page.locator('#fish-play').click();
  await expect(page.locator('.play-fish')).toHaveCount(1);
  await expect(page.locator('.play-fish')).toHaveCount(0);

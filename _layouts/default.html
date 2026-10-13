@@ -14,5 +14,6 @@
 <main id="main" class="inner-main">{{ content }}</main>
 {% include studio-buddies.html compact=true %}
 {% include studio-ornaments.html %}
-<footer class="inner-footer"><a class="brand" href="{{ '/' | relative_url }}">MX · 摸鱼工作室</a><div><a href="/guestbook/">留言</a><button type="button" data-language="en" lang="en">English</button><a href="https://github.com/Fexas25">GitHub ↗</a><a href="https://atcoder.jp/users/Fexas_01">AtCoder ↗</a><a href="{{ '/feed.xml' | relative_url }}">RSS</a><a href="{{ '/editor.html' | relative_url }}">写点什么</a></div><small>© {{ site.time | date: '%Y' }} MX · Built with GitHub Pages</small></footer>
+<footer class="inner-footer"><small>© {{ site.time | date: '%Y' }} MX · Meow!</small></footer>
+{% unless page.section == "guestbook" %}{% include quick-guestbook.html %}{% endunless %}
 </body></html>

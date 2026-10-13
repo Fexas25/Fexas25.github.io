@@ -21,7 +21,7 @@
   <dialog id="studio-intro" class="studio-intro" aria-labelledby="intro-title">
     <div class="intro-doodles" aria-hidden="true"><span class="intro-doodle doodle-1"><svg viewBox="0 0 80 80" fill="none"><path d="M16 33 13 13 30 24Q40 20 50 24L67 13 64 33Q75 53 60 64Q40 77 20 64Q5 53 16 33Z"/><path d="M24 43q5-5 10 0m12 0q5-5 10 0M36 51l4 3 4-3m-4 3v4m-7 0q7 7 14 0M8 48l13 3m-11 8 12-2m50-9-13 3m11 8-12-2"/></svg></span><span class="intro-doodle doodle-2"><svg viewBox="0 0 80 80" fill="none"><path d="M40 38C10 34 16 8 30 15Q40 5 40 38ZM42 40C46 10 72 16 65 30Q75 40 42 40ZM40 42C70 46 64 72 50 65Q40 75 40 42ZM38 40C34 70 8 64 15 50Q5 40 38 40ZM40 43q2 21 16 28"/></svg></span><span class="intro-doodle doodle-3"><svg viewBox="0 0 80 80" fill="none"><path d="M40 38C10 34 16 8 30 15Q40 5 40 38ZM42 40C46 10 72 16 65 30Q75 40 42 40ZM40 42C70 46 64 72 50 65Q40 75 40 42ZM38 40C34 70 8 64 15 50Q5 40 38 40ZM40 43q2 21 16 28"/></svg></span><span class="intro-doodle doodle-4"><svg viewBox="0 0 80 80" fill="none"><path d="M16 33 13 13 30 24Q40 20 50 24L67 13 64 33Q75 53 60 64Q40 77 20 64Q5 53 16 33Z"/><path d="M24 43q5-5 10 0m12 0q5-5 10 0M36 51l4 3 4-3m-4 3v4m-7 0q7 7 14 0M8 48l13 3m-11 8 12-2m50-9-13 3m11 8-12-2"/></svg></span></div>
     <div class="intro-card">
-      <p class="intro-brand intro-bouncy" aria-label="MX 摸鱼工作室"><span aria-hidden="true">M</span><span aria-hidden="true">X</span><span aria-hidden="true"> </span><span aria-hidden="true">摸</span><span aria-hidden="true">鱼</span><span aria-hidden="true">工</span><span aria-hidden="true">作</span><span aria-hidden="true">室</span></p>
+      <p class="intro-brand intro-bouncy" aria-label="MX的摸鱼生活"><span aria-hidden="true">M</span><span aria-hidden="true">X</span><span aria-hidden="true">的</span><span aria-hidden="true">摸</span><span aria-hidden="true">鱼</span><span aria-hidden="true">生</span><span aria-hidden="true">活</span></p>
       <h2 id="intro-title" class="intro-bouncy" aria-label="现在是摸鱼时间"><span aria-hidden="true">现</span><span aria-hidden="true">在</span><span aria-hidden="true">是</span><span aria-hidden="true">摸</span><span aria-hidden="true">鱼</span><span aria-hidden="true">时</span><span aria-hidden="true">间</span></h2>
       <div class="intro-pond">
         <button type="button" class="pond-water" aria-label="轻点水面，种一片四叶草"><svg class="pond-caustics" viewBox="0 0 400 400" aria-hidden="true" focusable="false"><path d="M38 134C104 102 116 161 184 137S267 111 326 135"/><path d="M82 240C135 211 166 252 223 223S290 213 354 194"/><path d="M134 55C103 114 157 161 127 204S94 266 117 313"/></svg></button>
@@ -31,23 +31,21 @@
         <button type="button" class="intro-swimmer" aria-label="摸摸领头小鱼，让它跳起来"><span class="fish" aria-hidden="true"></span></button>
         <button type="button" id="intro-enter" aria-label="开始摸鱼" autofocus><svg class="intro-paw" viewBox="0 0 120 110" aria-hidden="true" focusable="false"><g class="paw-shape"><ellipse cx="25" cy="43" rx="10" ry="14" transform="rotate(-28 25 43)"/><ellipse cx="47" cy="25" rx="10" ry="15" transform="rotate(-10 47 25)"/><ellipse cx="74" cy="25" rx="10" ry="15" transform="rotate(10 74 25)"/><ellipse cx="96" cy="43" rx="10" ry="14" transform="rotate(28 96 43)"/><path d="M60 49C47 49 44 62 34 71C22 83 30 99 43 96Q60 89 77 96C91 99 99 83 86 71C76 62 73 49 60 49Z"/></g></svg></button>
       </div>
-      <div class="intro-languages" aria-label="选择语言"><button type="button" data-language="zh" data-enter-zh>中文</button><button type="button" data-language="en" lang="en">English</button></div>
+      <div class="intro-languages" aria-label="选择语言"><button type="button" data-language="zh" aria-pressed="true">中文</button><button type="button" data-language="en" lang="en" aria-pressed="false">English</button></div>
     </div>
+    <div class="intro-go" hidden role="status"><strong>Let’s go!</strong><span class="fish" aria-hidden="true"></span></div>
   </dialog>
-  <a class="skip-link" href="#main">跳到主要内容</a>
-  <header class="site-header"><div class="header-inner">
-    <a class="brand" href="./" aria-label="MX 摸鱼工作室首页"><span class="fish" aria-hidden="true"></span>MX <span class="brand-sub">· 摸鱼工作室</span></a>
-    <nav aria-label="主导航"><a class="active" href="./" aria-current="page">首页</a><a href="blog/">碎碎念</a><a href="competitive-programming/">博客</a><a href="projects/">作品</a><a href="about/">关于</a><a href="search/">搜索</a></nav>
-  </div></header>
+  {% include studio-header.html %}
   <main id="main">
     <section class="hero" aria-labelledby="hero-title">
       <img class="room" src="assets/optimized/studio-room.webp" srcset="assets/optimized/studio-room-mobile.webp 800w, assets/optimized/studio-room.webp 1440w" sizes="(max-width: 700px) 100vw, 78vw" alt="阳光洒进摆着花草与照片的房间，橙发女孩趴在笔记本旁" fetchpriority="high" width="1440" height="824" />
       <div class="hero-wash" aria-hidden="true"></div>
       <div class="hero-inner">
         <div class="hero-copy" id="about">
-          <h1 id="hero-title" tabindex="-1">MX 的摸鱼工作室<span class="full-stop">。</span></h1>
-          <p class="intro">算法、游戏开发、绘画、AI 工作流。</p>
+          <h1 id="hero-title" class="meow-welcome" tabindex="-1"><span>MEOW！</span><span>欢迎来到MX 的 摸鱼空间！</span><span>快来一起摸鱼吧！</span></h1>
+          <p class="intro">Meow？ Miao！Miao~</p>
           <div class="fish-corner" hidden><button id="fish-play" type="button" aria-label="摸一下小鱼，让它游起来"><span class="fish" aria-hidden="true"></span><span>摸一下小鱼</span></button><p id="fish-message" role="status" aria-live="polite"></p></div>
+        <a class="meow-mail-entry" href="/guestbook/" data-mail-open aria-haspopup="dialog" aria-controls="quick-guestbook">{% include meow-cat.html %}<span>Meow！快来陪我玩！</span></a>
         </div>
         <div class="character-stage" aria-label="角色导航与今日抽签">
           <a class="character character-moments" href="blog/" aria-label="花里实乃理（花花）：前往碎碎念"><img src="assets/optimized/portrait-orange.webp" alt="" width="360" height="360" decoding="async" /><span class="character-label">碎碎念 <span aria-hidden="true">›</span></span><span class="character-hint">今天过得开心吗？</span></a>
@@ -59,7 +57,7 @@
           <noscript><a class="no-script-draw" href="daily-checkin/">前往每日签到抽签 →</a></noscript>
         </div>
       </div>
-      <p class="scene-credit">背景与角色来自原站素材库</p>
+
     </section>
     <div class="content-wrap">
       <div class="writing-grid">
@@ -91,7 +89,8 @@
   </main>
   {% include studio-buddies.html %}
   {% include studio-ornaments.html %}
-  <footer class="site-footer"><div><a href="/guestbook/">留言</a><button type="button" data-language="en" lang="en">English</button><a href="https://github.com/Fexas25">GitHub</a><span>·</span><a href="https://atcoder.jp/users/Fexas_01">AtCoder</a><span>·</span><a href="feed.xml">RSS</a><span>·</span><a href="editor.html">写点什么</a></div><small>© <span id="year">2026</span> MX · Built with GitHub Pages</small></footer>
+  <footer class="site-footer"><small>© <span id="year">2026</span> MX · Meow!</small></footer>
+  {% include quick-guestbook.html %}
   <dialog id="fortune-dialog" aria-labelledby="fortune-title" aria-describedby="fortune-description">
     <button type="button" class="dialog-close" aria-label="关闭今日签">×</button>
     <p class="fortune-eyebrow">MX 的今日签 <time id="fortune-date"></time></p>
