@@ -7,6 +7,26 @@ test.beforeEach(async ({ page }) => {
 });
 test.afterEach(async ({ page }) => expect(page.__buddyErrors).toEqual([]));
 
+async function onscreenBuddy(page) {
+  await page.evaluate(() => document.fonts.ready);
+  let name, lastPosition = '', stableSince = 0;
+  await expect.poll(async () => {
+    name = await page.locator('[data-buddy]').evaluateAll(elements => {
+      const actor = elements.find(el => {
+        const box = el.getBoundingClientRect();
+        return box.top >= 100 && box.bottom < innerHeight - 50 &&
+          el.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
+      });
+      return actor?.dataset.buddy;
+    });
+    const box = name ? await page.locator(`[data-buddy="${name}"]`).boundingBox() : null;
+    const position = JSON.stringify({ name, box });
+    if (position !== lastPosition) { lastPosition = position; stableSince = Date.now(); }
+    return !!name && Date.now() - stableSince >= 200;
+  }, { message: '先找到当前屏幕内可操作的小伙伴' }).toBe(true);
+  return page.locator(`[data-buddy="${name}"]`);
+}
+
 async function tapBuddy(page, buddy) {
   await page.evaluate(() => document.fonts.ready);
   await buddy.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
@@ -90,7 +110,7 @@ test('自由拖动支持横向和纵向，落在按钮上会让开', async ({ pa
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  const buddy = page.locator('[data-buddy]').first();
+  const buddy = await onscreenBuddy(page);
   await expect(buddy).toBeVisible();
   // Fonts/images can trigger the companion's delayed layout refresh in WebKit.
   // Start the drag only after its actual position has settled.
@@ -126,7 +146,7 @@ test('自由拖动支持横向和纵向，落在按钮上会让开', async ({ pa
 test('自动散步、减少动态效果与休息开关', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/');
-  const buddy = page.locator('[data-buddy]').first();
+  const buddy = await onscreenBuddy(page);
   await expect(buddy).toHaveClass(/is-walking/, { timeout: 12000 });
   const start = await buddy.boundingBox();
   await expect.poll(async () => {
