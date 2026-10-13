@@ -50,7 +50,9 @@
     if (dialog.open) return;
     opener = link; overflow = document.body.style.overflow;
     const heading = document.querySelector('[data-reading-content]') && document.querySelector('#article-top h1');
-    prefix = heading ? `关于《${heading.textContent.trim().slice(0,100)}》\n${location.pathname}\n\n` : '';
+    const documentId=document.querySelector('[data-backend-id]')?.dataset.backendId||new URLSearchParams(location.search).get('id')||location.hash.slice(1);
+    const source=/^[a-f0-9-]{36}$/.test(documentId||'')?config.origin+'/read/'+documentId:location.origin+location.pathname;
+    prefix = heading ? `关于《${heading.textContent.trim().slice(0,100)}》\n${source}\n\n` : '';
     const context = document.getElementById('quick-guestbook-context');
     context.hidden = !heading; context.textContent = heading ? `关于《${heading.textContent.trim()}》` : '';
     form.elements.message.maxLength = Math.max(1,1000-prefix.length);

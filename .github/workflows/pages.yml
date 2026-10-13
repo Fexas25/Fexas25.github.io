@@ -33,6 +33,7 @@ jobs:
         run: |
           npm ci --prefix _community
           npm test --prefix _community
+          python _checks/backend-restore.py
           npm run build --prefix _community
           npm ci --prefix _community/admin
           npm test --prefix _community/admin

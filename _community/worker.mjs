@@ -16,7 +16,7 @@ export default {async fetch(request,env){
   const origin=env.SITE_ORIGIN||'https://fexas25.github.io';
   const headers={'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Vary':'Origin','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'};
   const reply=(value,status=200)=>new Response(JSON.stringify(value),{status,headers});
-  if(request.headers.get('Origin')&&request.headers.get('Origin')!==origin&&!(request.headers.get('Origin')===requestUrl.origin&&['/documents','/documents/read','/translate'].includes(path)))return reply({error:'origin'},403);
+  if(request.headers.get('Origin')&&request.headers.get('Origin')!==origin&&!(request.headers.get('Origin')===requestUrl.origin&&['/documents','/documents/read','/translate','/messages'].includes(path)))return reply({error:'origin'},403);
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization'}});
   if(!env.DB)return reply({error:'not configured'},503);
   const now=Math.floor(Date.now()/1000);
@@ -32,7 +32,7 @@ export default {async fetch(request,env){
       return reply({messages:results.slice(0,30),next:results.length>30?String(results[29].id):''});
     }
     if(request.method!=='POST'||!['/messages','/translate'].includes(path))return reply({error:'not found'},404);
-    if(request.headers.get('Origin')!==origin&&!(path==='/translate'&&request.headers.get('Origin')===requestUrl.origin))return reply({error:'origin required'},403);
+    if(request.headers.get('Origin')!==origin&&!(['/translate','/messages'].includes(path)&&request.headers.get('Origin')===requestUrl.origin))return reply({error:'origin required'},403);
     if(!env.RATE_SECRET)return reply({error:'not configured'},503);
     const data=await body(request);if(!data||typeof data!=='object'||Array.isArray(data))return reply({error:'invalid'},400);const day=new Date().toISOString().slice(0,10);
     const ip=request.headers.get('CF-Connecting-IP');if(!ip)return reply({error:'client'},400);
@@ -40,8 +40,10 @@ export default {async fetch(request,env){
     if(path==='/messages'){
       if(!env.TURNSTILE_SECRET)return reply({error:'not configured'},503);
       if(typeof data.name!=='string'||typeof data.message!=='string'||!data.name.trim()||!data.message.trim()||data.name.length>32||data.message.length>1000||data.website||typeof data.token!=='string'||data.token.length>2048)return reply({error:'invalid'},400);
-      const check=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',signal:AbortSignal.timeout(10000),body:new URLSearchParams({secret:env.TURNSTILE_SECRET,response:data.token,remoteip:ip})}).then(r=>r.json());
-      if(!check.success||check.hostname!==new URL(origin).hostname||check.action!=='guestbook')return reply({error:'verification'},403);
+      const verification=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',signal:AbortSignal.timeout(10000),body:new URLSearchParams({secret:env.TURNSTILE_SECRET,response:data.token,remoteip:ip})});
+      if(!verification.ok)throw Error('verification unavailable');
+      const check=await verification.json();
+      if(!check.success||check.hostname!==new URL(request.headers.get('Origin')).hostname||check.action!=='guestbook')return reply({error:'verification'},403);
       const result=await env.DB.prepare('INSERT INTO messages(name,message,created,visitor) SELECT ?,?,?,? WHERE NOT EXISTS(SELECT 1 FROM messages WHERE visitor=? AND created>?) AND (SELECT COUNT(*) FROM messages WHERE visitor=?)<5').bind(data.name.trim(),data.message.trim(),now,visitor,visitor,now-60,visitor).run();
       return result.meta.changes?reply({pending:true},201):reply({error:'rate limit'},429);
     }

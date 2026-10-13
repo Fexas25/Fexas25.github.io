@@ -54,8 +54,6 @@ export async function publicPage(request,env){
   .on('.reading-header time',{element(e){e.setAttribute('datetime',model.meta.date);e.setInnerContent(model.meta.date.replaceAll('-','.'));}})
   .on('[data-document-body]',{element(e){if(model.isPublic){e.removeAttribute('hidden');e.setAttribute('data-reading-content','');e.setInnerContent(model.html,{html:true});}}})
   .on('[data-document-unlock]',{element(e){if(model.isPublic)e.setAttribute('hidden','');}})
-  // Guestbook verification stays on the site's registered Turnstile hostname.
-  .on('[data-mail-open]',{element(e){e.removeAttribute('data-mail-open');e.removeAttribute('aria-haspopup');e.removeAttribute('aria-controls');e.setAttribute('href',site+'/guestbook/');}})
   .on('[href],[src]',{element(e){for(const attr of ['href','src']){const value=e.getAttribute(attr);if(value?.startsWith('/')&&!value.startsWith('//'))e.setAttribute(attr,site+value);}}});
  const response=rewriter.transform(await shellResponse(site));
  // Inserted Markdown is intentionally rendered with raw HTML disabled. Resolve its

@@ -25,7 +25,10 @@ test('分享页原始 HTML 已有正文和预览，手机可读并保留语言�
  expect(html).toContain('<h1>正文标题</h1>');expect(html).toContain('"@type":"BlogPosting"');
  await page.route('https://fexas25.github.io/**',r=>r.fulfill({path:path.resolve(__dirname,'../../_site',new URL(r.request().url()).pathname.slice(1)),headers:{'Access-Control-Allow-Origin':'*'}}));
  await page.route('https://content.test/read/**',r=>r.fulfill({contentType:'text/html',body:html}));
- await page.route('**/community-config.js*',r=>r.fulfill({contentType:'text/javascript',body:'window.MX_COMMUNITY={origin:"https://content.test"}'}));
+ await page.route('**/community-config.js*',r=>r.fulfill({contentType:'text/javascript',body:'window.MX_COMMUNITY={origin:"https://content.test",siteKey:"mock"}'}));
+ await page.route('https://challenges.cloudflare.com/**',r=>r.fulfill({contentType:'text/javascript',body:'window.turnstile={render:(s,o)=>{window.challenge=o;return 0},remove:()=>{}};window.mxQuickGuestbookChallenge();'}));
+ let payload;
+ await page.route('https://content.test/messages',r=>{payload=r.request().postDataJSON();return r.fulfill({status:201,json:{pending:true}});});
  const headers={'Access-Control-Allow-Origin':'*'};
  await page.route('https://content.test/documents',r=>r.fulfill({headers,json:{documents:[]}}));
  // The server-rendered article remains readable if its enhancement request fails.
@@ -34,5 +37,17 @@ test('分享页原始 HTML 已有正文和预览，手机可读并保留语言�
  await page.goto('https://content.test/read/'+id+'?lang=en');
  await expect(page.locator('html')).toHaveAttribute('lang','en');await expect(page.locator('[data-document-body]')).toContainText('公开文章的完整内容');await expect(page.locator('[data-document-retry]')).toHaveText('Retry');await expect(page.locator('[name=key]')).toBeHidden();
  await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href','https://content.test/read/'+id);
+ const entry=page.locator('.reading-end [data-mail-open]');
+ await entry.click();await expect(page.locator('#quick-guestbook')).toBeVisible();
+ await page.locator('#quick-guestbook [name=name]').fill('Visitor');
+ await page.locator('#quick-guestbook [name=message]').fill('A note');
+ await page.locator('[data-mail-close]').click();await expect(entry).toBeFocused();await expect(entry).toBeInViewport();
+ await entry.click();await expect(page.locator('#quick-guestbook [name=message]')).toHaveValue('A note');
+ await page.evaluate(()=>window.challenge.callback('mock-token'));
+ await page.locator('#quick-guestbook [type=submit]').click();
+ await expect(page.locator('#quick-guestbook [name=message]')).toHaveValue('');
+ expect(payload.message).toContain('https://content.test/read/'+id+'\n\nA note');
+ expect(payload.message).not.toContain('?lang=');
+ await page.locator('[data-mail-close]').click();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
 });
