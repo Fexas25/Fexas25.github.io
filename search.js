@@ -146,9 +146,10 @@
       if (!Array.isArray(data)) throw Error('invalid index');
       data=data.filter(entry=>!entry.backendId);
       let catalogFailed=false;
-      if(window.MX_COMMUNITY?.origin){
+      const catalogOrigin=window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY?.origin;
+      if(catalogOrigin){
         try {
-          const response=await fetch(window.MX_COMMUNITY.origin+'/documents',{cache:'no-store',signal:AbortSignal.timeout(5000)});
+          const response=await fetch(catalogOrigin+'/documents',{cache:'no-store',signal:AbortSignal.timeout(5000)});
           if(!response.ok)throw Error('catalog');
           const {documents}=await response.json();
           for(const doc of documents){
