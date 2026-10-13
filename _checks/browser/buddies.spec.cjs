@@ -88,6 +88,8 @@ test('原有小圆圈保留，小伙伴额外分布在页面中', async ({ page 
 });
 
 test('小伙伴触摸回应、集合与纸飞机轮流接住', async ({ page }) => {
+  // Test touch responses without competing autonomous walking; roaming has its own test.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const buddies = page.locator('[data-buddy]');
   for (let i = 0; i < 3; i++) {
@@ -96,6 +98,7 @@ test('小伙伴触摸回应、集合与纸飞机轮流接住', async ({ page }) 
     await expect(page.locator('.buddy-message')).toContainText(['花里实乃理', '桃井爱莉', '芙宁娜'][i]);
   }
   await expect(page.locator('.buddy-message')).toContainText('全员集合');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   const send = page.locator('.buddy-send');
   await send.tap();
   await expect(send).toHaveAttribute('aria-disabled', 'true');
