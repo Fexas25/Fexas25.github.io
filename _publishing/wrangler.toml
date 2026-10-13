@@ -1,8 +1,22 @@
 name = "mx-writing-auth"
 main = "worker.mjs"
-compatibility_date = "2026-10-11"
+compatibility_date = "2026-10-13"
+account_id = "3f4c9bdb6fb5bb5578dddf9d264fab2b"
+workers_dev = true
+preview_urls = false
+
+[vars]
+GITHUB_CLIENT_ID = "Iv23li1aoLRQQO3ygOa6"
 
 # Configure GITHUB_CLIENT_ID as a variable and GITHUB_CLIENT_SECRET as a secret.
 # No credentials belong in this file or in the GitHub repository.
 [observability]
+enabled = true
+head_sampling_rate = 0.1
+
+[observability.logs]
+# OAuth callback URLs contain one-time codes; do not collect request URLs.
+enabled = false
+
+[observability.traces]
 enabled = false

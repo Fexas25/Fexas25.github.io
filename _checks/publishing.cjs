@@ -1,0 +1,52 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {JSDOM}=require('jsdom');
+const root=path.join(__dirname,'..');
+const pause=()=>new Promise(r=>setTimeout(r,25));
+(async()=>{
+ const worker=(await import('../_publishing/worker.mjs')).default;
+ const env={GITHUB_CLIENT_ID:'public-id',GITHUB_CLIENT_SECRET:'private-secret'};
+ const origin='https://auth.example',channel='12345678-1234-1234-1234-123456789abc';
+ const get=(p,cookie)=>new Request(origin+p,{headers:cookie?{Cookie:cookie}:{}});
+ assert.equal((await worker.fetch(get('/health'),{})).status,200);
+ assert.equal((await worker.fetch(get('/login?channel='+channel),{})).status,503);
+ assert.equal((await worker.fetch(get('/login?channel=bad'),env)).status,400);
+ const login=await worker.fetch(get('/login?channel='+channel),env),location=new URL(login.headers.get('Location')),cookie=login.headers.get('Set-Cookie').split(';')[0];
+ assert.equal(location.origin,'https://github.com');assert.equal(location.searchParams.get('code_challenge_method'),'S256');
+ assert.match(login.headers.get('Set-Cookie'),/Secure; HttpOnly; SameSite=Lax/);
+ const originalFetch=global.fetch;let calls=0,user='Fexas25',push=true;
+ global.fetch=async(url,options)=>{calls++;if(url.includes('access_token')){const data=JSON.parse(options.body);assert.equal(data.client_secret,env.GITHUB_CLIENT_SECRET);assert.equal(data.code_verifier.length,43);return Response.json({access_token:'test-access-token'});}if(url.endsWith('/user'))return Response.json({login:user});return Response.json({permissions:{push}});};
+ const callback='/callback?code=test&state='+location.searchParams.get('state');
+ let response=await worker.fetch(get('/callback?code=test&state=wrong',cookie),env);assert.equal(calls,0);assert.doesNotMatch(await response.text(),/test-access-token/);
+ response=await worker.fetch(get(callback,cookie),env);let html=await response.text();assert.match(html,/test-access-token/);assert.match(html,/https:\/\/fexas25.github.io/);assert.match(response.headers.get('Set-Cookie'),/Max-Age=0/);
+ user='other';assert.doesNotMatch(await (await worker.fetch(get(callback,cookie),env)).text(),/test-access-token/);user='Fexas25';push=false;assert.doesNotMatch(await (await worker.fetch(get(callback,cookie),env)).text(),/test-access-token/);
+ global.fetch=originalFetch;
+
+ const dom=new JSDOM(fs.readFileSync(path.join(root,'editor.html'),'utf8'),{url:'https://fexas25.github.io/editor.html',runScripts:'outside-only'}),w=dom.window;
+ w.AbortSignal=AbortSignal;w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;
+ w.MX_PUBLISH={authOrigin:origin};w.MXContent={folders:{blog:'_posts'}};
+ let record=null,latest=null,writes=0,networkFailure=false,openedURL='',popup;
+ const file={folder:'_posts',filename:'2026-10-13-test.md',text:'---\ntitle: 测试\n---\n\n正文'};
+ w.MXEditor={record:()=>record,exportDocument:()=>file,committed:(f,sha)=>{record={sha};},newDocument:()=>{},load:()=>{}};
+ w.document.getElementById('post-title').value='测试';w.document.getElementById('post-date').value='2026-10-13';
+ w.open=url=>{openedURL=url;popup={closed:false,close(){this.closed=true},focus(){}};return popup;};
+ w.fetch=async(url,opts={})=>{
+  if(url===origin+'/health')return {ok:true,json:async()=>({configured:true})};
+  if(url.includes('/git/trees/'))return {ok:true,json:async()=>({tree:[]})};
+  if(url.endsWith('/Fexas25.github.io'))return {ok:true,json:async()=>({permissions:{push:true}})};
+  if(opts.method==='PUT'){writes++;const body=JSON.parse(opts.body);assert.equal(body.branch,'main');latest={sha:'saved-sha',encoding:'base64',content:body.content};if(networkFailure)throw new w.TypeError('network');return {ok:true,json:async()=>({content:{sha:latest.sha}})};}
+  return latest?{ok:true,json:async()=>latest}:{ok:false,status:404};
+ };
+ w.eval(fs.readFileSync(path.join(root,'editor-github.js'),'utf8'));await pause();
+ const publish=w.document.getElementById('github-publish');publish.click();assert.match(openedURL,/\/login\?channel=/);const ch=new URL(openedURL).searchParams.get('channel');
+ const event=(from,source)=>new w.MessageEvent('message',{origin:from,source,data:{type:'mx-github-auth',channel:ch,token:'memory-only-token'}});
+ w.dispatchEvent(event('https://evil.example',popup));await pause();assert.equal(publish.textContent,'登录后发布');
+ w.dispatchEvent(event(origin,popup));await pause();assert.equal(publish.textContent,'发布到网站');
+ networkFailure=true;publish.click();await pause();assert.equal(writes,1);assert.match(w.document.getElementById('github-result').textContent,/网络中断/);
+ networkFailure=false;publish.click();await pause();assert.equal(writes,1,'ambiguous write retries must not create a second commit');assert.equal(record.sha,'saved-sha');
+ latest={...latest,sha:'remote-change',content:Buffer.from('different').toString('base64')};publish.click();await pause();assert.equal(writes,1);assert.match(w.document.getElementById('github-result').textContent,/远端文章已改变/);
+ assert.equal(w.localStorage.length,0);assert.equal(w.sessionStorage.length,0);
+ w.document.getElementById('github-logout').click();assert.equal(publish.textContent,'登录后发布');w.close();
+ console.log('PASS: OAuth PKCE/state/owner checks, message origin validation, in-memory login, publish retry deduplication and conflict protection.');
+})().catch(error=>{console.error(error);process.exitCode=1;});

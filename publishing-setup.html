@@ -10,6 +10,7 @@ portrait: /assets/optimized/portrait-pink.webp
 bubble: 把工作室连接起来。
 ---
 {% include section-intro.html %}
+<p>当前登录服务：<code>mx-writing-auth</code>；GitHub App：<a href="https://github.com/settings/apps/fexas25-mx-writing">Fexas25 MX Writing</a>。应用只安装在网站仓库。下方配置步骤用于维护或迁移，日常写作不用重复操作。</p>
 <article class="prose">
 <h2>1. 创建登录服务</h2>
 <p>注册并登录 <a href="https://dash.cloudflare.com/">Cloudflare</a>。打开 Workers &amp; Pages，创建一个 Worker，使用简单的 Hello World 模板，名称可以叫 <code>mx-writing-auth</code>。部署后记下它的 HTTPS 地址，例如 <code>https://mx-writing-auth.你的子域.workers.dev</code>。</p>
@@ -19,7 +20,7 @@ bubble: 把工作室连接起来。
 <ul><li>应用名称：取一个尚未被使用的名称，例如 <code>Fexas25 MX Writing</code>。</li><li>Homepage URL：<code>https://fexas25.github.io</code></li><li>Callback URL：你的 Worker 地址加 <code>/callback</code>。</li><li>保留用户令牌过期设置；不需要启用 Device Flow，也不需要设置 Setup URL。</li><li>Webhook：取消勾选 Active。</li><li>Repository permissions → Contents：选择 <strong>Read and write</strong>；Metadata 的只读权限保持默认。其余权限不需要开启。</li><li>安装范围：选择 <strong>Only on this account</strong>。</li></ul>
 <p>创建后，打开应用的 Install App，安装到自己的账号，选择 <strong>Only select repositories</strong>，仅勾选 <code>Fexas25.github.io</code>。这会允许该应用读取和更新这个仓库的内容。</p>
 <h2>3. 填入登录配置</h2>
-<p>在 GitHub App 的 General 页面找到 <strong>Client ID</strong>，再生成 <strong>Client secret</strong>。不用生成 Private key。</p>
+<p>在 GitHub App 的 General 页面找到 <strong>Client ID</strong>；在 Credentials → Client secrets 页面点击 New secret，生成 <strong>Client secret</strong>。本网站使用 OAuth 登录，不需要 Private key。</p>
 <p>回到 Worker 的 Settings → Variables and Secrets，添加以下两个值并重新部署：</p>
 <ul><li><code>GITHUB_CLIENT_ID</code>：Client ID，普通文本变量。</li><li><code>GITHUB_CLIENT_SECRET</code>：Client secret，类型必须选择 <strong>Secret</strong>。</li></ul>
 <p>密钥只填写在 Cloudflare 的 Secret 输入框，不要贴到聊天、网站代码或 GitHub 文件中。Worker 地址加 <code>/health</code> 显示 <code>{"configured":true}</code> 表示两个配置项已填入。</p>

@@ -18,8 +18,10 @@ class TestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         # Local browser checks must never use production comments, CAPTCHA or AI quota.
         # Configured-service scenarios supply their own mocked route in Playwright.
-        if urlsplit(self.path).path == '/community-config.js':
-            content = b'window.MX_COMMUNITY = Object.freeze({origin:"",siteKey:""});'
+        if urlsplit(self.path).path in ('/community-config.js', '/editor-config.js'):
+            content = (b'window.MX_PUBLISH = Object.freeze({authOrigin:""});'
+                       if urlsplit(self.path).path == '/editor-config.js'
+                       else b'window.MX_COMMUNITY = Object.freeze({origin:"",siteKey:""});')
             self.send_response(200)
             self.send_header('Content-Type', 'text/javascript; charset=utf-8')
             self.send_header('Content-Length', str(len(content)))

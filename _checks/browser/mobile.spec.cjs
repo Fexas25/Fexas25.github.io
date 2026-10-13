@@ -24,7 +24,7 @@ test.beforeEach(async ({ page }) => {
       errors.push(`${response.status()} ${response.url()}`);
   });
   page.__mobileErrors = errors;
-  // The paused GitHub publisher is outside this suite; never contact its API.
+  // Publishing has its own isolated suite; never contact the real GitHub API.
   await page.route('https://api.github.com/**', route => route.fulfill({ json: { tree: [] } }));
 });
 test.afterEach(async ({ page }) => {

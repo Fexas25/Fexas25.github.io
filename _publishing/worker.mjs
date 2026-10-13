@@ -16,7 +16,7 @@ export default {
   async fetch(request,env) {
     const url = new URL(request.url);
     if (request.method !== 'GET') return new Response('Method not allowed',{status:405,headers});
-    if (url.pathname === '/health') return Response.json({configured:Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET)},{headers});
+    if (url.pathname === '/health') return Response.json({configured:Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET)},{headers:{...headers,'Access-Control-Allow-Origin':SITE,'Vary':'Origin'}});
     if (!['/login','/callback'].includes(url.pathname)) return new Response('Not found',{status:404,headers});
     if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) return new Response('登录服务尚未配置完成，请站主设置 GitHub App 的 Client ID 和 Client Secret。',{status:503,headers:{...headers,'Content-Type':'text/plain; charset=utf-8'}});
     if (url.pathname === '/login') {
@@ -33,18 +33,18 @@ export default {
     try {
       const value = (request.headers.get('Cookie') || '').split(';').map(value=>value.trim()).find(value=>value.startsWith(COOKIE+'='));
       session = JSON.parse(decodeURIComponent(value.slice(COOKIE.length+1)));
-      if (!session.state || session.state !== url.searchParams.get('state') || session.expires < Date.now() || !/^[a-f0-9-]{36}$/.test(session.channel)) throw Error('Invalid state');
+      if (!session.state || session.state !== url.searchParams.get('state') || !Number.isFinite(session.expires) || session.expires < Date.now() || session.expires > Date.now()+600000 || !/^[a-f0-9-]{36}$/.test(session.channel) || !/^[A-Za-z0-9_-]{43}$/.test(session.verifier)) throw Error('Invalid state');
     } catch { return finish('',{error:'登录校验已失效，请关闭窗口并从写作页重新登录。'}); }
     if (url.searchParams.has('error') || !url.searchParams.get('code')) return finish(session.channel,{error:'GitHub 授权未完成，请重试。'});
     try {
-      const response = await fetch('https://github.com/login/oauth/access_token',{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({client_id:env.GITHUB_CLIENT_ID,client_secret:env.GITHUB_CLIENT_SECRET,code:url.searchParams.get('code'),code_verifier:session.verifier,redirect_uri:url.origin+'/callback'})});
+      const response = await fetch('https://github.com/login/oauth/access_token',{method:'POST',signal:AbortSignal.timeout(15000),headers:{Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({client_id:env.GITHUB_CLIENT_ID,client_secret:env.GITHUB_CLIENT_SECRET,code:url.searchParams.get('code'),code_verifier:session.verifier,redirect_uri:url.origin+'/callback'})});
       const auth = await response.json();
       if (!response.ok || !auth.access_token) return finish(session.channel,{error:'GitHub 登录交换失败，请检查应用配置或重新登录。'});
       const ghHeaders = {Authorization:`Bearer ${auth.access_token}`,Accept:'application/vnd.github+json','User-Agent':'MX-writing-auth','X-GitHub-Api-Version':'2022-11-28'};
-      const userResponse = await fetch('https://api.github.com/user',{headers:ghHeaders});
+      const userResponse = await fetch('https://api.github.com/user',{headers:ghHeaders,signal:AbortSignal.timeout(15000)});
       const user = await userResponse.json();
       if (!userResponse.ok || user.login?.toLowerCase() !== OWNER.toLowerCase()) return finish(session.channel,{error:'此写作页仅允许网站所有者 Fexas25 登录。'});
-      const repoResponse = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`,{headers:ghHeaders});
+      const repoResponse = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`,{headers:ghHeaders,signal:AbortSignal.timeout(15000)});
       const repo = await repoResponse.json();
       if (!repoResponse.ok || !repo.permissions?.push) return finish(session.channel,{error:'请将 GitHub App 安装到网站仓库，并授予 Contents 读写权限。'});
       // The access token is delivered only to the fixed site origin, never stored or logged.

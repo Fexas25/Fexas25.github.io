@@ -4,25 +4,36 @@
   const apiRoot = 'https://api.github.com/repos/Fexas25/Fexas25.github.io';
   const labels = {blog:'碎碎念','competitive-programming':'博客',projects:'项目 / AI', 'game-jam':'游戏',art:'绘画'};
   let token = '', popup = null, channel = '', loginTimer, busy = false, listing = 0;
-  let authOrigin = '';
+  let authOrigin = '', serviceReady = false;
   try {
     const url = new URL(window.MX_PUBLISH.authOrigin);
     if (url.protocol === 'https:') authOrigin = url.origin;
   } catch { /* Configuration is completed once by the site owner. */ }
   $('github-setup').hidden = Boolean(authOrigin);
+  if (authOrigin) $('github-status').textContent = '正在连接发布服务…';
   if (!authOrigin) $('github-status').textContent = '文章可以打开编辑；站主完成一次性配置后，即可登录并直接发布。';
   function controls() {
-    $('github-login').disabled = busy || !authOrigin;
+    $('github-login').disabled = busy || !serviceReady;
     $('github-login').hidden = Boolean(token);
     $('github-logout').hidden = !token;
     $('github-logout').disabled = busy;
-    $('github-publish').disabled = busy || !token;
+    $('github-publish').disabled = busy || !serviceReady;
     $('github-publish').textContent = busy ? '处理中…' : token ? (window.MXEditor.record() ? '保存修改' : '发布到网站') : '登录后发布';
     ['github-load','github-new','github-refresh','github-article'].forEach(id => $(id).disabled = busy);
     $('writing-form').inert = busy;
     document.querySelector('.draft-library').inert = busy;
   }
   function result(message) { $('github-result').hidden = false; $('github-result').textContent = message; }
+  async function checkService() {
+    if (!authOrigin) return;
+    try {
+      const response=await fetch(authOrigin+'/health',{cache:'no-store',signal:AbortSignal.timeout(10000)});
+      const data=await response.json();serviceReady=response.ok&&data.configured===true;
+      $('github-status').textContent=serviceReady?'登录后可直接发布；也可以先打开已有文章修改。':'发布服务还差一次性配置，草稿和导出可照常使用。';
+      $('github-setup').hidden=serviceReady;
+    } catch { $('github-status').textContent='暂时无法连接发布服务，请刷新重试。草稿和导出可照常使用。'; }
+    controls();
+  }
   async function api(path, options = {}) {
     const response = await fetch(apiRoot + path, {...options,cache:'no-store',headers:{Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(token ? {Authorization:`Bearer ${token}`} : {}),...(options.body ? {'Content-Type':'application/json'} : {})}});
     if (!response.ok) {
@@ -72,7 +83,7 @@
   $('clear-editor').addEventListener('click',controls);
   $('restore-draft').addEventListener('click',controls);
   $('github-login').addEventListener('click',() => {
-    if (!authOrigin || busy) return;
+    if (!serviceReady || busy) return;
     if (popup && !popup.closed) { popup.focus(); return; }
     channel = crypto.randomUUID();
     popup = window.open(`${authOrigin}/login?channel=${encodeURIComponent(channel)}`,'mx-github-login','popup,width=600,height=750');
@@ -101,7 +112,9 @@
   });
   $('github-logout').addEventListener('click',() => { token = ''; $('github-status').textContent = '已退出当前页面的登录，草稿仍保留。'; controls(); });
   $('github-publish').addEventListener('click',async () => {
-    if (!token || busy || !$('writing-form').reportValidity()) return;
+    if (busy) return;
+    if (!token) { $('published-content').open=true; $('github-login').click(); return; }
+    if (!$('writing-form').reportValidity()) return;
     let file;
     try { file = window.MXEditor.exportDocument(); } catch(error) { result(error.message); return; }
     const path = `${file.folder}/${file.filename}`, record = window.MXEditor.record();
@@ -123,5 +136,5 @@
       result(error instanceof TypeError ? '网络中断，提交结果暂时无法确认。草稿仍保留；恢复网络后可再点发布，系统会先检查远端以避免重复提交。' : error.message);
     } finally { busy = false; controls(); }
   });
-  controls(); listArticles();
+  controls(); checkService(); listArticles();
 })();
