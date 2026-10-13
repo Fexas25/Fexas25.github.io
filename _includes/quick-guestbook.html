@@ -1,11 +1,11 @@
-<dialog id="quick-guestbook" class="quick-guestbook notranslate" translate="no" aria-labelledby="quick-guestbook-title">
+<dialog id="quick-guestbook" class="quick-guestbook" aria-labelledby="quick-guestbook-title">
   <button class="dialog-close" type="button" data-mail-close aria-label="关闭留言框" autofocus>×</button>
   <div class="mail-heading">{% include meow-cat.html %}<h2 id="quick-guestbook-title">Meow！快来陪我玩！</h2></div>
   <div class="mail-choices" hidden>
     <button type="button" class="mail-option mail-option-cat" data-mail-write>{% include meow-cat.html %}<span>写留言</span><span class="mail-option-arrow" aria-hidden="true">↗</span></button>
     <a class="mail-option mail-option-fish" href="{{ '/guestbook/#guestbook-messages' | relative_url }}">{% include studio-mark.html kind="fish" %}<span>留言板</span><span class="mail-option-arrow" aria-hidden="true">↗</span></a>
   </div>
-  <p id="quick-guestbook-context" class="mail-context" hidden></p>
+  <p id="quick-guestbook-context" translate="no" class="mail-context" hidden></p>
   <form id="quick-guestbook-form" class="guestbook-form">
     <label>昵称<input name="name" required maxlength="32" autocomplete="nickname" /></label>
     <label>想说的话<textarea name="message" required maxlength="1000" rows="3" placeholder="今天也来摸鱼啦？"></textarea></label>

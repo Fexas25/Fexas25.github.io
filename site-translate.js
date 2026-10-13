@@ -12,35 +12,47 @@
   const ready=fetch('/translation-cache.json',{signal:cacheController.signal}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>Object.entries(data).forEach(([k,v])=>{if(typeof v==='string')cache.set(k,v);})).catch(()=>{}).finally(()=>clearTimeout(cacheTimeout));
   function status(text){if(notice.textContent!==text)notice.textContent=text;retry.hidden=!/unavailable/.test(text);}
   const chinese=text=>/[\u3400-\u9fff]/.test(text);
+  const parent=node=>node.nodeType===2?node.ownerElement:node.parentElement;
+  const connected=node=>Boolean(parent(node)?.isConnected);
   function collect(){
-    for(const node of records.keys())if(!node.isConnected)records.delete(node);
+    for(const node of records.keys())if(!connected(node))records.delete(node);
     const nodes=[],walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
     while(walker.nextNode()){
       const node=walker.currentNode;if(!node.parentElement||node.parentElement.closest(skip))continue;
       const text=node.textContent.trim();if(!chinese(text))continue;
       const previous=records.get(node);if(previous&&node.textContent===previous.output)continue;
       nodes.push({node,text});
-    }return nodes;
+    }
+    for(const el of document.querySelectorAll('[aria-label],[title],[placeholder]')){
+      if(el.closest('.notranslate,[translate="no"],[data-private-content],.writing-form,.draft-library,[data-guestbook-list],#preview-content,[data-language]'))continue;
+      for(const name of ['aria-label','title','placeholder']){const node=el.getAttributeNode(name);if(!node||!chinese(node.value))continue;const previous=records.get(node);if(previous&&node.value===previous.output)continue;nodes.push({node,text:node.value.trim()});}
+    }
+    return nodes;
   }
   function apply(node,text,value){
-    if(!active||!node.isConnected||node.textContent.trim()!==text)return;
+    if(!active||!connected(node)||node.textContent.trim()!==text)return;
     const original=node.textContent;
     const output=original.replace(text,value);records.set(node,{original,output});node.textContent=output;
+  }
+  function localText(text){
+    if(cache.has(text))return cache.get(text);
+    const patterns=[[/^(\d+) 次记录$/,n=>`${n} draws`],[/^展开全部（(\d+)）↓$/,n=>`Show all (${n}) ↓`],[/^今日签到完成，([^：]+)：(.+)$/, (level,body)=>`Today's draw: ${cache.get(level)||level}. ${cache.get(body)||body}`],[/^导入完成，新增 (\d+) 条记录。同一天的原签文已保留。$/,n=>`Imported ${n} new records. Existing draws were kept.`],[/^摸摸跟随小鱼 (\d+)，让它跳起来$/,n=>`Tap companion fish ${n} to make it jump`],[/^放大图片：(.+)$/,alt=>`Enlarge image: ${alt}`]];
+    for(const [pattern,format]of patterns){const match=text.match(pattern);if(match)return format(...match.slice(1));}
   }
   async function translate(){
     if(!active||busy)return;busy=true;const version=generation, signal=controller.signal;let missing=false;
     try{
-      for(const item of collect())if(cache.has(item.text))apply(item.node,item.text,cache.get(item.text));
+      for(const item of collect())if(localText(item.text)!==undefined)apply(item.node,item.text,localText(item.text));
       await ready;if(!active||version!==generation)return;
       const pending=[];
       for(const item of collect()){
-        if(cache.has(item.text))apply(item.node,item.text,cache.get(item.text));else pending.push(item);
+        if(localText(item.text)!==undefined)apply(item.node,item.text,localText(item.text));else pending.push(item);
       }
       const origin=window.MX_COMMUNITY?.origin;
       if(pending.length&&(!origin||Date.now()<retryAfter)){missing=true;return;}
       if(pending.length)status('Translating…');
       const unique=new Map();for(const item of pending){if(!unique.has(item.text))unique.set(item.text,[]);unique.get(item.text).push(item);}
-      const queue=Array.from(unique).sort((a,b)=>Number(b[1][0].node.parentElement.getBoundingClientRect().top<innerHeight)-Number(a[1][0].node.parentElement.getBoundingClientRect().top<innerHeight));
+      const queue=Array.from(unique).sort((a,b)=>Number(parent(b[1][0].node).getBoundingClientRect().top<innerHeight)-Number(parent(a[1][0].node).getBoundingClientRect().top<innerHeight));
       async function run(){
         while(queue.length&&active&&version===generation){
           const [source,items]=queue.shift();
@@ -63,7 +75,7 @@
       await Promise.all(Array.from({length:Math.min(3,queue.length)},()=>run()));
     }catch{missing=true;if(version===generation)retryAfter=Date.now()+30000;}finally{
       if(version===generation){busy=false;if(dirty){dirty=false;clearTimeout(debounce);debounce=setTimeout(translate,300);}}
-      if(active&&version===generation)status(missing?'Translation unavailable · 部分保留原文':'Auto · 自动翻译');
+      if(active&&version===generation)status(missing?'Translation unavailable · Some text is unchanged':'Auto-translated');
     }
   }
   function introLanguage(english){
@@ -81,7 +93,7 @@
     document.documentElement.lang=english?'en':'zh-CN';
     document.querySelectorAll('[data-language]:not(.intro-languages *)').forEach(button=>{button.dataset.language=english?'zh':'en';button.textContent=english?'中文':'English';});
     if(english){status('Translating…');translate();}
-    else{for(const [node,{original,output}]of records){if(node.isConnected&&node.textContent===output)node.textContent=original;}records.clear();status('');}
+    else{for(const [node,{original,output}]of records){if(connected(node)&&node.textContent===output)node.textContent=original;}records.clear();status('');}
   }
   let selected='zh';
   const intro=document.getElementById('studio-intro');
@@ -96,7 +108,7 @@
     if(!active||!changes.some(c=>!(c.target.nodeType===1?c.target:c.target.parentElement)?.closest(skip)))return;
     if(busy){dirty=true;return;}
     clearTimeout(debounce);debounce=setTimeout(translate,300);
-  }).observe(document.body,{subtree:true,childList:true,characterData:true});
+  }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["aria-label","title","placeholder"]});
   try{if(sessionStorage.getItem('mx-language')==='en')selected='en';}catch{}
   selection();
   if(selected==='en')setLanguage(true);

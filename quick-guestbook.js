@@ -16,8 +16,8 @@
     if (!dialog.open || form.hidden || widget !== null) return;
     try {
       widget = window.turnstile.render(challenge, {
-        sitekey:config.siteKey, action:'guestbook', size:form.clientWidth < 300 ? 'compact' : 'normal',
-        callback(value) { token = value; submit.disabled = busy; retry.hidden = true; if(status.textContent.startsWith("验证")) status.textContent = ""; },
+        sitekey:config.siteKey, action:'guestbook', language:document.documentElement.lang==='en'?'en':'zh-cn', size:form.clientWidth < 300 ? 'compact' : 'normal',
+        callback(value) { token = value; submit.disabled = busy; retry.hidden = true; if(/^(验证|Verification|Could not load verification)/.test(status.textContent)) status.textContent = ""; },
         'expired-callback':expire,
         'error-callback'() { expire(); status.textContent = '验证暂不可用，请重试。'; retry.hidden = false; }
       });

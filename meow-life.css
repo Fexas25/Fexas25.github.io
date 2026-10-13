@@ -73,3 +73,14 @@ html[lang=en] .intro-brand{font-size:clamp(18px,3.6vw,26px)}
 @media(prefers-reduced-motion:reduce){.meow-invitation *,a,button{transition:none!important}.meow-invitation:hover .meow-cat,.meow-invitation:hover .invitation-note{transform:none}a:hover,button:hover,a:active,button:active{translate:none!important;scale:none!important}}
 
 html[lang=en] .intro-bouncy>span{white-space:pre}
+
+/* Longer English labels wrap inside compact controls and dialogs. */
+html[lang=en] :is(.primary-link,.mail-option,.draw-face strong,.character-label,.fortune-details dd,.header-tools button){white-space:normal;overflow-wrap:anywhere;min-width:0}
+html[lang=en] .mail-option{font-size:16px}
+html[lang=en] .draw-face strong{font-size:18px;line-height:1.35;padding:0 8px}
+html[lang=en] .fortune-paper h2{font-size:28px;line-height:1.3;overflow-wrap:anywhere}
+html[lang=en] .fortune-details{grid-template-columns:repeat(2,minmax(0,1fr))}
+html[lang=en] .quick-guestbook :is(label,p,h2,button,a){overflow-wrap:anywhere;min-width:0}
+html[lang=en] .translation-status{max-width:155px;white-space:normal}
+
+.quick-guestbook .mail-note a{display:block;margin-top:4px}
