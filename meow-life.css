@@ -32,3 +32,16 @@
 @media(prefers-reduced-motion:reduce){.mail-option{transition:none}.mail-option:hover,.mail-option:active{transform:none}}
 
 .quick-guestbook .guestbook-form .primary-link:hover{transform:none}
+
+/* Soft note paper; decoration stays clear of the message text. */
+.guestbook-board .guestbook-list{display:grid;gap:22px;margin-top:26px;max-width:780px}
+.guestbook-board .guestbook-message{--note-paper:#fffaf0;--note-line:#eee3cf;--note-tape:#e9d8ba;position:relative;min-width:0;padding:27px 24px 20px;border:1px solid var(--note-line);border-radius:5px 15px 15px 15px;background:var(--note-paper);box-shadow:0 4px 12px #65566d06}
+.guestbook-board .guestbook-message:nth-child(3n+2){--note-paper:#fff6f7;--note-line:#efdee3;--note-tape:#e7cbd8}
+.guestbook-board .guestbook-message:nth-child(3n){--note-paper:#f3faf9;--note-line:#dceae7;--note-tape:#bfded7}
+.guestbook-board .guestbook-message::before{content:"";position:absolute;left:22px;top:-7px;width:43px;height:14px;border-radius:2px;background:var(--note-tape);opacity:.6;transform:rotate(-6deg);pointer-events:none}
+.guestbook-board .guestbook-message:nth-child(even)::before{left:auto;right:24px;transform:rotate(5deg)}
+.guestbook-message-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;min-width:0}
+.guestbook-message-meta strong{font-size:14px;font-weight:600;color:#766776;overflow-wrap:anywhere;min-width:0}
+.guestbook-board .guestbook-message time{margin:0;font-size:11px;color:#938a92;font-variant-numeric:tabular-nums}
+.guestbook-board .guestbook-message p{margin:12px 0 0;color:#514e59;font-size:15px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:600px){.guestbook-board .guestbook-list{gap:20px;margin-top:24px}.guestbook-board .guestbook-message{padding:23px 18px 18px}.guestbook-message-meta{gap:3px 10px}.guestbook-board .guestbook-message p{margin-top:10px;font-size:14px}}
