@@ -1,8 +1,4 @@
 (() => {
-  // A rapid navigation or reduced-motion change can cancel a native transition.
-  for (const type of ['pageswap', 'pagereveal']) addEventListener(type, event => {
-    event.viewTransition?.ready.catch(() => {});
-  });
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const ornaments = document.querySelector('.studio-ornaments');
   if (!ornaments) return;

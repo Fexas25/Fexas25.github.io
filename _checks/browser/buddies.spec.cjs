@@ -8,19 +8,24 @@ test.beforeEach(async ({ page }) => {
 test.afterEach(async ({ page }) => expect(page.__buddyErrors).toEqual([]));
 
 async function tapBuddy(page, buddy) {
+  await page.evaluate(() => document.fonts.ready);
   await buddy.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
   await expect(page.locator('[data-buddy-scene]')).not.toHaveClass(/is-scrolling/);
   await expect(buddy).toBeVisible();
   // Locator.tap may scroll again in WebKit, hiding companions while scrolling.
   // Check the real hit target, then use a touch without another automatic scroll.
-  let point;
+  let point, lastPoint = '', stableSince = 0;
   await expect.poll(async () => {
     point = await buddy.evaluate(el => {
       const box = el.getBoundingClientRect();
       const x = box.left + box.width / 2, y = box.top + box.height / 2;
-      return { x, y, hittable: el.contains(document.elementFromPoint(x, y)) };
+      return { x, y, hittable: !el.closest('[data-buddy-scene]').classList.contains('is-scrolling') && el.contains(document.elementFromPoint(x, y)) };
     });
-    return point.hittable;
+    // Scrolling and late font/image layout can reposition a companion after it
+    // first becomes hittable. Wait for a settled target before the physical tap.
+    const signature = JSON.stringify(point);
+    if (signature !== lastPoint) { lastPoint = signature; stableSince = Date.now(); }
+    return point.hittable && Date.now() - stableSince >= 200;
   }).toBe(true);
   await page.touchscreen.tap(point.x, point.y);
 }
