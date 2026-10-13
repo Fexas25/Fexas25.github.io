@@ -23,7 +23,7 @@ test('project packages enforce all file paths, keys, sessions, preview and rever
  const catalog=await projectCatalog(env.DB);assert.equal(catalog.length,1);assert(!JSON.stringify(catalog).includes('private description'));assert(!JSON.stringify(catalog).includes(key));
  for(const path of ['', 'index.html','secret.js','image.png','%2e%2e%2fsecret.js'])for(const method of ['GET','HEAD']){r=await read(path,'',{method,headers:{Range:'bytes=0-4'}});assert(!(await r.text()).includes('PRIVATE'));}
  const unlock=k=>read('_unlock','',{method:'POST',headers:{Origin:'https://runtime.example','Content-Type':'application/x-www-form-urlencoded','CF-Connecting-IP':'192.0.2.1'},body:new URLSearchParams({key:k}).toString()});
- assert.equal((await unlock('wrong')).status,403);r=await unlock(key);assert.equal(r.status,303);const cookie=r.headers.get('Set-Cookie').split(';')[0];assert.equal(r.headers.get('Referrer-Policy'),'same-origin');assert(r.headers.get('Set-Cookie').includes('HttpOnly'));
+ assert.equal((await unlock('wrong')).status,403);r=await unlock(key);assert.equal(r.status,303);const cookie=r.headers.get('Set-Cookie').split(';')[0];assert.equal(r.headers.get('Referrer-Policy'),'same-origin');assert(r.headers.get('Set-Cookie').includes('HttpOnly'));assert(r.headers.get('Set-Cookie').includes('Secure'));
  r=await read('secret.js',cookie);assert.equal(await r.text(),'PRIVATE SCRIPT');assert.match(r.headers.get('Cache-Control'),/no-store/);
  r=await read('image.png',cookie,{headers:{Range:'bytes=0-3'}});assert.equal(r.status,206);assert.equal(await r.text(),'PRIV');
  data.key=key2;r=await admin(data);data.revision=(await r.json()).revision;assert.equal((await read('secret.js',cookie)).status,403);

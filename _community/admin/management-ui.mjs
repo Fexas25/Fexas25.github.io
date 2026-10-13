@@ -13,5 +13,5 @@ export function draftsClient(){
  $('search').oninput=render;$('filter').onchange=render;
  $('backup').onclick=()=>{try{const blob=new Blob([drafts.backup()],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='mx-writing-drafts-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);status('已备份本机文章草稿；项目草稿保存在后台。');}catch(e){status(e.message);}};
  $('restore').onclick=()=>$('backup-file').click();$('backup-file').onchange=async()=>{try{const f=$('backup-file').files[0];if(!f)return;if(f.size>30*1024*1024)throw Error('备份文件过大。');drafts.restore(drafts.validateBackup(JSON.parse(await f.text())));render();status('已恢复，原有草稿保留。');}catch(e){status(e.message);}finally{$('backup-file').value='';}};
- render();window.MXAdminApi('projects',{action:'list',state:'draft'}).then(r=>{projects=r.projects;render();}).catch(e=>status(e.message));
+ render();if(drafts.error())status(drafts.error());window.MXAdminApi('projects',{action:'list',state:'draft'}).then(r=>{projects=r.projects;render();}).catch(e=>status(e.message));
 }
