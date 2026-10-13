@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="theme-color" content="#fffaf6" />
+<html lang="zh-CN"><head><meta charset="UTF-8" />
+{% include transition-guard.html %}<meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="theme-color" content="#fffaf6" />
 {% include seo.html %}
 {% assign asset_version = site.time | date: '%s' %}
 <link rel="stylesheet" href="{{ '/home.css' | relative_url }}?v={{ asset_version }}" /><link rel="stylesheet" href="{{ '/content.css' | relative_url }}?v={{ asset_version }}" /><script src="{{ '/content.js' | relative_url }}?v={{ asset_version }}" defer></script>

@@ -114,6 +114,14 @@
   }
   form.addEventListener('submit', event => { event.preventDefault(); if (composing) return; limit = 20; render(); });
   const scheduleSearch = () => { clearTimeout(timer); timer = setTimeout(() => { limit = 20; render(); }, 120); };
+  // Keep the pressed link in the DOM until the browser dispatches its click.
+  let pressingResult = false;
+  results.addEventListener('pointerdown', () => { pressingResult = true; clearTimeout(timer); });
+  for (const type of ['pointerup', 'pointercancel']) window.addEventListener(type, () => {
+    if (!pressingResult) return;
+    pressingResult = false;
+    if (!composing) scheduleSearch();
+  });
   fields.q.addEventListener('compositionstart', () => { composing = true; clearTimeout(timer); });
   fields.q.addEventListener('compositionend', () => { composing = false; scheduleSearch(); });
   fields.q.addEventListener('input', event => { if (!composing && !event.isComposing) scheduleSearch(); });

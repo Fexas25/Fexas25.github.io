@@ -23,7 +23,7 @@
  .section-heading:hover .studio-mark{animation:mark-wiggle .55s ease-out}
 }
 @keyframes mark-wiggle{0%,100%{rotate:0deg}35%{rotate:-10deg}70%{rotate:6deg}}
-@view-transition{navigation:auto}
+
 ::view-transition-old(root){animation:studio-page-out .16s ease-out both}
 ::view-transition-new(root){animation:studio-page-in .2s ease-out both}
 @keyframes studio-page-out{to{opacity:0}}
@@ -31,7 +31,7 @@
 .inner-main{animation:studio-content-in .28s ease-out}
 @keyframes studio-content-in{from{opacity:.65}to{opacity:1}}
 @media(max-width:600px){.studio-ornaments{gap:20px;margin-top:12px}.studio-ornaments .studio-mark{width:26px;height:26px}.studio-click-spark{width:25px;height:25px}}
-@media(prefers-reduced-motion:reduce){@view-transition{navigation:none}.studio-ornaments>span,.shelf-character .portrait,.studio-click-spark,.inner-main{animation:none!important}::view-transition-old(root),::view-transition-new(root){animation:none!important}.studio-click-effects{display:none}}
+@media(prefers-reduced-motion:reduce){.studio-ornaments>span,.shelf-character .portrait,.studio-click-spark,.inner-main{animation:none!important}::view-transition-old(root),::view-transition-new(root){animation:none!important}.studio-click-effects{display:none}}
 @media print{.studio-ornaments,.studio-click-effects{display:none}.inner-main{animation:none}}
 
 .site-footer button[data-language],.inner-footer button[data-language]{border:0;background:none;padding:0;font:inherit;color:inherit;min-height:32px}

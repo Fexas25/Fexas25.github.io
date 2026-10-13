@@ -43,7 +43,7 @@ test('睡猫留言按需验证、保留输入、恢复焦点和小屏提交',asy
  expect(posts).toBe(2);expect(payload.message).toBe('今天也开心！');
  await expect(message).toHaveValue('');
  await dialog.locator('[data-mail-close]').click();
- expect(await page.evaluate(()=>document.body.style.overflow)).toBe('');
+ await expect.poll(()=>page.evaluate(()=>document.body.style.overflow)).toBe('');
 });
 
 test('文章留言保留阅读位置并注明文章',async({page})=>{

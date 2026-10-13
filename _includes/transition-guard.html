@@ -1,0 +1,8 @@
+<script>
+// pagereveal can precede deferred scripts: register before the first paint.
+// A skipped native transition is normal during rapid navigation.
+for (const type of ['pageswap', 'pagereveal']) addEventListener(type, event => {
+  event.viewTransition?.ready.catch(() => {});
+});
+</script>
+<style>@view-transition{navigation:auto}@media(prefers-reduced-motion:reduce){@view-transition{navigation:none}}</style>
