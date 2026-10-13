@@ -62,7 +62,7 @@ test('文章留言保留阅读位置并注明文章',async({page})=>{
 });
 
 
-test('睡猫可选择查看留言，列表底部快捷返回输入区',async({page})=>{
+test('睡猫可选择查看留言，列表底部打开独立留言弹窗',async({page})=>{
  await page.addInitScript(()=>sessionStorage.setItem('mx-studio-intro-seen-v2','1'));
  await page.goto('/');if(await page.locator('#studio-intro').isVisible())await page.locator('#intro-enter').click();
  await page.locator('.meow-mail-entry').click();
@@ -71,7 +71,9 @@ test('睡猫可选择查看留言，列表底部快捷返回输入区',async({pa
  await expect(page).toHaveURL(/guestbook\/#guestbook-messages$/);
  await expect(page.locator('#guestbook-messages')).toBeInViewport();
  await page.locator('[data-guestbook-write]').click();
- await expect(page.locator('#guestbook-form [name=message]')).toBeFocused();
- await expect(page.locator('#guestbook-form')).toBeInViewport();
+ await expect(page.locator('#guestbook-form')).toHaveCount(0);
+ await expect(page.locator('#quick-guestbook')).toBeVisible();
+ await expect(page.locator('#quick-guestbook [name=name]')).toBeFocused();
+ await page.locator('[data-mail-close]').click();await expect(page.locator('[data-guestbook-write]')).toBeFocused();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
 });

@@ -20,3 +20,15 @@
 @media(max-width:700px){.guestbook-form input,.guestbook-form textarea{font-size:16px}}
 
 .mail-choices{display:grid;gap:12px;margin:20px 0 4px;text-align:center}.mail-choices a{display:flex;justify-content:center;align-items:center;min-height:44px}.guestbook-write-link{margin:24px 0 0}#guestbook-form,#guestbook-messages{scroll-margin-top:140px}
+
+.mail-choices{grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 4px}
+.mail-option{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:64px;padding:10px 16px;border:1px solid #eddae3;border-radius:23px 23px 23px 10px;background:linear-gradient(145deg,#fff9f7,#fcebed);color:#987486;font-family:MXMeow,"YouYuan",sans-serif;font-size:17px;line-height:1.5;text-decoration:none;cursor:pointer;box-shadow:0 4px 0 #f3e3e8;transition:transform .2s,box-shadow .2s}
+.mail-choices .mail-option{flex-direction:column;gap:3px;padding:14px 10px;min-width:0}
+.mail-option-fish{background:linear-gradient(145deg,#f8fcfc,#e7f3f5);border-color:#d2e5eb;color:#769ba9;border-radius:23px 23px 10px 23px;box-shadow:0 4px 0 #e0edf0}
+.mail-option .meow-cat{width:65px;height:54px}.mail-option .studio-mark{width:58px;height:54px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mail-option-arrow{position:absolute;right:11px;top:8px;font-family:inherit;font-size:14px;opacity:.6}
+.mail-option:hover{transform:translateY(-3px) rotate(-1deg);box-shadow:0 7px 0 #eddee6}.mail-option-fish:hover{transform:translateY(-3px) rotate(1deg);box-shadow:0 7px 0 #dcebef}.mail-option:active{transform:translateY(2px);box-shadow:none}.mail-option:focus-visible{outline:2px solid currentColor;outline-offset:5px}
+.guestbook-write-link .mail-option{padding:5px 20px 5px 10px}.guestbook-write-link .meow-cat{width:56px;height:46px}
+@media(prefers-reduced-motion:reduce){.mail-option{transition:none}.mail-option:hover,.mail-option:active{transform:none}}
+
+.quick-guestbook .guestbook-form .primary-link:hover{transform:none}

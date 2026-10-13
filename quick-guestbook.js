@@ -56,7 +56,7 @@
     form.elements.message.maxLength = Math.max(1,1000-prefix.length);
     const choosing=link.hasAttribute('data-mail-choice');
     choices.hidden=!choosing;form.hidden=choosing;note.hidden=choosing;
-    dialog.showModal(); document.body.style.overflow = 'hidden';fitKeyboard();if(!choosing)verify();
+    dialog.showModal(); document.body.style.overflow = 'hidden';fitKeyboard();if(!choosing){verify();if(link.hasAttribute('data-guestbook-write'))form.elements.name.focus({preventScroll:true});}
   });
   dialog.querySelector('[data-mail-close]').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {
