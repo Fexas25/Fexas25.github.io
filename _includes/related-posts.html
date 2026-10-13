@@ -1,4 +1,4 @@
 {% assign related_count = 0 %}
 {% assign related_pool = site.posts | concat: site.cp | concat: site.projects | concat: site.gamejam | concat: site.art | sort: 'date' | reverse %}
 {% capture related_links %}{% for entry in related_pool %}{% unless entry.url == page.url %}{% assign shares_tag = false %}{% for tag in page.tags %}{% if entry.tags contains tag %}{% assign shares_tag = true %}{% break %}{% endif %}{% endfor %}{% if shares_tag %}{% assign related_count = related_count | plus: 1 %}<li><a href="{{ entry.url | relative_url }}"><span>{{ entry.title | escape }}</span><time datetime="{{ entry.date | date: '%Y-%m-%d' }}">{{ entry.date | date: '%Y.%m.%d' }}</time></a></li>{% endif %}{% endunless %}{% if related_count == 3 %}{% break %}{% endif %}{% endfor %}{% endcapture %}
-{% if related_count > 0 %}<section class="related-posts" aria-labelledby="related-title"><h2 id="related-title">同标签，再读一篇</h2><ul>{{ related_links }}</ul></section>{% endif %}
+{% if related_count > 0 %}<section hidden class="related-posts" aria-labelledby="related-title"><h2 id="related-title">同标签，再读一篇</h2><ul>{{ related_links }}</ul></section>{% endif %}

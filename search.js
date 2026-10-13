@@ -142,8 +142,9 @@
     try {
       const response = await fetch(root.dataset.indexUrl, {signal:controller.signal});
       if (!response.ok) throw Error('index unavailable');
-      const data = await response.json();
+      let data = await response.json();
       if (!Array.isArray(data)) throw Error('invalid index');
+      data=data.filter(entry=>!entry.backendId);
       let catalogFailed=false;
       if(window.MX_COMMUNITY?.origin){
         try {
@@ -170,7 +171,7 @@
       const shown=Number(new URLSearchParams(location.search).get('shown'));if(Number.isSafeInteger(shown)&&shown>20)limit=Math.min(shown,Math.max(20,entries.length));
       render(false); if(catalogFailed){status.textContent+=' · 最新内容目录暂未加载，可重试';retry.hidden=false;} form.hidden = false; results.hidden = false; fallback.hidden = true;
     } catch {
-      status.textContent = '搜索暂时没加载好，可以重试，或先按下方年份翻阅。'; retry.hidden = false;
+      status.textContent = '搜索暂时没加载好，请稍后重试。'; retry.hidden = false;
     } finally { clearTimeout(timeout); }
   }
   retry.addEventListener('click', load);

@@ -1,6 +1,9 @@
 (async()=>{
  const browser=document.querySelector('[data-browser]'),home=document.querySelector('#moments');
- if(!browser&&!home)return;
+ const related=document.querySelector('.related-posts');
+ if(!browser&&!home&&!related)return;
+ if(related)related.hidden=true;
+ document.querySelectorAll('[data-backend-entry],[data-month-marker],#moments .moment,#blog .blog-row').forEach(e=>e.remove());
  const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text)e.textContent=text;if(cls)e.className=cls;return e;};
  function card(doc,work=false){
   const a=make('article',null,work?'portfolio-card':'entry-card');a.dataset.backendEntry='';a.dataset.entry='';a.dataset.year=doc.date.slice(0,4);a.dataset.tags=JSON.stringify(doc.tags);a.dataset.search=doc.title;a.dataset.category=work?(doc.folder==='_gamejam'?'game':doc.type):doc.topic;
@@ -12,7 +15,9 @@
  }
  try{
   const response=await fetch((window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY.origin)+'/documents',{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error();
-  const {documents}=await response.json();documents.sort((a,b)=>b.date.localeCompare(a.date));
+  const {documents}=await response.json();
+  if(related){const urls=new Set(documents.map(d=>new URL(d.url,location.origin).pathname));related.querySelectorAll('li').forEach(li=>{if(!urls.has(new URL(li.querySelector('a').href).pathname))li.remove();});related.hidden=!related.querySelector('li');}
+  documents.sort((a,b)=>b.date.localeCompare(a.date));
   if(browser){
    const pathname=location.pathname.replace(/index\.html$/,''),folders=pathname==='/blog/'?['_posts']:pathname==='/competitive-programming/'?['_cp']:pathname==='/game-jam/'?['_gamejam']:pathname==='/art/'?['_art']:['_projects','_gamejam','_art'];
    const selected=documents.filter(d=>folders.includes(d.folder)),work=!folders.includes('_posts')&&!folders.includes('_cp');
@@ -33,6 +38,6 @@
    for(const doc of documents.filter(x=>!['_posts','_cp'].includes(x.folder)).slice(0,3)){const node=card(doc,true);node.classList.add('work-card');grid.append(node);}
   }
  }catch{
-  const target=browser||home;const notice=make('p','最新内容暂时未加载，刷新可重试。','empty-note');notice.setAttribute('role','status');target.append(notice);
+  const target=browser||home;if(!target)return;const notice=make('p','最新内容暂时未加载，刷新可重试。','empty-note');notice.setAttribute('role','status');target.append(notice);
  }
 })();

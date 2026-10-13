@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS documents (
  id TEXT PRIMARY KEY, title TEXT NOT NULL, document TEXT NOT NULL,
  metadata TEXT NOT NULL, visibility TEXT NOT NULL CHECK(visibility IN ('public','private')),
  key_hash TEXT NOT NULL DEFAULT '', revision TEXT NOT NULL, updated INTEGER NOT NULL,
- public_url TEXT NOT NULL UNIQUE, source_path TEXT UNIQUE
+ public_url TEXT NOT NULL UNIQUE, source_path TEXT UNIQUE, deleted_at INTEGER NOT NULL DEFAULT 0
 );

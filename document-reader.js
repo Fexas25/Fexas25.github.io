@@ -9,7 +9,7 @@
   try {
    const response=await fetch((window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY.origin)+'/documents/read',{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,...(secret?{key:secret}:{})}),signal:AbortSignal.any([current.signal,AbortSignal.timeout(20000)])});
    const data=await response.json();if(current.signal.aborted)return;
-   if(!response.ok){if(response.status===403){lock();status.textContent=secret?'密钥不正确，请重试。':'这篇内容需要密钥。';if(data.title)document.querySelector('.reading-header h1').textContent=data.title;return;}throw Error(response.status===429?'请稍等一分钟再试。':'暂时无法读取，请重试。');}
+   if(!response.ok){if(response.status===404){lock();status.textContent='内容已移除或暂不可用。';return;}if(response.status===403){lock();status.textContent=secret?'密钥不正确，请重试。':'这篇内容需要密钥。';if(data.title)document.querySelector('.reading-header h1').textContent=data.title;return;}throw Error(response.status===429?'请稍等一分钟再试。':'暂时无法读取，请重试。');}
    const doc=data.document,record=window.MXContent.parse(doc.text,doc.folder+'/'+doc.filename,'');
    document.querySelector('.reading-header h1').textContent=data.title;document.title=data.title+' · MX的摸鱼生活';
    const time=document.querySelector('.reading-header time');if(time){time.dateTime=data.date;time.textContent=data.date.replaceAll('-','.');}

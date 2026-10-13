@@ -5,7 +5,7 @@ const folders=['_posts','_cp','_projects','_gamejam','_art'];
 const hash=async value=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 export function summary(row){return {id:row.id,title:row.title,...JSON.parse(row.metadata),visibility:row.visibility,url:row.public_url,updated:row.updated};}
 export async function catalog(db){
- const {results}=await db.prepare("SELECT id,title,metadata,visibility,public_url,updated,CASE WHEN visibility='public' THEN json_extract(document,'$.text') ELSE '' END AS public_text FROM documents ORDER BY updated DESC").all();
+ const {results}=await db.prepare("SELECT id,title,metadata,visibility,public_url,updated,CASE WHEN visibility='public' THEN json_extract(document,'$.text') ELSE '' END AS public_text FROM documents WHERE deleted_at=0 ORDER BY updated DESC").all();
  return results.map(row=>({...summary(row),content:row.public_text.replace(/^---[\s\S]*?\n---\s*/,'').replace(/!\[[^\]]*\]\([^)]*\)/g,'').replace(/<[^>]*>/g,'').replace(/data:image\/[^\s)]+/g,'').replace(/\s+/g,' ').trim()}));
 }
 export async function publicDocuments(request,env,{reply,body,path,now}){
@@ -14,7 +14,7 @@ export async function publicDocuments(request,env,{reply,body,path,now}){
  const data=await body(request);
  if(!uuid.test(data?.id||''))return reply({error:'unavailable'},404);
  const row=await env.DB.prepare('SELECT * FROM documents WHERE id=?').bind(data.id).first();
- if(!row)return reply({error:'not found'},404);
+ if(!row||row.deleted_at)return reply({error:'not found'},404);
  if(row.visibility==='private'){
   if(!data.key)return reply({locked:true,title:row.title},403);
   const ip=request.headers.get('CF-Connecting-IP');if(!ip||!env.RATE_SECRET)return reply({error:'unavailable'},503);
@@ -28,10 +28,21 @@ export async function publicDocuments(request,env,{reply,body,path,now}){
 }
 // Only called after the management site's signed Access assertion and CSRF checks.
 export async function manageDocuments(data,db,reply){
- if(data?.action==='list')return reply({documents:await catalog(db)});
+ if(data?.action==='list'){
+  const {results}=await db.prepare('SELECT id,title,metadata,visibility,public_url,updated,revision,deleted_at FROM documents WHERE '+(data.trash?'deleted_at>0':'deleted_at=0')+' ORDER BY '+(data.trash?'deleted_at':'updated')+' DESC').all();
+  return reply({documents:results.map(row=>({...summary(row),revision:row.revision,deletedAt:row.deleted_at}))});
+ }
  if(!uuid.test(data?.id||''))return reply({error:'参数无效。'},400);
  const row=await db.prepare('SELECT * FROM documents WHERE id=?').bind(data.id).first();
- if(data.action==='read')return row?reply({...summary(row),document:JSON.parse(row.document),revision:row.revision}):reply({error:'未找到内容。'},404);
+ if(data.action==='read')return row?reply({...summary(row),document:JSON.parse(row.document),revision:row.revision,deletedAt:row.deleted_at}):reply({error:'未找到内容。'},404);
+ if(['trash','restore'].includes(data.action)){
+  if(!row)return reply({error:'未找到内容。'},404);
+  if(row.revision!==data.revision)return reply({error:'内容已变化，请刷新列表后重试。'},409);
+  const deletedAt=data.action==='trash'?Math.floor(Date.now()/1000):0,revision=crypto.randomUUID();
+  const result=await db.prepare('UPDATE documents SET deleted_at=?,revision=? WHERE id=? AND revision=?').bind(deletedAt,revision,data.id,data.revision).run();
+  return result.meta.changes?reply({id:data.id,revision,deletedAt,url:row.public_url}):reply({error:'内容已变化，请刷新列表后重试。'},409);
+ }
+ if(row?.deleted_at)return reply({error:'这篇内容已在回收站，请先恢复并重新打开。当前草稿仍保留。'},409);
  if(data.action!=='save')return reply({error:'操作无效。'},400);
  const doc=data.document,meta=data.metadata;
  if(!doc||typeof doc.title!=='string'||!doc.title.trim()||doc.title.length>200||typeof doc.text!=='string'||new TextEncoder().encode(doc.text).length>1800000||!folders.includes(doc.folder)||typeof doc.filename!=='string'||!/^[-\p{L}\p{N}_.]+\.md$/u.test(doc.filename)||!['public','private'].includes(data.visibility)||!meta||typeof meta.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(meta.date)||!Array.isArray(meta.tags)||meta.tags.length>40||meta.tags.some(t=>typeof t!=='string'||t.length>80))return reply({error:'内容格式无效，正文最多 1.8 MB。'},400);
@@ -43,6 +54,6 @@ export async function manageDocuments(data,db,reply){
  if(row&&row.document===document&&row.metadata===metadata&&row.visibility===data.visibility&&row.key_hash===keyHash)return reply({...summary(row),revision:row.revision});
  if(row&&row.revision!==data.revision)return reply({error:'内容已在其他页面更新，请备份当前草稿，再重新载入最新内容。'},409);
  const revision=crypto.randomUUID(),now=Math.floor(Date.now()/1000),url=row?.public_url||'/document/?id='+data.id;
- const result=row?await db.prepare('UPDATE documents SET title=?,document=?,metadata=?,visibility=?,key_hash=?,revision=?,updated=? WHERE id=? AND revision=?').bind(doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,data.id,data.revision).run():await db.prepare('INSERT OR IGNORE INTO documents(id,title,document,metadata,visibility,key_hash,revision,updated,public_url) VALUES(?,?,?,?,?,?,?,?,?)').bind(data.id,doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,url).run();
+ const result=row?await db.prepare('UPDATE documents SET title=?,document=?,metadata=?,visibility=?,key_hash=?,revision=?,updated=? WHERE id=? AND revision=? AND deleted_at=0').bind(doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,data.id,data.revision).run():await db.prepare('INSERT OR IGNORE INTO documents(id,title,document,metadata,visibility,key_hash,revision,updated,public_url) VALUES(?,?,?,?,?,?,?,?,?)').bind(data.id,doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,url).run();
  return result.meta.changes?reply({id:data.id,revision,url},row?200:201):reply({error:'内容已变化，请重新载入。'},409);
 }

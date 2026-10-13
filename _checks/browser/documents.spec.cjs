@@ -28,3 +28,28 @@ test('后端阅读、密钥错误、解锁与锁定；搜索能找到加密标�
  await page.getByRole('button',{name:'收起来',exact:true}).click();await expect(page.locator('[data-document-body]')).toBeEmpty();await expect(page.locator('[name=key]')).toHaveValue('');
  visibility='public';await page.reload();await expect(page.locator('[data-document-body]')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
 });
+
+
+test('回收站隐藏内容、保留草稿并恢复，手机按钮可用',async({page})=>{
+ const {writing}=await import('../../_community/admin/hub.mjs');let saved={...row,deletedAt:0};const actions=[];
+ await page.route('https://fexas25.github.io/**',r=>r.fulfill({path:path.join(root,new URL(r.request().url()).pathname)}));
+ await page.route('**/admin-write*',r=>r.fulfill({contentType:'text/html',body:writing('test',true)}));
+ await page.route('**/api/documents',r=>{const d=r.request().postDataJSON();if(d.action==='list')return r.fulfill({json:{documents:Boolean(saved.deletedAt)===Boolean(d.trash)?[saved]:[]}});if(d.action==='read')return r.fulfill({json:saved});actions.push(d);saved={...saved,deletedAt:d.action==='trash'?123:0,revision:'v'+(actions.length+1)};return r.fulfill({json:saved});});
+ await page.goto('/admin-write');await page.locator('#github-article').selectOption(id);await page.locator('#github-load').click();await page.locator('#markdown-input').fill('尚未保存的本地修改');
+ page.once('dialog',d=>d.dismiss());await page.locator('#backend-trash').click();expect(actions).toHaveLength(0);
+ page.once('dialog',d=>d.accept());await page.locator('#backend-trash').click();await expect(page.locator('#backend-status')).toContainText('已移入回收站');await expect(page.locator('#github-article option')).toHaveCount(1);
+ await page.locator('#backend-scope').click();await page.locator('#github-article').selectOption(id);await expect(page.locator('#github-load')).toBeHidden();await expect(page.locator('#backend-trash')).toHaveText('恢复到网站');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.locator('#backend-trash').click();await expect(page.locator('#backend-status')).toContainText('已恢复');await expect(page.locator('#markdown-input')).toHaveValue('尚未保存的本地修改');
+ await page.locator('#backend-scope').click();await expect(page.locator('#github-article option')).toHaveCount(2);expect(actions.map(d=>d.action)).toEqual(['trash','restore']);expect(actions[1].revision).toBe('v2');
+});
+
+
+test('已回收内容不会由旧搜索索引重新显示，旧链接不可读',async({page})=>{
+ await page.route('**/search-index.json*',r=>r.fulfill({json:[{...row,backendId:id,content:'旧索引正文',category:'moments'}]}));
+ await page.route('**/community-config.js*',r=>r.fulfill({contentType:'text/javascript',body:'window.MX_COMMUNITY={origin:location.origin}'}));
+ await page.route('**/documents',r=>r.fulfill({json:{documents:[]}}));
+ await page.route('**/documents/read',r=>r.fulfill({status:404,json:{error:'not found'}}));
+ await page.goto('/search/');await expect(page.locator('.site-search-form')).toBeVisible();await expect(page.locator('[data-search-results]')).toBeEmpty();
+ await page.goto('/document/?id='+id);await expect(page.locator('[data-document-unlock] [role=status]')).toContainText('已移除');await expect(page.locator('[data-document-body]')).toBeEmpty();
+});

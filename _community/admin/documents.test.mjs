@@ -22,6 +22,26 @@ test('documents share one Access-protected source; private bodies never enter pu
  assert.equal((await admin({...data,revision:'old'})).status,409);
  r=await admin({...data,revision:saved.revision});assert.equal(r.status,200);assert.equal((await read()).status,200);
  const exact=await r.json();r=await admin({...data,revision:'old'});assert.equal((await r.json()).revision,exact.revision);
+
+ // Recycle private works without losing their key, URL or body.
+ r=await admin({...data,revision:exact.revision,visibility:'private',key});saved=await r.json();
+ const oldRevision=saved.revision;
+ assert.equal((await admin({action:'trash',id,revision:'stale'})).status,409);
+ r=await admin({action:'trash',id,revision:oldRevision});assert.equal(r.status,200);const trashed=await r.json();
+ assert.equal((await read(key)).status,404);
+ assert.equal((await (await worker.fetch(new Request('https://worker.example/documents'),env)).json()).documents.length,0);
+ assert.equal((await (await admin({action:'list'})).json()).documents.length,0);
+ const bin=await (await admin({action:'list',trash:true})).json();assert.equal(bin.documents.length,1);assert(bin.documents[0].deletedAt>0);assert(!JSON.stringify(bin).includes('secret body'));
+ assert.equal((await admin({...data,revision:oldRevision})).status,409);
+ assert.equal((await admin({action:'restore',id,revision:oldRevision})).status,409);
+ r=await admin({action:'restore',id,revision:trashed.revision});assert.equal(r.status,200);const restored=await r.json();assert.equal(restored.url,saved.url);
+ assert.equal((await read()).status,403);assert.equal((await (await read(key)).json()).document.text,'secret body');
+ assert.equal((await (await admin({action:'list',trash:true})).json()).documents.length,0);
+ assert.equal((await admin({...data,revision:oldRevision})).status,409);
+ // Public articles follow the same lifecycle.
+ r=await admin({...data,revision:restored.revision});saved=await r.json();
+ r=await admin({action:'trash',id,revision:saved.revision});saved=await r.json();assert.equal((await read()).status,404);
+ await admin({action:'restore',id,revision:saved.revision});assert.equal((await read()).status,200);
  const bad={...data,id:crypto.randomUUID(),metadata:{date:'bad',tags:[]}};assert.equal((await admin(bad)).status,400);
  db.close();
 });
