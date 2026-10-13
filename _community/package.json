@@ -1,0 +1,16 @@
+{
+  "name": "mx-community",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild worker.mjs --bundle --minify --format=esm --platform=browser --outfile=dist/worker.mjs",
+    "test": "node --test public-pages.test.mjs"
+  },
+  "dependencies": {
+    "markdown-it": "^14.3.2"
+  },
+  "devDependencies": {
+    "@worker-tools/html-rewriter": "^0.1.0-pre.19",
+    "esbuild": "^0.25.0"
+  }
+}

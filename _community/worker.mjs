@@ -1,3 +1,4 @@
+import {publicPage} from './public-pages.mjs';
 import {publicDocuments} from './documents.mjs';
 import {privateRequest} from './private.mjs';
 const encoder=new TextEncoder();
@@ -10,13 +11,15 @@ async function body(request,limit=8192){
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 export default {async fetch(request,env){
+  const requestUrl=new URL(request.url),path=requestUrl.pathname;
+  if(path.startsWith('/read/')||['/sitemap.xml','/robots.txt'].includes(path)){try{return await publicPage(request,env);}catch{return new Response('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>暂时无法读取</title><style>body{margin:0;background:#fffaf6;color:#384358;font:16px system-ui}main{max-width:26rem;margin:20vh auto;padding:1.5rem;text-align:center}button,a{display:inline-block;margin:.5rem;padding:.75rem 1.3rem;border:0;border-radius:2rem;background:#ff9690;color:inherit;font:inherit;text-decoration:none;cursor:pointer}</style><main><p>暂时无法读取，请稍后重试。</p><button onclick="location.reload()">重试</button><a href="https://fexas25.github.io/">回到首页</a></main></html>',{status:503,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex','Retry-After':'30'}});}}
   const origin=env.SITE_ORIGIN||'https://fexas25.github.io';
   const headers={'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Vary':'Origin','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'};
   const reply=(value,status=200)=>new Response(JSON.stringify(value),{status,headers});
-  if(request.headers.get('Origin')&&request.headers.get('Origin')!==origin)return reply({error:'origin'},403);
+  if(request.headers.get('Origin')&&request.headers.get('Origin')!==origin&&!(request.headers.get('Origin')===requestUrl.origin&&['/documents','/documents/read','/translate'].includes(path)))return reply({error:'origin'},403);
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization'}});
   if(!env.DB)return reply({error:'not configured'},503);
-  const path=new URL(request.url).pathname, now=Math.floor(Date.now()/1000);
+  const now=Math.floor(Date.now()/1000);
   try{
     if(path==='/documents'||path==='/documents/read')return await publicDocuments(request,env,{body,reply,path,now});
     if(['/private/manage','/private/read'].includes(path)){
@@ -29,7 +32,7 @@ export default {async fetch(request,env){
       return reply({messages:results.slice(0,30),next:results.length>30?String(results[29].id):''});
     }
     if(request.method!=='POST'||!['/messages','/translate'].includes(path))return reply({error:'not found'},404);
-    if(request.headers.get('Origin')!==origin)return reply({error:'origin required'},403);
+    if(request.headers.get('Origin')!==origin&&!(path==='/translate'&&request.headers.get('Origin')===requestUrl.origin))return reply({error:'origin required'},403);
     if(!env.RATE_SECRET)return reply({error:'not configured'},503);
     const data=await body(request);if(!data||typeof data!=='object'||Array.isArray(data))return reply({error:'invalid'},400);const day=new Date().toISOString().slice(0,10);
     const ip=request.headers.get('CF-Connecting-IP');if(!ip)return reply({error:'client'},400);

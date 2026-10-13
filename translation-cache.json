@@ -266,5 +266,9 @@
   "记录保存在当前浏览器中，和首页抽签互通。": "Saved in this browser and shared with the home page draw.",
   "请启用 JavaScript，即可签到、抽签和查看本地记录。": "Enable JavaScript to draw a fortune and view your history.",
   "跳到主要内容": "Skip to main content",
-  "连续签到": "Day streak"
+  "连续签到": "Day streak",
+  "内容列表暂时未加载。": "The list could not load.",
+  "正在加载…": "Loading…",
+  "重试": "Retry",
+  "打开": "Open"
 }

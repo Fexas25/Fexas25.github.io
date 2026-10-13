@@ -1,5 +1,5 @@
 <section data-backend-id="{{ page.backend_id | escape }}" translate="no" data-private-content>
-<form class="private-reader" data-document-unlock><label>访问密钥<input name="key" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="43" /></label><button type="submit" class="primary-link">打开 / 重试</button><p role="status">正在打开…</p></form>
+<form class="private-reader" data-document-unlock><label hidden>访问密钥<input name="key" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="43" /></label><button type="submit" class="primary-link" hidden>打开</button><p role="status">正在打开…</p><button type="button" data-document-retry class="quiet-link" hidden>重试</button></form>
 <div class="prose" data-document-body hidden></div>
 <noscript>请启用 JavaScript 读取文章，或稍后再试。</noscript>
 </section>

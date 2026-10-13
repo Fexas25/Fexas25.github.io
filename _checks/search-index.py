@@ -34,7 +34,13 @@ for file in root.rglob('*.html'):
     if re.search(r'property="og:type"\s+content="article"', html):
         canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html)
         assert canonical, file
-        articles.add(urlsplit(canonical[1]).path)
+        backend = re.search(r'data-backend-id="([^"]+)"', html)
+        if backend:
+            match = next((e for e in entries if e.get('backendId') == backend[1]), None)
+            assert match and not match['content'], f'Bodyless legacy route missing from search: {file}'
+            articles.add(match['url'])
+        else:
+            articles.add(urlsplit(canonical[1]).path)
 assert articles <= seen, f'Published articles missing from search: {articles - seen}'
 assert entries and articles, 'Expected published content in the search index'
 print(f'PASS: search index has {len(entries)} valid targets and covers all {len(articles)} articles.')

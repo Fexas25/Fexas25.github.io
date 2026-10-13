@@ -1,0 +1,30 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import {HTMLRewriter} from '@worker-tools/html-rewriter/base64';
+import worker from './worker.mjs';
+import {pageModel} from './public-pages.mjs';
+globalThis.HTMLRewriter=HTMLRewriter;
+const shell='<!doctype html><html><head><title>内容</title><meta name="description"><meta name="robots" content="noindex"><meta property="og:title"><meta property="og:description"><meta property="og:url"><meta property="og:type"><meta name="twitter:title"><meta name="twitter:description"><link rel="canonical"><link rel="stylesheet" href="/content.css"></head><body><header class="reading-header"><h1>内容</h1><time></time></header><section data-backend-id="" data-private-content translate="no"><form data-document-unlock></form><div data-document-body hidden></div></section><a data-mail-open href="/guestbook/">留言</a></body></html>';
+test('live HTML and sitemap include only public bodies; privacy, trash and hostile Markdown are safe',async t=>{
+ const db=new DatabaseSync(':memory:');db.exec(readFileSync(new URL('schema.sql',import.meta.url),'utf8'));
+ const DB={prepare(sql){const stmt=db.prepare(sql);const wrap=(a=[])=>({bind:(...v)=>wrap(v),first:async()=>stmt.get(...a)||null,all:async()=>({results:stmt.all(...a)})});return wrap();}};
+ const id=crypto.randomUUID(),origin='https://worker.example',site='https://fexas25.github.io';
+ const text='---\ntitle: hidden front matter\n---\n# Visible heading\n\nPUBLIC_BODY\n\n[unsafe](javascript:alert(1))\n\n<script>alert(2)</script>\n\n![photo](photo.webp)';
+ db.prepare('INSERT INTO documents(id,title,document,metadata,visibility,key_hash,revision,updated,public_url) VALUES(?,?,?,?,?,?,?,?,?)').run(id,'Title <&"',JSON.stringify({text}),JSON.stringify({date:'2026-10-13',folder:'_cp',tags:[]}), 'public','PRIVATE_KEY_HASH','r',1791849600,'/competitive-programming/test/');
+ t.mock.method(globalThis,'fetch',async url=>{assert.equal(url,site+'/document/');return new Response(shell,{headers:{'Content-Type':'text/html'}});});
+ const request=(path,method='GET')=>worker.fetch(new Request(origin+path,{method}),{DB,SITE_ORIGIN:site});
+ let response=await request('/read/'+id),html=await response.text();
+ assert.equal(response.status,200);assert.equal(response.headers.get('Cache-Control'),'no-store');assert.match(response.headers.get('X-Robots-Tag'),/^index/);
+ assert.match(html,/<h1>Visible heading<\/h1>/);assert.match(html,/PUBLIC_BODY/);assert(!html.includes('hidden front matter'));assert(!html.includes('<script>alert(2)'));assert(!html.includes('href="javascript:'));assert.match(html,/src="https:\/\/fexas25.github.io\/competitive-programming\/test\/photo.webp"/);assert.match(html,/Title &lt;&amp;/);assert.match(html,/application\/ld\+json/);assert.match(html,/href="https:\/\/worker.example\/read\//);assert(!html.includes('data-mail-open'));assert(!html.includes('PRIVATE_KEY_HASH'));
+ assert((await (await request('/sitemap.xml')).text()).includes(id));assert.equal(await (await request('/read/'+id,'HEAD')).text(),'');
+ db.prepare("UPDATE documents SET visibility='private',document=? WHERE id=?").run('{"text":"PRIVATE_BODY"}',id);
+ response=await request('/read/'+id);html=await response.text();assert.match(response.headers.get('X-Robots-Tag'),/noindex/);assert(!html.includes('PRIVATE_BODY'));assert(!html.includes('application/ld+json'));assert(!html.includes('PUBLIC_BODY'));assert(!html.includes('PRIVATE_KEY_HASH'));assert(!(await (await request('/sitemap.xml')).text()).includes(id));
+ // A corrupt private body must not be parsed by HTML rendering.
+ assert.equal(pageModel({id,title:'private',metadata:'{}',document:'invalid JSON',visibility:'private'},origin).html,'');
+ db.prepare('UPDATE documents SET deleted_at=1 WHERE id=?').run(id);assert.equal((await request('/read/'+id)).status,404);assert.equal((await request('/read/invalid')).status,404);assert.equal((await request('/read/'+id,'POST')).status,405);
+ db.prepare("UPDATE documents SET deleted_at=0,visibility='public' WHERE id=?").run(id);assert((await (await request('/sitemap.xml')).text()).includes(id));
+ t.mock.method(globalThis,'fetch',async()=>{throw Error('offline')});response=await request('/read/'+id);assert.equal(response.status,503);assert.equal(response.headers.get('Retry-After'),'30');
+ db.close();
+});

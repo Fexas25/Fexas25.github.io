@@ -60,23 +60,33 @@ defaults:
       type: posts
     values:
       layout: post
+      noindex: true
+      sitemap: false
   - scope:
       path: ""
       type: cp
     values:
       layout: post
+      noindex: true
+      sitemap: false
   - scope:
       path: ""
       type: gamejam
     values:
       layout: post
+      noindex: true
+      sitemap: false
   - scope:
       path: ""
       type: projects
     values:
       layout: post
+      noindex: true
+      sitemap: false
   - scope:
       path: ""
       type: art
     values:
       layout: post
+      noindex: true
+      sitemap: false

@@ -8,17 +8,7 @@ layout: default
 <div class="reading-mail"><a href="/guestbook/" data-mail-open aria-haspopup="dialog" aria-controls="quick-guestbook">给 Meow 留言</a></div>
 <details class="article-toc" data-article-toc hidden><summary>本文目录</summary><ol></ol></details>
 {% if page.backend_id or page.backend %}{% include backend-reader.html %}{% else %}<article class="prose" data-reading-content>{{ content }}</article>{% endif %}
-{% assign reading_collection = page.collection | default: 'posts' %}
-{% assign reading_entries = site[reading_collection] | sort: 'date' %}
-{% assign older_entry = nil %}{% assign newer_entry = nil %}{% assign found_entry = false %}
-{% for entry in reading_entries %}
-{% if found_entry %}{% assign newer_entry = entry %}{% break %}{% endif %}
-{% if entry.url == page.url %}{% assign found_entry = true %}{% else %}{% assign older_entry = entry %}{% endif %}
-{% endfor %}
-{% if found_entry %}{% if older_entry or newer_entry %}<nav class="article-neighbors" aria-label="同栏目文章">
-{% if older_entry %}<a href="{{ older_entry.url | relative_url }}"><span>← 上一篇</span><strong>{{ older_entry.title | escape }}</strong></a>{% endif %}
-{% if newer_entry %}<a href="{{ newer_entry.url | relative_url }}"><span>下一篇 →</span><strong>{{ newer_entry.title | escape }}</strong></a>{% endif %}
-</nav>{% endif %}{% endif %}
+<nav class="article-neighbors" data-document-neighbors aria-label="同栏目文章" hidden></nav>
 {% include related-posts.html %}
 <a class="reading-top" href="#article-top" data-reading-top hidden>↑ 回到标题</a>
 <div class="reading-end"><span aria-hidden="true">✧</span><p><a href="/guestbook/" data-mail-open aria-haspopup="dialog" aria-controls="quick-guestbook">Meow，想说两句？</a></p><a class="quiet-link" href="{{ back_url | relative_url }}">继续看看{{ label }} →</a></div></div>

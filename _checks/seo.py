@@ -74,7 +74,11 @@ for file in files:
     assert len(head.titles) == 1 and head.titles[0].strip(), file
     assert len(head.links.get('canonical', [])) == 1, file
     canonical = head.links['canonical'][0]
-    assert canonical.startswith(origin + '/') and unquote(urlsplit(canonical).path) == unquote(route), file
+    backend = 'data-backend-id="' in html and 'data-backend-id=""' not in html
+    if backend:
+        assert canonical.startswith('https://mx-community.liuwanting830.workers.dev/read/'), file
+    else:
+        assert canonical.startswith(origin + '/') and unquote(urlsplit(canonical).path) == unquote(route), file
     assert canonical not in seen, file
     seen.add(canonical)
     assert head.meta['og:url'] == canonical, file
@@ -89,7 +93,7 @@ for file in files:
     assert (root / unquote(urlsplit(image).path).lstrip('/')).is_file(), image
     assert head.meta['og:image:alt'], file
     assert head.links['alternate'] == [origin + '/feed.xml'], file
-    if route in private_routes:
+    if route in private_routes or backend:
         assert head.meta['robots'] == 'noindex, follow', file
         assert canonical not in urls and not head.schemas, file
     else:
@@ -105,7 +109,7 @@ for file in files:
             assert schema['@type'] == 'WebSite', file
         if route == '/about/':
             assert schema['mainEntity']['sameAs'] == ['https://github.com/Fexas25', 'https://atcoder.jp/users/Fexas_01'], file
-assert urls == seen - {origin + route for route in private_routes}, urls - seen
+assert urls == {url for url in seen if url.startswith(origin+'/')} - {origin + route for route in private_routes}, urls - seen
 robots = (root / 'robots.txt').read_text(encoding='utf-8')
 assert 'Sitemap: ' + origin + '/sitemap.xml' in robots and 'Disallow:' not in robots
 ET.parse(root / 'feed.xml')

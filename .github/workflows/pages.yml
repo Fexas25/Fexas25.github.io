@@ -31,6 +31,9 @@ jobs:
         run: npm ci --prefix _checks --ignore-scripts
       - name: Check guestbook moderation security and bundle
         run: |
+          npm ci --prefix _community
+          npm test --prefix _community
+          npm run build --prefix _community
           npm ci --prefix _community/admin
           npm test --prefix _community/admin
           npm run build --prefix _community/admin

@@ -9,7 +9,7 @@
   const notice=document.createElement('p');notice.dataset.translationStatus='';notice.className='translation-status';notice.setAttribute('role','status');(document.querySelector('.header-tools')||document.body).append(notice);
   const retry=document.createElement('button');retry.type='button';retry.className='translation-retry notranslate';retry.textContent='Retry';retry.hidden=true;notice.after(retry);retry.addEventListener('click',()=>{retryAfter=0;translate();});
   const cacheController=new AbortController(),cacheTimeout=setTimeout(()=>cacheController.abort(),5000);
-  const ready=fetch('/translation-cache.json',{signal:cacheController.signal}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>Object.entries(data).forEach(([k,v])=>{if(typeof v==='string')cache.set(k,v);})).catch(()=>{}).finally(()=>clearTimeout(cacheTimeout));
+  const ready=fetch((window.MX_SITE_ORIGIN||'')+'/translation-cache.json',{signal:cacheController.signal}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>Object.entries(data).forEach(([k,v])=>{if(typeof v==='string')cache.set(k,v);})).catch(()=>{}).finally(()=>clearTimeout(cacheTimeout));
   function status(text){if(notice.textContent!==text)notice.textContent=text;retry.hidden=!/unavailable/.test(text);}
   const chinese=text=>/[\u3400-\u9fff]/.test(text);
   const parent=node=>node.nodeType===2?node.ownerElement:node.parentElement;
@@ -110,6 +110,8 @@
     clearTimeout(debounce);debounce=setTimeout(translate,300);
   }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["aria-label","title","placeholder"]});
   try{if(sessionStorage.getItem('mx-language')==='en')selected='en';}catch{}
+  const requested=new URLSearchParams(location.search).get('lang');if(['zh','en'].includes(requested)){selected=requested;try{sessionStorage.setItem('mx-language',selected);}catch{}}
+  document.addEventListener('click',event=>{const link=event.target.closest('a[href]');if(!link)return;const url=new URL(link.href,location.href);if(url.origin!==location.origin&&['https://fexas25.github.io','https://mx-community.liuwanting830.workers.dev'].includes(url.origin)){url.searchParams.set('lang',active?'en':'zh');link.href=url.href;}},true);
   selection();
   if(selected==='en')setLanguage(true);
 })();

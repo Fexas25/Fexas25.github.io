@@ -1,9 +1,10 @@
+const readingUrl=id=>'https://mx-community.liuwanting830.workers.dev/read/'+id;
 import {verifyKey} from './private.mjs';
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 const keyPattern=/^[A-Za-z0-9_-]{43}$/;
 const folders=['_posts','_cp','_projects','_gamejam','_art'];
 const hash=async value=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');
-export function summary(row){return {id:row.id,title:row.title,...JSON.parse(row.metadata),visibility:row.visibility,url:row.public_url,updated:row.updated};}
+export function summary(row){return {id:row.id,title:row.title,...JSON.parse(row.metadata),visibility:row.visibility,url:row.public_url,readingUrl:readingUrl(row.id),updated:row.updated};}
 export async function catalog(db){
  const {results}=await db.prepare("SELECT id,title,metadata,visibility,public_url,updated,CASE WHEN visibility='public' THEN json_extract(document,'$.text') ELSE '' END AS public_text FROM documents WHERE deleted_at=0 ORDER BY updated DESC").all();
  return results.map(row=>({...summary(row),content:row.public_text.replace(/^---[\s\S]*?\n---\s*/,'').replace(/!\[[^\]]*\]\([^)]*\)/g,'').replace(/<[^>]*>/g,'').replace(/data:image\/[^\s)]+/g,'').replace(/\s+/g,' ').trim()}));
@@ -55,5 +56,5 @@ export async function manageDocuments(data,db,reply){
  if(row&&row.revision!==data.revision)return reply({error:'内容已在其他页面更新，请备份当前草稿，再重新载入最新内容。'},409);
  const revision=crypto.randomUUID(),now=Math.floor(Date.now()/1000),url=row?.public_url||'/document/?id='+data.id;
  const result=row?await db.prepare('UPDATE documents SET title=?,document=?,metadata=?,visibility=?,key_hash=?,revision=?,updated=? WHERE id=? AND revision=? AND deleted_at=0').bind(doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,data.id,data.revision).run():await db.prepare('INSERT OR IGNORE INTO documents(id,title,document,metadata,visibility,key_hash,revision,updated,public_url) VALUES(?,?,?,?,?,?,?,?,?)').bind(data.id,doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,url).run();
- return result.meta.changes?reply({id:data.id,revision,url},row?200:201):reply({error:'内容已变化，请重新载入。'},409);
+ return result.meta.changes?reply({id:data.id,revision,url,readingUrl:readingUrl(data.id)},row?200:201):reply({error:'内容已变化，请重新载入。'},409);
 }

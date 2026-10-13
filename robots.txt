@@ -6,3 +6,5 @@ User-agent: *
 Allow: /
 
 Sitemap: {{ '/sitemap.xml' | absolute_url }}
+
+Sitemap: https://mx-community.liuwanting830.workers.dev/sitemap.xml

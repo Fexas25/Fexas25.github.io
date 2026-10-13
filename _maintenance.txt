@@ -15,6 +15,8 @@ MX 网站维护索引
 - _design、picture、image、audio：保留的角色源图与个人原始素材。
 
 检查与部署
+- npm ci --prefix _community（后端 Markdown 渲染依赖，检查前安装）
+- npm test --prefix _community；npm run build --prefix _community
 - npm ci --prefix _checks
 - npm test --prefix _checks
 - 正式 Jekyll 构建到 _site 后运行：
@@ -32,3 +34,5 @@ MX 网站维护索引
 - 本次删除了已无引用的旧 theme.css/theme.js；当前主题由 home.css、content.css 和各功能样式维护。
 
 本轮清理：移除旧 GitHub 发布及仓库图片上传的浏览器场景、已完成的一次性迁移脚本；保留当前后台测试、安全校验、备份测试、数据库迁移和授权文件。
+
+公开分享页：mx-community 的 /read/<id> 从 D1 实时判断可见性，以 /document/ 为外观模板返回 HTML。部署社区服务时上传 _community/dist/worker.mjs 打包产物，并继承原有绑定。/sitemap.xml 只列公开且未回收的内容。旧 GitHub 阅读网址继续可用，但不独立收录，以后端阅读网址为 canonical。

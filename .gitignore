@@ -10,3 +10,6 @@ __pycache__/
 .sass-cache/
 
 _community/admin/editor-body.mjs
+
+_community/node_modules/
+_community/dist/
