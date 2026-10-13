@@ -14,3 +14,6 @@ _community/admin/editor-body.mjs
 _community/node_modules/
 _community/dist/
 /music/
+
+_community/admin/project-client.mjs
+_project-backup/

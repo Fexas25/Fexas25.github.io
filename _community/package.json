@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild worker.mjs --bundle --minify --format=esm --platform=browser --outfile=dist/worker.mjs",
+    "build": "esbuild worker.mjs --bundle --minify --format=esm --platform=browser --outfile=dist/worker.mjs && esbuild projects/worker.mjs --bundle --minify --format=esm --platform=browser --outfile=dist/projects.mjs",
     "test": "node --test public-pages.test.mjs guestbook-origin.test.mjs"
   },
   "dependencies": {

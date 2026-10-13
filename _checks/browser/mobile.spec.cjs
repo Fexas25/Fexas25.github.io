@@ -13,6 +13,7 @@ if (!routes.length) throw Error('正式构建没有 HTML 页面，无法进行�
 
 // Fail on uncaught application errors and broken local assets, independently of remote services.
 test.beforeEach(async ({ page }) => {
+  await page.route('https://mx-projects.liuwanting830.workers.dev/**',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><h1>项目入口</h1><a href="http://127.0.0.1:4173/projects/">返回作品</a>'}));
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('requestfailed', request => {

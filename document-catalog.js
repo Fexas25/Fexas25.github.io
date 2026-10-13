@@ -7,11 +7,11 @@
  document.querySelectorAll('[data-backend-entry],[data-month-marker],#moments .moment,#blog .blog-row').forEach(e=>e.remove());
  const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text)e.textContent=text;if(cls)e.className=cls;return e;};
  function card(doc,work=false){
-  const a=make('article',null,work?'portfolio-card':'entry-card');a.dataset.backendEntry='';a.dataset.entry='';a.dataset.year=doc.date.slice(0,4);a.dataset.tags=JSON.stringify(doc.tags);a.dataset.search=doc.title;a.dataset.category=work?(doc.folder==='_gamejam'?'game':doc.type):doc.topic;
+  const a=make('article',null,work?'portfolio-card':'entry-card');a.dataset.backendEntry='';if(doc.slug)a.dataset.projectSlug=doc.slug;a.dataset.entry='';a.dataset.year=doc.date.slice(0,4);a.dataset.tags=JSON.stringify(doc.tags);a.dataset.search=doc.title;a.dataset.category=work?(doc.folder==='_gamejam'?'game':doc.type):doc.topic;
   const copy=work?make('div',null,'portfolio-copy'):a;
   const meta=make('div',null,'entry-meta');meta.append(make('time',doc.date.replaceAll('-','.')));if(doc.visibility==='private')meta.append(make('span','需要密钥'));
   const link=make('a',null,'entry-link');link.href=new URL(doc.url,site).href;link.append(make('h2',doc.title));if(doc.content)link.append(make('p',doc.content.slice(0,110)));copy.append(meta,link);
-  if(work){const art=make('div',null,'portfolio-art art-'+doc.type);art.setAttribute('aria-hidden','true');art.append(make('span',doc.type==='game'?'＋':doc.type==='ai'?'✧':'✿'));a.append(art,copy);}
+  if(work){const art=make('div',null,'portfolio-art art-'+doc.type);art.setAttribute('aria-hidden','true');art.append(make('span',doc.slug==='dad-birthday'?'♡':doc.type==='game'?'＋':doc.type==='ai'?'✧':'✿'));if(doc.slug==='dad-birthday'){art.classList.add('birthday-cover');art.append(make('i','Happy Birthday'));}a.append(art,copy);}
   const tags=make('div',null,'entry-tags');for(const tag of doc.tags){const link=make('a','# '+tag);link.href=site+'/search/?tag='+encodeURIComponent(tag);tags.append(link);}copy.append(tags);return a;
  }
  let busy=false;const notice=make('div',null,'catalog-retry'),message=make('span'),retry=make('button','重试','quiet-link');notice.setAttribute('role','status');retry.type='button';notice.append(message,retry);retry.addEventListener('click',load);

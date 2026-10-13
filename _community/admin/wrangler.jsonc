@@ -10,6 +10,26 @@
     "ACCESS_ISSUER": "https://silent-darkness-412d.cloudflareaccess.com",
     "ACCESS_AUD": "5ef1d4fa8e1c38cdea6f575e9c53b6760af92cb0deea322938d72e92c6a41634"
   },
-  "d1_databases": [{"binding":"DB","database_name":"mx-community","database_id":"921bdb6c-a4f1-494b-a517-034d76ab7012"}],
-  "observability": {"enabled":true,"head_sampling_rate":0.1,"traces":{"enabled":true,"head_sampling_rate":0.1}}
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mx-community",
+      "database_id": "921bdb6c-a4f1-494b-a517-034d76ab7012"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1,
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.1
+    },
+    "redact_query_string": true
+  },
+  "kv_namespaces": [
+    {
+      "binding": "PROJECT_FILES",
+      "id": "171a8d370fde4124a08f6a7a323cfb7b"
+    }
+  ]
 }

@@ -17,3 +17,5 @@ for(const folder of ['_posts','_cp','_projects','_gamejam','_art','_pages']){
  }
 }
 console.log('PASS: public content contains no private exports.');
+
+for(const folder of ['assets/optimized','audio'])if(fs.existsSync(path.join(root,folder)))for(const file of fs.readdirSync(path.join(root,folder)))if(/^birthday-|^happy-birthday/.test(file))throw Error('Migrated project assets must not return to public hosting: '+folder+'/'+file);

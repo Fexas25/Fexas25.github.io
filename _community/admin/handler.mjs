@@ -1,5 +1,6 @@
 import {manageDocuments} from '../documents.mjs';
-import {dashboard,writing} from './hub.mjs';
+import {dashboard,writing,management,drafts,projectWriting} from './hub.mjs';
+import {manageProjects} from '../projects.mjs';
 import {authenticate} from './auth.mjs';
 import {page} from './ui.mjs';
 
@@ -14,6 +15,13 @@ async function readBody(request,limit=4096) {
   return JSON.parse(text+decoder.decode());
 }
 
+async function readFileBody(request){
+ if(request.headers.get('Content-Type')!=='application/octet-stream')throw Error('input');
+ const reader=request.body?.getReader();if(!reader)throw Error('input');let size=0;const chunks=[];
+ while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>5*1024*1024){await reader.cancel();throw Error('input');}chunks.push(value);}
+ const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}return bytes;
+}
+
 // Dependency injection is used by isolated tests; production always verifies signed Access tokens.
 export function createHandler(verify=authenticate) {
   return async function handle(request, env) {
@@ -25,11 +33,20 @@ export function createHandler(verify=authenticate) {
       const nonce=crypto.randomUUID();
       return new Response(page(nonce),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
     }
-    if(request.method==='GET'&&['/','/write','/documents'].includes(url.pathname)){
+    if(request.method==='GET'&&url.pathname==='/documents')return new Response(null,{status:302,headers:{...common,Location:'/articles'}});
+    if(request.method==='GET'&&['/','/write','/articles','/articles/edit','/drafts','/projects','/projects/new','/projects/edit','/projects/article'].includes(url.pathname)){
       const nonce=crypto.randomUUID();
-      return new Response(url.pathname==='/'?dashboard(nonce):writing(nonce,url.pathname==='/documents'),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}' https://fexas25.github.io; style-src 'nonce-${nonce}' https://fexas25.github.io; connect-src 'self'; img-src https: data: blob:; font-src https://fexas25.github.io; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
+      return new Response(url.pathname==='/'?dashboard(nonce):url.pathname==='/drafts'?drafts(nonce):url.pathname==='/articles'?management(nonce):url.pathname==='/projects'?management(nonce,true):['/projects/new','/projects/edit'].includes(url.pathname)?projectWriting(nonce,url.pathname.endsWith('/edit')):writing(nonce,url.pathname!=='/write',url.pathname==='/projects/article'),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}' https://fexas25.github.io; style-src 'nonce-${nonce}' https://fexas25.github.io; connect-src 'self'; img-src https: data: blob:; font-src https://fexas25.github.io; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
     }
     try {
+      if(url.pathname==='/api/project-file'&&request.method==='POST'){
+        if(request.headers.get('Origin')!==env.ADMIN_ORIGIN||request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
+        return await manageProjects({action:'upload-file',id:url.searchParams.get('id'),upload:url.searchParams.get('upload'),path:url.searchParams.get('path'),bytes:await readFileBody(request)},env,json);
+      }
+      if(url.pathname==='/api/projects'&&request.method==='POST'){
+        if(request.headers.get('Origin')!==env.ADMIN_ORIGIN||request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
+        return await manageProjects(await readBody(request,30000),env,json);
+      }
       if(url.pathname==='/api/documents'&&request.method==='POST'){
         if(request.headers.get('Origin')!==env.ADMIN_ORIGIN||request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
         return await manageDocuments(await readBody(request,2100000),env.DB,json);

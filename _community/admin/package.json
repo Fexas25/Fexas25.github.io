@@ -4,11 +4,12 @@
   "type": "module",
   "scripts": {
     "build": "esbuild worker.mjs --bundle --format=esm --platform=browser --outfile=dist/worker.mjs",
-    "test": "node --test admin.test.mjs documents.test.mjs",
+    "test": "node --test admin.test.mjs documents.test.mjs projects.test.mjs",
     "prebuild": "node prepare.mjs",
     "pretest": "node prepare.mjs"
   },
   "dependencies": {
+    "fflate": "0.8.3",
     "jose": "^6.1.0"
   },
   "devDependencies": {

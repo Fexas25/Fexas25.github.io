@@ -1,3 +1,4 @@
+import {projectCatalog} from './projects.mjs';
 const readingUrl=id=>'https://mx-community.liuwanting830.workers.dev/read/'+id;
 import {verifyKey} from './private.mjs';
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
@@ -10,7 +11,7 @@ export async function catalog(db){
  return results.map(row=>({...summary(row),content:row.public_text.replace(/^---[\s\S]*?\n---\s*/,'').replace(/!\[[^\]]*\]\([^)]*\)/g,'').replace(/<[^>]*>/g,'').replace(/data:image\/[^\s)]+/g,'').replace(/\s+/g,' ').trim()}));
 }
 export async function publicDocuments(request,env,{reply,body,path,now}){
- if(path==='/documents'&&request.method==='GET')return reply({documents:await catalog(env.DB)});
+ if(path==='/documents'&&request.method==='GET')return reply({documents:[...await catalog(env.DB),...await projectCatalog(env.DB)]});
  if(path!=='/documents/read'||request.method!=='POST')return reply({error:'not found'},404);
  const data=await body(request);
  if(!uuid.test(data?.id||''))return reply({error:'unavailable'},404);

@@ -43,6 +43,7 @@ plugins:
 
 # Exclude from processing
 exclude:
+  - _project-backup
   - music/
   - Gemfile
   - Gemfile.lock

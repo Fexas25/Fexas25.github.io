@@ -30,12 +30,12 @@ module.exports = defineConfig({
     { name: 'chromium-390', use: { browserName: 'chromium', viewport: { width: 390, height: 844 } } },
     { name: 'webkit-390', use: { browserName: 'webkit', viewport: { width: 390, height: 844 } } },
   ],
-  webServer: {
+  webServer: [{
     command: `python "${path.join(__dirname, 'serve.py')}" --directory "${site}"`,
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false,
     stdout: 'ignore',
     stderr: 'ignore',
     timeout: 30000,
-  },
+  }, {command:`node "${path.join(__dirname,'../_community/admin/prepare.mjs')}" && node "${path.join(__dirname,'admin-server.mjs')}"`,url:'http://127.0.0.1:4175/health',reuseExistingServer:false,timeout:30000}],
 });
