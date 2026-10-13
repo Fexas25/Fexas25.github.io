@@ -43,6 +43,7 @@ plugins:
 
 # Exclude from processing
 exclude:
+  - music/
   - Gemfile
   - Gemfile.lock
   - vendor/

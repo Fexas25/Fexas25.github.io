@@ -190,13 +190,14 @@
     el.addEventListener('pointerenter', () => { actor.hover = true; });
     el.addEventListener('pointerleave', () => { actor.hover = false; });
     el.addEventListener('focus', () => { actor.focused = !actor.pointerFocus; });
-    el.addEventListener('blur', () => { actor.focused = false; actor.pause = performance.now() + 2500; });
+    el.addEventListener('blur', () => { el.classList.remove('is-pointer-focus'); actor.focused = false; actor.pause = performance.now() + 2500; });
     el.addEventListener('pointerdown', event => {
       if (event.button !== 0 || drag) return;
       actor.target = null;
       actor.el.classList.remove('is-walking');
       drag = { actor, pointer: event.pointerId, startX: event.clientX, startY: event.clientY, x: actor.x, y: actor.y, scroll: scrollY, clientX: event.clientX, clientY: event.clientY, moved: false };
       actor.pointerFocus = true;
+      el.classList.add('is-pointer-focus');
       actor.focused = false;
       el.focus({ preventScroll: true });
       actor.pointerFocus = false;
@@ -225,6 +226,7 @@
     el.addEventListener('pointercancel', () => stopDrag(true));
     el.addEventListener('lostpointercapture', () => stopDrag(true));
     el.addEventListener('keydown', event => {
+      el.classList.remove('is-pointer-focus');
       actor.focused = true;
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();

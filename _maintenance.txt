@@ -7,6 +7,7 @@ MX 网站维护索引
 - /community-setup.html：留言审核入口及社区服务维护信息。
 
 源代码
+- 音乐歌单：_data/music.json；网页播放副本：assets/music/*.mp3；原始 music/ 保留在本地，不纳入 Git 或公开构建。当前按确认先上线 10 首，《在银河中孤独摇摆》暂不加入。
 - _posts、_cp 等集合只保留原网址元数据；正文在 D1 documents 表。不要删除这些网址占位文件。
 - _includes、_layouts：共用页面结构；根目录 CSS/JS：页面与互动。
 - _publishing：旧 GitHub 登录服务代码，仅保留兼容与维护用途。

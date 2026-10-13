@@ -1,0 +1,17 @@
+<div class="meow-music notranslate" translate="no" data-music-player>
+  <button type="button" class="music-toggle" aria-label="音乐" title="音乐" aria-expanded="false" aria-controls="music-panel">
+    <svg class="music-cat" viewBox="0 0 48 48" fill="none" aria-hidden="true" focusable="false"><g class="music-cat-head" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 25 11 10l10 7q4-2 8 0l9-7-1 17c2 17-27 18-25-2Z" fill="#fff5f2"/><path d="M9 26v-3C9 4 40 4 40 24v3"/><rect x="7" y="23" width="6" height="11" rx="3" fill="#e8e0ef"/><rect x="35" y="23" width="6" height="11" rx="3" fill="#e8e0ef"/><path d="m18 26 3 2 3-2m4 0 3 2 3-2m-11 6q3 4 6 0M10 34l6-1m18 0 5 1"/></g><path class="music-note" d="M42 9v7m0-7 4-1v7m-4 0c-4-2-4 3-1 2m5-3c-4-2-4 3-1 2" stroke="#8eacb5" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <div id="music-panel" class="music-panel" role="region" aria-label="音乐播放器" hidden>
+    <p class="music-title notranslate" translate="no" data-music-title></p>
+    <p class="music-artist notranslate" translate="no" data-music-artist></p>
+    <div class="music-controls">
+      <button type="button" data-music-prev aria-label="上一首" title="上一首"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M19 5 9 12l10 7Z"/></svg></button>
+      <button type="button" data-music-play aria-label="播放" title="播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="music-play-shape" d="m8 4 12 8-12 8Z"/><path class="music-pause-shape" d="M8 5v14M16 5v14"/></svg></button>
+      <button type="button" data-music-next aria-label="下一首" title="下一首"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14M5 5l10 7-10 7Z"/></svg></button>
+    </div>
+    <p class="music-status" data-music-status role="status" hidden></p>
+  </div>
+  <audio preload="none" data-music-audio></audio>
+  <script type="application/json" data-music-tracks>{{ site.data.music | jsonify }}</script>
+</div>

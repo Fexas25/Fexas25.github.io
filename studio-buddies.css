@@ -11,7 +11,9 @@
 .studio-buddy.is-happy img,.studio-buddy.is-catching img{animation:buddy-hop .65s ease both}
 .studio-buddy:hover img{filter:drop-shadow(0 3px 4px #c7a7d077)}
 .studio-buddy.is-offscreen img,.buddy-scene.is-inactive img{animation-play-state:paused}
-.studio-buddy:focus-visible{outline-offset:2px}
+.studio-buddy:focus{outline:none}
+.studio-buddy{-webkit-tap-highlight-color:transparent}
+.studio-buddy:focus-visible:not(.is-pointer-focus) img{filter:drop-shadow(0 0 2px #7b709d) drop-shadow(0 0 5px #b8a7d8)}
 .buddy-tools{display:flex;justify-content:center;align-items:center;gap:20px;min-height:44px;padding:6px 16px;font-size:12px;color:var(--muted)}
 .buddy-tools button{min-height:44px;border:0;background:none;padding:10px 4px;font-size:12px;color:var(--coral-dark)}
 .buddy-tools button[aria-disabled=true]{opacity:.6}

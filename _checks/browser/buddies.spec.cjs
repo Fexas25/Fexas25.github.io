@@ -48,6 +48,7 @@ async function tapBuddy(page, buddy) {
     return point.hittable && Date.now() - stableSince >= 200;
   }).toBe(true);
   await page.touchscreen.tap(point.x, point.y);
+  await expect(buddy).toHaveCSS('outline-style','none');
 }
 
 async function unobstructed(page) {
@@ -179,6 +180,8 @@ test('键盘自由移动、编辑时让开、窗口改变后不遮挡', async ({
   await buddy.focus();
   await expect(buddy).toBeFocused();
   await page.keyboard.press('Enter');
+  await expect(buddy).not.toHaveClass(/is-pointer-focus/);
+  await expect(buddy).toHaveCSS('outline-style','none');
   await expect(page.locator('.buddy-message')).toContainText('芙芙：');
   for (const key of ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home']) await buddy.press(key);
   await expect(buddy).toBeFocused();
