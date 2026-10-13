@@ -7,8 +7,12 @@ test('开屏语言选择，正文可翻译并恢复，动态小鱼清理',async(
  const box=await english.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(780);
  await english.click();
  await expect(english).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#intro-title')).toHaveText('Time to Meow');
+ await expect(page.locator('#intro-enter')).toHaveAttribute('aria-label',"Let's meow");
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await expect(page.locator('#studio-intro')).toBeVisible();
  await page.locator('.intro-languages [data-language=zh]').click();
+ await expect(page.locator('#intro-title')).toHaveText('现在是摸鱼时间');
  await expect(page.locator('#studio-intro')).toBeVisible();
  await english.click();
  await page.locator('#intro-enter').click();
@@ -43,4 +47,9 @@ test('留言未配置不可提交，配置后验证、保留失败内容和审�
  await expect(page.locator('#quick-guestbook-status')).toHaveText('收到啦，审核后会出现喵！');
  await expect(page.locator('[name=message]')).toHaveValue('');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+});
+
+
+test('睡猫邀请纸条在手机上可打开留言选择',async({page})=>{
+ await page.goto('/about/');const entry=page.locator('.meow-invitation');await entry.scrollIntoViewIfNeeded();await expect(entry).toContainText('陪我聊聊？');await entry.click();await expect(page.locator('#quick-guestbook')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
 });

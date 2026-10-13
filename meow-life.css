@@ -1,5 +1,5 @@
-/* ZCOOL KuaiLe: SIL OFL 1.1; subset for static headings, body uses existing fonts. */
-@font-face{font-family:MXMeow;src:url(/assets/fonts/mx-meow.woff2) format("woff2");font-display:swap;font-weight:400 900}
+/* Existing approved ZCOOL KuaiLe, OFL: UI subset first; full glyph fallback for new articles. */
+@font-face{font-family:MXMeow;src:url(/assets/fonts/mx-meow.woff2?v=20261013-ui) format("woff2");font-display:swap;font-weight:400 900}
 .brand,.intro-brand,.meow-welcome,.intro-go strong,.shelf-about h1,.about-introduction h2,.interest-card h3{font-family:MXMeow,"YouYuan","幼圆","Comic Sans MS","Microsoft YaHei",sans-serif}
 .site-header{height:auto;min-height:74px}.header-inner{min-height:74px;display:flex;flex-wrap:wrap;gap:10px 24px}.header-inner .brand{gap:3px;white-space:nowrap;font-size:22px}.brand>.fish{margin-right:8px}.header-tools{order:3;display:flex;align-items:center;gap:3px;margin-left:auto}.header-tools button,.header-tools a{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:8px;border:0;border-radius:18px;color:var(--muted);background:transparent;font:inherit;font-size:12px}.header-tools a{font-size:25px}.header-tools button:hover,.header-tools a:hover{background:#f4e9ef}.header-inner nav{margin-left:auto;gap:20px}
 .hero .meow-welcome{font-size:clamp(25px,2.7vw,37px);line-height:1.55;letter-spacing:.5px;max-width:460px}.meow-welcome>span{display:block;animation:none}.meow-welcome>span:nth-child(2){animation-delay:-1.5s}.meow-welcome>span:nth-child(3){animation-delay:-3s}.meow-welcome>span:hover{color:#a67b97}.hero .intro{font-size:16px}.fish-corner p:empty{min-height:0;margin:0}
@@ -51,3 +51,25 @@
 @media(prefers-reduced-motion:reduce){.guestbook-board .guestbook-message{transition:none}.guestbook-board .guestbook-message:hover{transform:none}}
 
 .guestbook-reply{margin-top:16px;padding:13px 0 0 14px;border-top:1px dashed var(--note-line);border-left:2px solid var(--note-tape)}.guestbook-reply>strong{font-size:12px;font-weight:600;color:#987486}.guestbook-board .guestbook-reply p{margin-top:5px;font-size:14px;line-height:1.8}
+
+@font-face{font-family:MXMeowFull;src:url(/assets/fonts/mx-meow-full.woff2) format("woff2");font-display:swap;font-weight:400 900}
+:root{--site-font:MXMeow,MXMeowFull,"Microsoft YaHei",system-ui,sans-serif;font-family:var(--site-font)}
+body,button,input,select,textarea,.brand,.intro-brand,.meow-welcome,.intro-go strong,.shelf-about h1,.about-introduction h2,.interest-card h3,.mail-heading h2,.mail-option,.handwritten,.about-signature,.mini-slip strong,.fortune-paper h2,.fortune-seal,.studio-intro .intro-bouncy{font-family:var(--site-font)}
+pre,code,kbd,samp,.prose code,#markdown-input{font-family:Consolas,"SFMono-Regular",monospace}
+.meow-invitation{display:inline-flex;align-items:center;justify-content:center;gap:4px;max-width:100%;padding:12px 8px;min-height:100px;color:#94778a;text-decoration:none!important;border-radius:24px}
+.meow-invitation .meow-cat{width:106px;height:88px;transition:transform .3s}
+.invitation-note{position:relative;display:grid;gap:7px;text-align:left;padding:17px 32px 17px 17px;background:#fff4ec;border:1px solid #efdfd3;border-radius:3px 16px 16px 16px;transform:rotate(-3deg);box-shadow:3px 4px 0 #e9dce540;transition:transform .25s,box-shadow .25s}
+.invitation-note::before{content:"";position:absolute;top:-5px;left:25px;width:34px;height:11px;background:#dfd0e68c;transform:rotate(5deg)}
+.invitation-note small{font-size:12px}.invitation-note strong{font-size:19px;font-weight:500}.invitation-note>span{position:absolute;right:12px;bottom:13px}
+.meow-invitation:hover .invitation-note,.meow-invitation:focus-visible .invitation-note{transform:rotate(0deg) translateY(-3px);box-shadow:3px 7px 0 #e9dce540}
+.meow-invitation:hover .meow-cat{transform:rotate(-5deg) translateY(-2px)}
+:is(.primary-link,.quiet-link,.mail-option,.filter-reset,.header-tools button,.header-tools a,.work-filters button,.reading-tools button,.social-card){transition:translate .2s,scale .2s,box-shadow .2s,background .2s}
+:is(.primary-link,.quiet-link,.mail-option,.filter-reset,.header-tools button,.header-tools a,.work-filters button,.social-card):active{scale:.96}
+:is(.header-inner nav a,.quiet-link,.collection-links a,.prose a){text-decoration-line:underline;text-decoration-color:transparent;text-decoration-style:wavy;text-underline-offset:6px;transition:text-decoration-color .2s,color .2s}
+:is(.header-inner nav a,.quiet-link,.collection-links a,.prose a):is(:hover,:focus-visible){text-decoration-color:#c8a7bb}
+@media(hover:hover){:is(.primary-link,.quiet-link,.mail-option,.filter-reset,.header-tools button,.header-tools a,.work-filters button):hover{translate:0 -2px;box-shadow:0 4px 0 #dac4d52b}}
+html[lang=en] .intro-bouncy{letter-spacing:0;font-size:clamp(22px,4.5vw,35px)}
+html[lang=en] .intro-brand{font-size:clamp(18px,3.6vw,26px)}
+@media(prefers-reduced-motion:reduce){.meow-invitation *,a,button{transition:none!important}.meow-invitation:hover .meow-cat,.meow-invitation:hover .invitation-note{transform:none}a:hover,button:hover,a:active,button:active{translate:none!important;scale:none!important}}
+
+html[lang=en] .intro-bouncy>span{white-space:pre}

@@ -1,11 +1,11 @@
 (() => {
-  const skip='script,style,code,pre,kbd,textarea,input,select,option,[contenteditable],.notranslate,[translate="no"],[data-translation-status],.intro-bouncy,.intro-languages,[data-language],.writing-form,.draft-library,#preview-content,[data-guestbook-list],[data-private-content],#private-share,#github-result,#github-article,[data-meow-playing]'+(location.pathname==='/editor.html'?',#main':'');
+  const skip='script,style,code,pre,kbd,textarea,input,[contenteditable],.notranslate,[translate="no"],[data-translation-status],.intro-bouncy,.intro-languages,[data-language],.writing-form,.draft-library,#preview-content,[data-guestbook-list],[data-private-content],#private-share,#github-result,#github-article,[data-meow-playing]'+(location.pathname==='/editor.html'?',#main':'');
   const records=new Map(), cache=new Map(), stored=new Map();
   const cacheKey='mx-translations-v2';
   try {const data=JSON.parse(localStorage.getItem(cacheKey)||'null');if(data?.expires>Date.now()&&Array.isArray(data.items))for(const [key,value]of data.items.slice(-200))if(typeof key==='string'&&typeof value==='string'&&key.length<10000&&value.length<20000){cache.set(key,value);stored.set(key,value);}}catch{}
   function remember(key,value){cache.set(key,value);stored.set(key,value);while(stored.size>200)stored.delete(stored.keys().next().value);try {const items=Array.from(stored);while(JSON.stringify(items).length>200000)items.shift();localStorage.setItem(cacheKey,JSON.stringify({expires:Date.now()+30*86400000,items}));}catch{}}
 
-  let active=false, generation=0, debounce=0, busy=false, controller, retryAfter=0;
+  let active=false, generation=0, debounce=0, busy=false, dirty=false, controller, retryAfter=0;
   const notice=document.createElement('p');notice.dataset.translationStatus='';notice.className='translation-status';notice.setAttribute('role','status');(document.querySelector('.header-tools')||document.body).append(notice);
   const retry=document.createElement('button');retry.type='button';retry.className='translation-retry notranslate';retry.textContent='Retry';retry.hidden=true;notice.after(retry);retry.addEventListener('click',()=>{retryAfter=0;translate();});
   const cacheController=new AbortController(),cacheTimeout=setTimeout(()=>cacheController.abort(),5000);
@@ -62,12 +62,20 @@
       }
       await Promise.all(Array.from({length:Math.min(3,queue.length)},()=>run()));
     }catch{missing=true;if(version===generation)retryAfter=Date.now()+30000;}finally{
-      if(version===generation)busy=false;
+      if(version===generation){busy=false;if(dirty){dirty=false;clearTimeout(debounce);debounce=setTimeout(translate,300);}}
       if(active&&version===generation)status(missing?'Translation unavailable · 部分保留原文':'Auto · 自动翻译');
     }
   }
+  function introLanguage(english){
+    for(const [selector,zh,en] of [['.intro-brand','MX的摸鱼生活',"MX’s Meow Life"],['#intro-title','现在是摸鱼时间','Time to Meow']]){
+      const el=document.querySelector(selector);if(!el)continue;const text=english?en:zh;
+      el.setAttribute('aria-label',text);el.replaceChildren(...(english?text.split(' ').map((word,i)=>(i?' ':'')+word):Array.from(text)).map(char=>{const span=document.createElement('span');span.textContent=char;span.setAttribute('aria-hidden','true');return span;}));
+    }
+    for(const [selector,zh,en] of [['#intro-enter','开始摸鱼',"Let's meow"],['.pond-water','轻点水面，种一片四叶草','Tap the water to grow a clover'],['.intro-swimmer','摸摸小鱼，让它跳起来','Tap the fish to make it jump']])document.querySelectorAll(selector).forEach(el=>el.setAttribute('aria-label',english?en:zh));
+  }
   function setLanguage(english){
     window.MXMeow?.reset();
+    introLanguage(english);
     active=english;generation++;controller?.abort();controller=new AbortController();busy=false;
     try{sessionStorage.setItem('mx-language',english?'en':'zh');}catch{}
     document.documentElement.lang=english?'en':'zh-CN';
@@ -81,15 +89,15 @@
   document.addEventListener('click',event=>{
     const button=event.target.closest('[data-language]');if(!button)return;
     selected=button.dataset.language;
-    if(button.closest('.intro-languages')){selection();try{sessionStorage.setItem('mx-language',selected);}catch{};return;}
+    if(button.closest('.intro-languages'))selection();
     setLanguage(selected==='en');
   });
   new MutationObserver(changes=>{
-    if(!active||busy||!changes.some(c=>!(c.target.nodeType===1?c.target:c.target.parentElement)?.closest(skip)))return;
+    if(!active||!changes.some(c=>!(c.target.nodeType===1?c.target:c.target.parentElement)?.closest(skip)))return;
+    if(busy){dirty=true;return;}
     clearTimeout(debounce);debounce=setTimeout(translate,300);
   }).observe(document.body,{subtree:true,childList:true,characterData:true});
   try{if(sessionStorage.getItem('mx-language')==='en')selected='en';}catch{}
   selection();
-  if(intro?.open)intro.addEventListener('close',()=>setLanguage(selected==='en'),{once:true});
-  else if(selected==='en')setLanguage(true);
+  if(selected==='en')setLanguage(true);
 })();

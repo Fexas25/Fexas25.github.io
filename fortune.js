@@ -1,4 +1,4 @@
-// Shared daily draw data and date-based selection, matching the existing check-in page.
+// Shared random daily draw data for the home and check-in pages.
 (() => {
   'use strict';
     const STORAGE_KEY = "daily-checkin";
@@ -116,26 +116,19 @@
     const inauspiciousList = ["熬夜", "冲动购物", "拖延", "暴饮暴食", "争执", "重度社交", "临时变更计划", "久坐", "过度思考", "迟到", "长时间游戏", "情绪化决定"];
     const luckyColors = ["薄荷绿", "樱花粉", "天空蓝", "柠檬黄", "薰衣草紫", "奶油白", "石墨灰", "雾霾蓝", "珊瑚橙", "茶棕色", "青柠绿", "玫瑰金"];
 
-    function hashString(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
-      }
-      return hash;
+    // Rejection sampling avoids modulo bias; date never seeds the draw.
+    function randomIndex(length) {
+      const limit=Math.floor(0x100000000/length)*length, value=new Uint32Array(1);
+      do { crypto.getRandomValues(value); } while(value[0]>=limit);
+      return value[0]%length;
     }
+    function pickFromList(list) { return list.length?list[randomIndex(list.length)]:''; }
 
-    function pickFromList(dateStr, key, list) {
-      if (!list.length) return "";
-      const seed = hashString(`${dateStr}:${key}`);
-      const index = seed % list.length;
-      return list[index];
-    }
-
-    function pickFortune(dateStr) {
+    function pickFortune() {
       const categories = Object.keys(fortuneLevelMap);
-      const category = pickFromList(dateStr, "category", categories);
+      const category = pickFromList(categories);
       const levels = fortuneLevelMap[category].levels;
-      const level = pickFromList(dateStr, "level", levels);
+      const level = pickFromList(levels);
       return {
         category,
         level,
@@ -144,26 +137,25 @@
       };
     }
 
-    function pickFortuneImage(dateStr, category) {
+    function pickFortuneImage(category) {
       const list = fortuneImagesByCategory[category] || [];
-      return pickFromList(dateStr, "image", list);
+      return pickFromList(list);
     }
 
-    function pickAuspicious(dateStr) {
-      return pickFromList(dateStr, "yi", auspiciousList);
+    function pickAuspicious() {
+      return pickFromList(auspiciousList);
     }
 
-    function pickInauspicious(dateStr) {
-      return pickFromList(dateStr, "ji", inauspiciousList);
+    function pickInauspicious() {
+      return pickFromList(inauspiciousList);
     }
 
-    function pickLuckyNumber(dateStr) {
-      const seed = hashString(`${dateStr}:number`);
-      return String((seed % 99) + 1);
+    function pickLuckyNumber() {
+      return String(randomIndex(99) + 1);
     }
 
-    function pickLuckyColor(dateStr) {
-      return pickFromList(dateStr, "color", luckyColors);
+    function pickLuckyColor() {
+      return pickFromList(luckyColors);
     }
 
     function parseDate(dateStr) {
@@ -196,18 +188,21 @@
       };
     } catch { return emptyState(); }
   }
+  function createItem(date) {
+    const fortune = pickFortune();
+    return {
+      date: date, level: fortune.level, text: fortune.text, color: fortune.color,
+      image: pickFortuneImage(fortune.category),
+      auspicious: pickAuspicious(), inauspicious: pickInauspicious(),
+      luckyNumber: pickLuckyNumber(), luckyColor: pickLuckyColor()
+    };
+  }
   function draw() {
     const today = getToday();
     const state = loadState();
     const existing = state.history.find(item => item.date === today);
     if (existing) return { item: existing, persisted: true };
-    const fortune = pickFortune(today);
-    const item = {
-      date: today, level: fortune.level, text: fortune.text, color: fortune.color,
-      image: pickFortuneImage(today, fortune.category),
-      auspicious: pickAuspicious(today), inauspicious: pickInauspicious(today),
-      luckyNumber: pickLuckyNumber(today), luckyColor: pickLuckyColor(today)
-    };
+    const item = createItem(today);
     if (state.lastDate !== today) {
       state.streakDays = diffDays(state.lastDate, today) === 1 ? state.streakDays + 1 : 1;
       state.totalDays += 1;
@@ -218,5 +213,5 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); persisted = true; } catch { /* Show the sign even with storage disabled. */ }
     return { item, persisted };
   }
-  window.MXFortune = Object.freeze({ draw, hasDrawnToday: () => loadState().history.some(item => item.date === getToday()) });
+  window.MXFortune = Object.freeze({ draw, createItem, hasDrawnToday: () => loadState().history.some(item => item.date === getToday()) });
 })();
