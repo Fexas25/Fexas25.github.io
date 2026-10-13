@@ -4,13 +4,16 @@
   if (!dialog) return;
   const form = dialog.querySelector('form'), submit = form.querySelector('[type=submit]');
   const status = document.getElementById('quick-guestbook-status'), retry = dialog.querySelector('.mail-retry');
+  const choices=dialog.querySelector('.mail-choices'),note=dialog.querySelector('.mail-note');
+  function write(){choices.hidden=true;form.hidden=false;note.hidden=false;fitKeyboard();verify();form.elements.name.focus({preventScroll:true});}
+  dialog.querySelector('[data-mail-write]').addEventListener('click',write);
   const challenge = document.getElementById('quick-guestbook-challenge');
   let token = '', widget = null, loading = false, busy = false, opener, overflow, prefix = '', script, timer;
   const config = window.MX_COMMUNITY;
   const expire = () => { token = ''; submit.disabled = true; };
   function render() {
     clearTimeout(timer); loading = false;
-    if (!dialog.open || widget !== null) return;
+    if (!dialog.open || form.hidden || widget !== null) return;
     try {
       widget = window.turnstile.render(challenge, {
         sitekey:config.siteKey, action:'guestbook', size:form.clientWidth < 300 ? 'compact' : 'normal',
@@ -51,7 +54,9 @@
     const context = document.getElementById('quick-guestbook-context');
     context.hidden = !heading; context.textContent = heading ? `关于《${heading.textContent.trim()}》` : '';
     form.elements.message.maxLength = Math.max(1,1000-prefix.length);
-    dialog.showModal(); document.body.style.overflow = 'hidden';fitKeyboard(); verify();
+    const choosing=link.hasAttribute('data-mail-choice');
+    choices.hidden=!choosing;form.hidden=choosing;note.hidden=choosing;
+    dialog.showModal(); document.body.style.overflow = 'hidden';fitKeyboard();if(!choosing)verify();
   });
   dialog.querySelector('[data-mail-close]').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {
@@ -83,7 +88,7 @@
     } finally {
       busy = false; expire(); form.elements.name.readOnly = form.elements.message.readOnly = false;
       if (widget !== null) { window.turnstile?.remove(widget); widget = null; }
-      if (dialog.open) verify();
+      if (dialog.open && !form.hidden) verify();
     }
   });
 })();

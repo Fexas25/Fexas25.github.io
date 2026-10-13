@@ -22,12 +22,12 @@ test('留言加载与验证可重试，提交中不丢失编辑内容',async({pa
 
 test('留言弹窗适应键盘可视区域，关闭恢复焦点和滚动',async({page})=>{
  await page.addInitScript(()=>sessionStorage.setItem('mx-studio-intro-seen-v2','1'));await page.goto('/');if(await page.locator('#studio-intro').isVisible())await page.locator('#intro-enter').click();
- await page.locator('.meow-mail-entry').click();const dialog=page.locator('#quick-guestbook');await dialog.locator('[name=message]').fill('键盘弹出时继续写');
+ await page.locator('.meow-mail-entry').click();const dialog=page.locator('#quick-guestbook');await dialog.locator('[data-mail-write]').click();await dialog.locator('[name=message]').fill('键盘弹出时继续写');
  await page.evaluate(()=>{Object.defineProperty(visualViewport,'height',{configurable:true,value:330});Object.defineProperty(visualViewport,'offsetTop',{configurable:true,value:0});visualViewport.dispatchEvent(new Event('resize'));});
  await expect(dialog).toHaveClass(/mail-keyboard/);const rect=await dialog.boundingBox();expect(rect.y).toBeGreaterThanOrEqual(0);expect(rect.y+rect.height).toBeLessThanOrEqual(330);
  await dialog.locator('[data-mail-close]').click();await expect.poll(()=>page.evaluate(()=>document.body.style.overflow)).toBe('');await expect(page.locator('.meow-mail-entry')).toBeFocused();
  await page.evaluate(()=>{delete visualViewport.height;delete visualViewport.offsetTop;visualViewport.dispatchEvent(new Event('resize'));});
- await page.locator('.meow-mail-entry').click();await expect(dialog).not.toHaveClass(/mail-keyboard/);await expect(dialog.locator('[name=message]')).toHaveValue('键盘弹出时继续写');await page.keyboard.press('Escape');await expect(dialog).toBeHidden();
+ await page.locator('.meow-mail-entry').click();await dialog.locator('[data-mail-write]').click();await expect(dialog).not.toHaveClass(/mail-keyboard/);await expect(dialog.locator('[name=message]')).toHaveValue('键盘弹出时继续写');await page.keyboard.press('Escape');await expect(dialog).toBeHidden();
 });
 
 test('图片提示与可见性一致，切换草稿不残留旧状态',async({page})=>{

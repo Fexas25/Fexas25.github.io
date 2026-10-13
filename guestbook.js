@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const config=window.MX_COMMUNITY,form=document.getElementById('guestbook-form'),status=document.getElementById('guestbook-status'),list=document.querySelector('[data-guestbook-list]'),more=document.getElementById('guestbook-more'),submit=form.querySelector('[type=submit]');
+  document.querySelector('[data-guestbook-write]')?.addEventListener('click',()=>{requestAnimationFrame(()=>form.elements.message.focus({preventScroll:true}));});
   if(!config?.origin||!config.siteKey)return;
   const listStatus=document.getElementById('guestbook-list-status'),retry=document.getElementById('guestbook-verify-retry');
   let token='',cursor='',widget=null,busy=false,loading=false,challengeLoading=false,script,timer;

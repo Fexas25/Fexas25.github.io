@@ -18,3 +18,5 @@
 
 #guestbook-verify-retry,#guestbook-more{min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.8);color:inherit;font:inherit;cursor:pointer}
 @media(max-width:700px){.guestbook-form input,.guestbook-form textarea{font-size:16px}}
+
+.mail-choices{display:grid;gap:12px;margin:20px 0 4px;text-align:center}.mail-choices a{display:flex;justify-content:center;align-items:center;min-height:44px}.guestbook-write-link{margin:24px 0 0}#guestbook-form,#guestbook-messages{scroll-margin-top:140px}
