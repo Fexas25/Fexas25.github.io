@@ -49,8 +49,8 @@ test('睡猫留言按需验证、保留输入、恢复焦点和小屏提交',asy
 
 test('文章留言保留阅读位置并注明文章',async({page})=>{
  await page.goto('/blog/');
- const href=await page.locator('a[href^="/blog/"]').evaluateAll(links=>links.map(a=>a.getAttribute('href')).find(h=>h!='/blog/'));
- expect(href).toBeTruthy();await page.goto(href);
+ await page.locator('[data-backend-entry] .entry-link').first().click();
+ await expect(page.locator('[data-document-body]')).toBeVisible();
  const link=page.locator('.reading-end [data-mail-open]');
  await link.scrollIntoViewIfNeeded();await link.click();
  await expect(page.locator('#quick-guestbook-context')).toContainText(await page.locator('#article-top h1').innerText());

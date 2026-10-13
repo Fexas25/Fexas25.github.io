@@ -6,9 +6,11 @@
  const labels={'访问密钥':'Access key','打开':'Open','重试':'Retry','正在打开…':'Opening…','请从文章列表或分享链接打开内容。':'Open an article from the list or a shared link.','内容已移除或暂不可用。':'This content is unavailable.','密钥不正确，请重试。':'Incorrect key. Try again.','这篇内容需要密钥。':'This content requires an access key.','暂时无法读取，请重试。':'Could not load. Please retry.'};
  const localize=()=>{const en=document.documentElement.lang==='en',walker=document.createTreeWalker(form,NodeFilter.SHOW_TEXT);while(walker.nextNode()){const node=walker.currentNode,value=node.textContent.trim(),zh=Object.keys(labels).find(k=>k===value||labels[k]===value);if(zh){const next=node.textContent.replace(value,en?labels[zh]:zh);if(next!==node.textContent)node.textContent=next;}}};
  new MutationObserver(localize).observe(form,{subtree:true,childList:true,characterData:true});new MutationObserver(localize).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});localize();
+ const share=document.querySelector('[data-document-share]');let shareUrl='';
+ share?.addEventListener('click',async()=>{if(!shareUrl)return;try{const url=new URL(shareUrl);if(document.documentElement.lang==='en')url.searchParams.set('lang','en');await navigator.clipboard.writeText(url.href);share.textContent=document.documentElement.lang==='en'?'Copied':'已复制';}catch{share.textContent=document.documentElement.lang==='en'?'Copy failed. Retry':'复制失败，请重试';}setTimeout(()=>{share.textContent=document.documentElement.lang==='en'?'Copy link':'复制链接';},1800);});
  let controller;
  retry?.addEventListener("click",()=>load(key.value.trim()));
- const lock=()=>{controller?.abort();article.replaceChildren();article.hidden=true;form.hidden=false;key.value='';root.setAttribute('data-private-content','');root.setAttribute('translate','no');const toc=document.querySelector('[data-article-toc]');if(toc){toc.hidden=true;toc.querySelector('ol').replaceChildren();}document.querySelectorAll('[data-private-viewer]').forEach(e=>{e.close();e.remove();});};
+ const lock=()=>{controller?.abort();if(share)share.hidden=true;shareUrl="";article.replaceChildren();article.hidden=true;form.hidden=false;key.value='';root.setAttribute('data-private-content','');root.setAttribute('translate','no');const toc=document.querySelector('[data-article-toc]');if(toc){toc.hidden=true;toc.querySelector('ol').replaceChildren();}document.querySelectorAll('[data-private-viewer]').forEach(e=>{e.close();e.remove();});};
  async function load(secret=''){
   if(!/^[a-f0-9-]{36}$/.test(id)){status.textContent='请从文章列表或分享链接打开内容。';return;}
   controller?.abort();controller=new AbortController();const current=controller;unlock.disabled=true;if(retry){retry.disabled=true;retry.hidden=true;}status.textContent='正在打开…';
@@ -16,6 +18,7 @@
    const response=await fetch((window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY.origin)+'/documents/read',{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,...(secret?{key:secret}:{})}),signal:AbortSignal.any([current.signal,AbortSignal.timeout(20000)])});
    const data=await response.json();if(current.signal.aborted)return;
    if(!response.ok){if(response.status===404){lock();label.hidden=true;unlock.hidden=true;status.textContent='内容已移除或暂不可用。';return;}if(response.status===403){lock();label.hidden=false;unlock.hidden=false;status.textContent=secret?'密钥不正确，请重试。':'这篇内容需要密钥。';if(data.title)document.querySelector('.reading-header h1').textContent=data.title;return;}throw Error(response.status===429?'请稍等一分钟再试。':'暂时无法读取，请重试。');}
+   if(share){shareUrl=data.visibility==='public'?data.readingUrl||'':'';share.hidden=!shareUrl;}
    const doc=data.document,record=window.MXContent.parse(doc.text,doc.folder+'/'+doc.filename,'');
    document.querySelector('.reading-header h1').textContent=data.title;document.title=data.title+' · MX的摸鱼生活';
    const time=document.querySelector('.reading-header time');if(time){time.dateTime=data.date;time.textContent=data.date.replaceAll('-','.');}

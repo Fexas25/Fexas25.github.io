@@ -270,5 +270,7 @@
   "内容列表暂时未加载。": "The list could not load.",
   "正在加载…": "Loading…",
   "重试": "Retry",
-  "打开": "Open"
+  "打开": "Open",
+  "复制链接": "Copy link",
+  "复制失败，请重试": "Copy failed. Retry"
 }

@@ -9,7 +9,7 @@ bubble: 今天又学会了什么？
 ---
 {% include section-intro.html %}
 <section class="archive" data-browser aria-label="博客归档">
-<div class="archive-heading"><div><h2>学习与创作笔记 <span class="small-count">{{ site.cp.size }} 篇</span></h2></div><a class="quiet-link" href="https://mx-guestbook-admin.liuwanting830.workers.dev/write?category=competitive-programming">写一篇 →</a></div>
+<div class="archive-heading"><div><h2>学习与创作笔记 <span class="small-count">{{ site.cp.size }} 篇</span></h2></div><a class="quiet-link" href="https://mx-guestbook-admin.liuwanting830.workers.dev/write?new=1&amp;category=competitive-programming">写一篇 →</a></div>
 <details class="simple-disclosure archive-disclosure"><summary>筛选<span data-filter-summary></span></summary><div class="archive-tools"><div class="category-tabs" role="group" aria-label="博客分类"><button type="button" data-category-filter="all" aria-pressed="true">全部</button>{% for topic in site.data.blog_topics %}<button type="button" data-category-filter="{{ topic[0] }}" aria-pressed="false">{{ topic[1] }}</button>{% endfor %}</div><label class="archive-search"><span>找文章</span><input type="search" placeholder="输入标题…" data-search-input /></label></div>
 {% include archive-filters.html %}</details>
 {% assign entries = site.cp | sort: 'date' | reverse %}{% for post in entries %}{% include writing-card.html filters=true %}{% endfor %}

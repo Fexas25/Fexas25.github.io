@@ -155,17 +155,16 @@
           for(const doc of documents){
             if(!/^[a-f0-9-]{36}$/.test(doc.id)||typeof doc.title!=='string')continue;
             const existing=data.find(entry=>entry.backendId===doc.id);
-            const entry={title:doc.title,url:doc.readingUrl||doc.url,privateId:doc.visibility==='private'?doc.id:'',backendId:doc.id,content:doc.visibility==='private'?'':doc.content||'',tags:doc.tags||[],date:doc.date||'',category:doc.folder==='_posts'?'moments':doc.folder==='_cp'?'writing':'works'};
+            const entry={title:doc.title,url:doc.url,privateId:doc.visibility==='private'?doc.id:'',backendId:doc.id,content:doc.visibility==='private'?'':doc.content||'',tags:doc.tags||[],date:doc.date||'',category:doc.folder==='_posts'?'moments':doc.folder==='_cp'?'writing':'works'};
             if(existing)Object.assign(existing,entry);else data.push(entry);
           }
         }catch {catalogFailed=true;}
       }
       entries = data.map(entry => {
         const url = new URL(entry.url, location.origin);
-        const backendLink=entry.backendId&&url.origin==='https://mx-community.liuwanting830.workers.dev'&&url.pathname==='/read/'+entry.backendId;
-        if ((!backendLink&&url.origin !== location.origin) || !['http:','https:'].includes(url.protocol) || typeof entry.title !== 'string' || typeof entry.content !== 'string') throw Error('invalid entry');
+        if (url.origin !== location.origin || !['http:','https:'].includes(url.protocol) || typeof entry.title !== 'string' || typeof entry.content !== 'string') throw Error('invalid entry');
         const tags = Array.isArray(entry.tags) ? entry.tags.filter(tag => typeof tag === 'string') : [];
-        return {...entry, date:entry.date || '', tags, url:backendLink?url.href:url.pathname + url.search + url.hash, searchText:normalize([entry.title,entry.content,...tags].join(' '))};
+        return {...entry, date:entry.date || '', tags, url:url.pathname + url.search + url.hash, searchText:normalize([entry.title,entry.content,...tags].join(' '))};
       }).sort((a,b) => b.date.localeCompare(a.date));
       for (const [key, values] of [['year', entries.map(entry => entry.date.slice(0,4)).filter(Boolean).sort().reverse()], ['tag', entries.flatMap(entry => entry.tags).sort()]]) {
         for (const value of new Set(values)) if(![...fields[key].options].some(o=>o.value===value))fields[key].add(new Option(value, value));

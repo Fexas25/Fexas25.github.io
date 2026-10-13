@@ -8,6 +8,6 @@ portrait: /assets/optimized/portrait-blue.webp
 bubble: 灵感慢慢积攒中。
 ---
 {% include section-intro.html %}
-<section class="archive" data-browser><div class="archive-heading"><h2>绘画创作 <span class="small-count">{{ site.art.size }} 篇</span></h2><a class="quiet-link" href="https://mx-guestbook-admin.liuwanting830.workers.dev/write?category=art">记录新作品 →</a></div>
+<section class="archive" data-browser><div class="archive-heading"><h2>绘画创作 <span class="small-count">{{ site.art.size }} 篇</span></h2><a class="quiet-link" href="https://mx-guestbook-admin.liuwanting830.workers.dev/write?new=1&amp;category=art">记录新作品 →</a></div>
 <details class="simple-disclosure archive-disclosure"><summary>筛选<span data-filter-summary></span></summary>{% include archive-filters.html %}</details><div class="portfolio-grid">{% assign entries = site.art | sort: 'date' | reverse %}{% for post in entries %}{% include work-card.html category='creative' label='绘画创作' %}{% endfor %}</div>
 {% if site.art.size == 0 %}<div class="empty-note"><span class="empty-doodle" aria-hidden="true">✧</span><h2>暂无作品</h2><p></p></div>{% endif %}<a class="quiet-link" href="{{ '/projects/' | relative_url }}">← 返回所有作品</a><p class="empty-note" data-no-results hidden>没有符合筛选的作品。</p><p class="result-status" data-result-status role="status" aria-live="polite"></p></section>
