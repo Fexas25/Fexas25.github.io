@@ -1,6 +1,12 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
+  if(location.origin==='https://fexas25.github.io'){
+    const enter=()=>{location.href='https://mx-guestbook-admin.liuwanting830.workers.dev/write';};
+    $('github-publish').disabled=false;$('github-publish').textContent='进入管理中心';$('github-publish').addEventListener('click',enter);
+    $('published-content').hidden=true;document.querySelector('.publish-help').hidden=true;$('prepare-publish').hidden=true;
+    return;
+  }
   const apiRoot = 'https://api.github.com/repos/Fexas25/Fexas25.github.io';
   const labels = {blog:'碎碎念','competitive-programming':'博客',projects:'项目 / AI', 'game-jam':'游戏',art:'绘画'};
   let token = '', popup = null, channel = '', loginTimer, busy = false, listing = 0;

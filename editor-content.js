@@ -15,6 +15,7 @@
     if (!record.path.startsWith(file.folder + '/')) throw Error('修改已有文章时不能更换栏目；请另建一篇内容。');
     const next = parse(file.text, record.path, record.sha);
     const metadata = {...record.metadata,...next.metadata};
+    if(record.documentId&&!next.metadata.private)delete metadata.private;
     // Retain timestamps/timezones on existing articles when the day is unchanged.
     if (String(record.metadata.date || '').slice(0,10) === next.metadata.date) metadata.date = record.metadata.date;
     if (['projects','game-jam','art'].includes(record.category)) {

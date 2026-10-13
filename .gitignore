@@ -8,3 +8,5 @@ _checks/*-run.log
 __pycache__/
 .jekyll-cache/
 .sass-cache/
+
+_community/admin/editor-body.mjs

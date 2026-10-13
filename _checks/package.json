@@ -2,7 +2,7 @@
   "name": "mx-website-checks",
   "private": true,
   "scripts": {
-    "test": "node private-source.cjs && node private-access.cjs && node multi-drafts.cjs && node draft-backup.cjs && node studio-motion.cjs && node search.cjs && node reading.cjs && node community.cjs && node publishing.cjs",
+    "test": "node ../_community/admin/prepare.mjs && node private-source.cjs && node private-access.cjs && node multi-drafts.cjs && node draft-backup.cjs && node studio-motion.cjs && node search.cjs && node reading.cjs && node community.cjs && node publishing.cjs",
     "test:browser": "playwright test"
   },
   "devDependencies": {

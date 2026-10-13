@@ -23,7 +23,7 @@ const pause=()=>new Promise(r=>setTimeout(r,25));
  user='other';assert.doesNotMatch(await (await worker.fetch(get(callback,cookie),env)).text(),/test-access-token/);user='Fexas25';push=false;assert.doesNotMatch(await (await worker.fetch(get(callback,cookie),env)).text(),/test-access-token/);
  global.fetch=originalFetch;
 
- const dom=new JSDOM(fs.readFileSync(path.join(root,'editor.html'),'utf8'),{url:'https://fexas25.github.io/editor.html',runScripts:'outside-only'}),w=dom.window;
+ const dom=new JSDOM(fs.readFileSync(path.join(root,'editor.html'),'utf8'),{url:'https://legacy-editor.test/editor.html',runScripts:'outside-only'}),w=dom.window;
  w.AbortSignal=AbortSignal;w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;
  w.MX_PUBLISH={authOrigin:origin};w.MXContent={folders:{blog:'_posts'},parse:()=>({metadata:{}})};
  let record=null,latest=null,writes=0,networkFailure=false,openedURL='',popup;

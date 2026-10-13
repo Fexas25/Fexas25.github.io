@@ -11,6 +11,7 @@ share_image_alt, share_image_width/height, last_modified_at, noindex, sitemap: f
   {%- if page.collection -%}{%- assign seo_description = page.content -%}{%- endif -%}
 {%- endif -%}
 {%- assign seo_description = seo_description | default: site.description | markdownify | strip_html | normalize_whitespace | truncate: 160 | strip -%}
+{%- if page.backend_id -%}{%- assign seo_description = page.title | append: ' · MX的记录' | truncate: 160 -%}{%- endif -%}
 {%- assign seo_url = page.url | replace: '/index.html', '/' | absolute_url -%}
 {%- assign seo_image = page.share_image | default: site.share_image | absolute_url -%}
 {%- assign seo_image_alt = page.share_image_alt | default: site.share_image_alt -%}

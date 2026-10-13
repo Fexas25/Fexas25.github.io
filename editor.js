@@ -20,7 +20,7 @@
     $('work-fields').hidden = !isWork();
     $('blog-topic-field').hidden = $('post-category').value !== 'competitive-programming';
     $('post-category').disabled = Boolean(currentRecord);
-    $('post-visibility').disabled = Boolean(currentRecord);
+    $('post-visibility').disabled = Boolean(currentRecord?.privateId&&!currentRecord?.documentId);
     const privateMode=$('post-visibility').value==='private';
     $('private-note').hidden = !privateMode;
     const help=privateMode?'私密图片 · 嵌入正文，单张最多 512 KB':'公开图片 · 单张最多 5 MB';
@@ -331,7 +331,7 @@
       const meta = record.metadata;
       currentRecord = record;
       $('post-category').value = record.category;
-      $('post-visibility').value = record.privateId ? 'private' : 'public';
+      $('post-visibility').value = record.visibility || (record.privateId ? 'private' : 'public');
       $('post-title').value = String(meta.title || '');
       $('post-tags').value = window.MXContent.tags(meta.tags).join(', ');
       $('post-topic').value = window.MXContent.topic(meta);
@@ -347,9 +347,10 @@
       try { drafts.save(item); showDraft(item); draftStatus('已新建草稿，上一篇已保留。'); }
       catch (error) { draftStatus(error.message); }
     },
-    committed(file, sha, privateId) {
+    committed(file, sha, privateId, documentId, visibility) {
       currentRecord = window.MXContent.parse(file.text, `${file.folder}/${file.filename}`, sha);
       if (privateId) currentRecord.privateId = privateId;
+        if(documentId){currentRecord.documentId=documentId;currentRecord.visibility=visibility;}
       updateFields(); saveDraft();
     }
   };

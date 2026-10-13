@@ -54,7 +54,7 @@ class Head(HTMLParser):
 
 root = Path(sys.argv[1])
 origin = 'https://fexas25.github.io'
-private_routes = {'/private/','/community-setup.html', '/editor.html', '/publishing-setup.html', '/404.html'}
+private_routes = {'/document/','/private/','/community-setup.html', '/editor.html', '/publishing-setup.html', '/404.html'}
 sitemap = ET.parse(root / 'sitemap.xml')
 urls = {node.text for node in sitemap.findall('.//{*}loc')}
 assert len(urls) == len(sitemap.findall('.//{*}loc')), 'Duplicate sitemap entries'

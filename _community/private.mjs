@@ -4,7 +4,7 @@ const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}
 const keyPattern=/^[A-Za-z0-9_-]{43}$/;
 async function hash(value){return new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(value)));}
 const hex=bytes=>Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
-async function verifyKey(id,key,stored){
+export async function verifyKey(id,key,stored){
  if(!keyPattern.test(key||'')||!stored)return false;
  const actual=await hash(id+':'+key),expected=Uint8Array.from(stored.match(/../g),b=>parseInt(b,16));
  // Verify via HMAC to avoid comparing secret-derived strings directly.

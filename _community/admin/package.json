@@ -4,8 +4,14 @@
   "type": "module",
   "scripts": {
     "build": "esbuild worker.mjs --bundle --format=esm --platform=browser --outfile=dist/worker.mjs",
-    "test": "node --test admin.test.mjs"
+    "test": "node --test admin.test.mjs documents.test.mjs",
+    "prebuild": "node prepare.mjs",
+    "pretest": "node prepare.mjs"
   },
-  "dependencies": {"jose": "^6.1.0"},
-  "devDependencies": {"esbuild": "^0.25.0"}
+  "dependencies": {
+    "jose": "^6.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
 }

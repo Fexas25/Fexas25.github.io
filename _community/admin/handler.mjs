@@ -1,14 +1,16 @@
+import {manageDocuments} from '../documents.mjs';
+import {dashboard,writing} from './hub.mjs';
 import {authenticate} from './auth.mjs';
 import {page} from './ui.mjs';
 
 const common = {'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow'};
 const json = (data, status=200) => new Response(JSON.stringify(data), {status,headers:{...common,'Content-Type':'application/json; charset=utf-8'}});
 const states = {pending:0, published:1, trash:-1};
-async function readBody(request) {
+async function readBody(request,limit=4096) {
   if (!request.headers.get('Content-Type')?.startsWith('application/json')) throw Error('input');
   const reader=request.body?.getReader(); if(!reader) throw Error('input');
   let size=0, text=''; const decoder=new TextDecoder();
-  while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>4096){await reader.cancel();throw Error('input');}text+=decoder.decode(value,{stream:true});}
+  while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>limit){await reader.cancel();throw Error('input');}text+=decoder.decode(value,{stream:true});}
   return JSON.parse(text+decoder.decode());
 }
 
@@ -19,11 +21,19 @@ export function createHandler(verify=authenticate) {
     const url=new URL(request.url);
     if(url.origin!==env.ADMIN_ORIGIN) return json({error:'host'},403);
     try {await verify(request,env);} catch {return json({error:'请重新登录。'},401);}
-    if(request.method==='GET' && url.pathname==='/') {
+    if(request.method==='GET' && url.pathname==='/messages') {
       const nonce=crypto.randomUUID();
       return new Response(page(nonce),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
     }
+    if(request.method==='GET'&&['/','/write','/documents'].includes(url.pathname)){
+      const nonce=crypto.randomUUID();
+      return new Response(url.pathname==='/'?dashboard(nonce):writing(nonce,url.pathname==='/documents'),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}' https://fexas25.github.io; style-src 'nonce-${nonce}' https://fexas25.github.io; connect-src 'self'; img-src https: data: blob:; font-src https://fexas25.github.io; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
+    }
     try {
+      if(url.pathname==='/api/documents'&&request.method==='POST'){
+        if(request.headers.get('Origin')!==env.ADMIN_ORIGIN||request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
+        return await manageDocuments(await readBody(request,2100000),env.DB,json);
+      }
       if(url.pathname==='/api/messages' && request.method==='GET') {
         const state=url.searchParams.get('state')||'pending', before=url.searchParams.get('before');
         if(!Object.hasOwn(states,state) || (before && (!/^\d+$/.test(before)||!Number.isSafeInteger(Number(before)))))return json({error:'参数无效。'},400);

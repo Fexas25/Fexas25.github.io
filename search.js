@@ -88,6 +88,7 @@
       }
       const card = make('article', null, 'entry-card'), meta = make('div', null, 'entry-meta');
       meta.append(make('span', labels[entry.category] || '作品'));
+      if(entry.privateId)meta.append(make('span','需要密钥'));
       if (entry.date) { const time = make('time', entry.date.replaceAll('-','.')); time.dateTime = entry.date; meta.append(time); }
       const link = make('a', null, 'entry-link'); link.href = entry.url;
       link.append(highlight(make('h3'), entry.title, words));
@@ -143,6 +144,20 @@
       if (!response.ok) throw Error('index unavailable');
       const data = await response.json();
       if (!Array.isArray(data)) throw Error('invalid index');
+      let catalogFailed=false;
+      if(window.MX_COMMUNITY?.origin){
+        try {
+          const response=await fetch(window.MX_COMMUNITY.origin+'/documents',{cache:'no-store',signal:AbortSignal.timeout(5000)});
+          if(!response.ok)throw Error('catalog');
+          const {documents}=await response.json();
+          for(const doc of documents){
+            if(!/^[a-f0-9-]{36}$/.test(doc.id)||typeof doc.title!=='string')continue;
+            const existing=data.find(entry=>entry.backendId===doc.id);
+            const entry={title:doc.title,url:doc.url,privateId:doc.visibility==='private'?doc.id:'',backendId:doc.id,content:doc.visibility==='private'?'':doc.content||'',tags:doc.tags||[],date:doc.date||'',category:doc.folder==='_posts'?'moments':doc.folder==='_cp'?'writing':'works'};
+            if(existing)Object.assign(existing,entry);else data.push(entry);
+          }
+        }catch {catalogFailed=true;}
+      }
       entries = data.map(entry => {
         const url = new URL(entry.url, location.origin);
         if (url.origin !== location.origin || !['http:','https:'].includes(url.protocol) || typeof entry.title !== 'string' || typeof entry.content !== 'string') throw Error('invalid entry');
@@ -150,13 +165,14 @@
         return {...entry, date:entry.date || '', tags, url:url.pathname + url.search + url.hash, searchText:normalize([entry.title,entry.content,...tags].join(' '))};
       }).sort((a,b) => b.date.localeCompare(a.date));
       for (const [key, values] of [['year', entries.map(entry => entry.date.slice(0,4)).filter(Boolean).sort().reverse()], ['tag', entries.flatMap(entry => entry.tags).sort()]]) {
-        for (const value of new Set(values)) fields[key].add(new Option(value, value));
+        for (const value of new Set(values)) if(![...fields[key].options].some(o=>o.value===value))fields[key].add(new Option(value, value));
       }
-      readURL(); render(false); form.hidden = false; results.hidden = false; fallback.hidden = true;
+      const shown=Number(new URLSearchParams(location.search).get('shown'));if(Number.isSafeInteger(shown)&&shown>20)limit=Math.min(shown,Math.max(20,entries.length));
+      render(false); if(catalogFailed){status.textContent+=' · 最新内容目录暂未加载，可重试';retry.hidden=false;} form.hidden = false; results.hidden = false; fallback.hidden = true;
     } catch {
       status.textContent = '搜索暂时没加载好，可以重试，或先按下方年份翻阅。'; retry.hidden = false;
     } finally { clearTimeout(timeout); }
   }
   retry.addEventListener('click', load);
-  load();
+  readURL(); load();
 })();

@@ -11,6 +11,7 @@ test('睡猫留言按需验证、保留输入、恢复焦点和小屏提交',asy
  const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
  await page.route('https://community.test/**',async r=>{
   if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers});
+  if(r.request().method()==='GET')return r.fulfill({headers,json:{documents:[]}});
   posts++;payload=r.request().postDataJSON();
   await new Promise(resolve=>setTimeout(resolve,300));
   return r.fulfill({headers,status:fail?503:201,json:fail?{error:'unavailable'}:{pending:true}});

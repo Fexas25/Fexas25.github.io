@@ -1,3 +1,4 @@
+import {publicDocuments} from './documents.mjs';
 import {privateRequest} from './private.mjs';
 const encoder=new TextEncoder();
 async function digest(value){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(value)))].map(b=>b.toString(16).padStart(2,'0')).join('');}
@@ -17,6 +18,7 @@ export default {async fetch(request,env){
   if(!env.DB)return reply({error:'not configured'},503);
   const path=new URL(request.url).pathname, now=Math.floor(Date.now()/1000);
   try{
+    if(path==='/documents'||path==='/documents/read')return await publicDocuments(request,env,{body,reply,path,now});
     if(['/private/manage','/private/read'].includes(path)){
       if(request.headers.get('Origin')!==origin)return reply({error:'origin required'},403);
       return await privateRequest(request,env,{body,reply,path,now});

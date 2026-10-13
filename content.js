@@ -1,6 +1,6 @@
 /* Progressive enhancement: every entry is visible without JavaScript. */
 document.querySelectorAll('[data-browser]').forEach(browser => {
-  const entries = [...browser.querySelectorAll('[data-entry]')];
+  let entries = [...browser.querySelectorAll('[data-entry]')];
   const buttons = [...browser.querySelectorAll('[data-category-filter]')];
   const search = browser.querySelector('[data-search-input]');
   const year = browser.querySelector('[data-year-filter]');
@@ -36,6 +36,13 @@ document.querySelectorAll('[data-browser]').forEach(browser => {
       marker.hidden = !anyVisible;
     });
   };
+  window.addEventListener('mx-documents-ready',()=>{
+    entries=[...browser.querySelectorAll('[data-entry]')];
+    for(const [select,values] of [[year,entries.map(e=>e.dataset.year).filter(Boolean).sort().reverse()],[tag,entries.flatMap(tags).sort()]]){
+      if(!select)continue;const previous=select.value;while(select.options.length>1)select.remove(1);for(const value of new Set(values))select.add(new Option(value,value));select.value=previous;if(select.selectedIndex<0)select.selectedIndex=0;
+    }
+    if(filters)filters.hidden=!entries.length;update();
+  });
   buttons.forEach(button => button.addEventListener('click', () => {
     category = button.dataset.categoryFilter;
     buttons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
@@ -45,7 +52,8 @@ document.querySelectorAll('[data-browser]').forEach(browser => {
   update();
 });
 
-document.querySelectorAll('[data-reading-content]').forEach(article => {
+function initReading(){document.querySelectorAll('[data-reading-content]').forEach(article => {
+  if(article.dataset.readingReady)return;article.dataset.readingReady='1';
   const topLink = document.querySelector('[data-reading-top]');
   if (topLink) {
     let pending = false;
@@ -65,6 +73,7 @@ document.querySelectorAll('[data-reading-content]').forEach(article => {
   if (images.length && typeof HTMLDialogElement !== 'undefined' && HTMLDialogElement.prototype.showModal) {
     const dialog = document.createElement('dialog');
     dialog.className = 'reading-viewer';
+    if(article.closest('[data-private-content]')){dialog.dataset.privateViewer='';dialog.dataset.privateContent='';dialog.setAttribute('translate','no');}
     dialog.setAttribute('aria-label', '文章图片预览');
     const toolbar = document.createElement('div'); toolbar.className = 'viewer-toolbar';
     const zoom = document.createElement('button'); zoom.type = 'button'; zoom.textContent = '查看原尺寸'; zoom.setAttribute('aria-pressed','false');
@@ -148,4 +157,5 @@ document.querySelectorAll('[data-reading-content]').forEach(article => {
     actions.append(status, button);
     pre.before(actions);
   });
-});
+});}
+initReading();window.addEventListener('mx-content-ready',initReading);

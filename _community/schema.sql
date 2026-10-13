@@ -9,3 +9,10 @@ CREATE TABLE IF NOT EXISTS private_attempts(bucket TEXT PRIMARY KEY, used INTEGE
 CREATE INDEX IF NOT EXISTS private_attempts_expiry ON private_attempts(expires);
 
 CREATE TABLE IF NOT EXISTS message_replies (message_id INTEGER PRIMARY KEY REFERENCES messages(id) ON DELETE CASCADE, body TEXT NOT NULL, updated INTEGER NOT NULL, revision INTEGER NOT NULL DEFAULT 1);
+
+CREATE TABLE IF NOT EXISTS documents (
+ id TEXT PRIMARY KEY, title TEXT NOT NULL, document TEXT NOT NULL,
+ metadata TEXT NOT NULL, visibility TEXT NOT NULL CHECK(visibility IN ('public','private')),
+ key_hash TEXT NOT NULL DEFAULT '', revision TEXT NOT NULL, updated INTEGER NOT NULL,
+ public_url TEXT NOT NULL UNIQUE, source_path TEXT UNIQUE
+);
