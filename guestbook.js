@@ -1,5 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
   const config=window.MX_COMMUNITY,list=document.querySelector('[data-guestbook-list]'),more=document.getElementById('guestbook-more'),listStatus=document.getElementById('guestbook-list-status');
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),feedback=new WeakMap();
+  let touch=null;
+  list.addEventListener('pointerdown',event=>{
+    const note=event.target.closest('.guestbook-message');
+    touch=note&&event.isPrimary&&event.pointerType!=='mouse'?{note,id:event.pointerId,x:event.clientX,y:event.clientY,time:performance.now()}:null;
+  },{passive:true});
+  list.addEventListener('pointercancel',()=>{touch=null;},{passive:true});
+  list.addEventListener('pointermove',event=>{if(touch&&Math.hypot(event.clientX-touch.x,event.clientY-touch.y)>8)touch=null;},{passive:true});
+  list.addEventListener('pointerup',event=>{
+    const start=touch;touch=null;
+    if(!start||start.id!==event.pointerId||performance.now()-start.time>350||Math.hypot(event.clientX-start.x,event.clientY-start.y)>8||!start.note.contains(event.target)||getSelection()?.toString())return;
+    feedback.get(start.note)?.cancel();
+    const shadows=['0 4px 12px #65566d06','0 7px 18px #65566d16','0 4px 12px #65566d06'];
+    const frames=shadows.map((boxShadow,i)=>({boxShadow,...(reduced.matches?{}:{transform:`translateY(${i===1?-2:0}px)`})}));
+    feedback.set(start.note,start.note.animate(frames,{duration:260,easing:'ease-out'}));
+  },{passive:true});
   if(!config?.origin){listStatus.textContent='留言板暂未开放。';return;}
   let cursor='',loading=false;
   async function load(){

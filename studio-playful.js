@@ -31,7 +31,7 @@
     const start = down; down = null;
     if (!start || start.id !== event.pointerId || Math.hypot(event.clientX-start.x,event.clientY-start.y)>9) return;
     if (reduced.matches || document.hidden || !marks.length || document.querySelector('dialog[open]')) return;
-    if (event.target.closest('input,textarea,select,button,a,summary,label,[contenteditable],pre,code,[data-buddy-scene],.prose')) return;
+    if (event.target.closest('input,textarea,select,button,a,summary,label,[contenteditable],pre,code,[data-buddy-scene],.prose,.guestbook-message')) return;
     if (getSelection()?.toString()) return;
     const now = performance.now();
     if (now-last<140) return;

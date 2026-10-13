@@ -45,3 +45,7 @@
 .guestbook-board .guestbook-message time{margin:0;font-size:11px;color:#938a92;font-variant-numeric:tabular-nums}
 .guestbook-board .guestbook-message p{margin:12px 0 0;color:#514e59;font-size:15px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:600px){.guestbook-board .guestbook-list{gap:20px;margin-top:24px}.guestbook-board .guestbook-message{padding:23px 18px 18px}.guestbook-message-meta{gap:3px 10px}.guestbook-board .guestbook-message p{margin-top:10px;font-size:14px}}
+
+.guestbook-board .guestbook-message{transition:transform .2s ease,box-shadow .2s ease}
+@media(hover:hover) and (pointer:fine){.guestbook-board .guestbook-message:hover{transform:translateY(-3px);box-shadow:0 8px 20px #65566d12}}
+@media(prefers-reduced-motion:reduce){.guestbook-board .guestbook-message{transition:none}.guestbook-board .guestbook-message:hover{transform:none}}
