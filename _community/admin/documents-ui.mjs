@@ -34,5 +34,6 @@ export function client(manage){
  if(manage){const library=$('published-content');document.querySelector('.draft-library').before(library);}
  $('image-upload-help').textContent='原图最多 5 MB · 大图自动压缩，GIF 最多 512 KB';
  $('private-note').textContent='标题仍可搜索，正文和作品链接需要密钥。曾公开的历史副本、缓存及旧图片链接不受此设置影响。';
+ const params=new URLSearchParams(location.search);if(params.get('new')==='1'){const category=params.get('category');if(Object.hasOwn(window.MXContent.folders,category))$('post-category').value=category;window.MXEditor.newDocument();params.delete('new');history.replaceState(null,'',location.pathname+(params.size?'?'+params:''));}
  controls();list().catch(e=>status(e.message));
 }
