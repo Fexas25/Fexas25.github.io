@@ -51,7 +51,7 @@
     $('private-rotate').disabled=busy||!token;
     if(sharedId!==window.MXEditor.record()?.privateId){$('private-share').hidden=true;$('private-key').value='';sharedId='';}
     $('github-publish').textContent = busy ? '处理中…' : token ? (window.MXEditor.record() ? '保存修改' : (privateMode() ? '发布私密内容' : '发布到网站')) : '登录后发布';
-    ['github-load','github-new','github-refresh','github-article'].forEach(id => $(id).disabled = busy);
+    ['github-load','github-refresh','github-article'].forEach(id => $(id).disabled = busy);
     $('writing-form').inert = busy;
     document.querySelector('.draft-library').inert = busy;
   }
@@ -167,12 +167,10 @@
       if (select.options.length === 1) select.options[0].textContent = '还没有文章，可以新建内容';
     } catch (error) { result(error.message); }
   }
-  function canSwitch() { return true; } // The editor preserves the current draft before switching.
   $('github-refresh').addEventListener('click',listArticles);
   $('github-load').addEventListener('click',async () => {
     const path = $('github-article').value;
     if (!path) { result('请先选择文章。'); return; }
-    if (!canSwitch()) return;
     busy = true; controls();
     try {
       if(path.startsWith('private:')) {
@@ -187,7 +185,6 @@
     } catch (error) { result(error.message); }
     finally { busy = false; controls(); }
   });
-  $('github-new').addEventListener('click',() => { if (canSwitch()) { window.MXEditor.newDocument(); $('github-result').hidden = true; controls(); } });
   window.addEventListener('mx-editor-change',controls);
   $('clear-editor').addEventListener('click',controls);
   $('restore-draft').addEventListener('click',controls);

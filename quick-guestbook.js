@@ -5,16 +5,16 @@
   const form = dialog.querySelector('form'), submit = form.querySelector('[type=submit]');
   const status = document.getElementById('quick-guestbook-status'), retry = dialog.querySelector('.mail-retry');
   const challenge = document.getElementById('quick-guestbook-challenge');
-  let token = '', widget = null, loading = false, busy = false, opener, overflow, prefix = '', script;
+  let token = '', widget = null, loading = false, busy = false, opener, overflow, prefix = '', script, timer;
   const config = window.MX_COMMUNITY;
   const expire = () => { token = ''; submit.disabled = true; };
   function render() {
-    loading = false;
+    clearTimeout(timer); loading = false;
     if (!dialog.open || widget !== null) return;
     try {
       widget = window.turnstile.render(challenge, {
         sitekey:config.siteKey, action:'guestbook', size:form.clientWidth < 300 ? 'compact' : 'normal',
-        callback(value) { token = value; submit.disabled = busy; },
+        callback(value) { token = value; submit.disabled = busy; retry.hidden = true; if(status.textContent.startsWith("验证")) status.textContent = ""; },
         'expired-callback':expire,
         'error-callback'() { expire(); status.textContent = '验证暂不可用，请重试。'; retry.hidden = false; }
       });
@@ -29,9 +29,17 @@
     window.mxQuickGuestbookChallenge = render;
     script = document.createElement('script'); script.async = true;
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=mxQuickGuestbookChallenge&render=explicit';
-    script.onerror = () => { loading = false; script.remove(); status.textContent = '验证加载失败，请重试。'; retry.hidden = false; };
+    script.onerror = () => { clearTimeout(timer);loading = false; script.remove(); status.textContent = '验证加载失败，请重试。'; retry.hidden = false; };
+    timer=setTimeout(()=>script.onerror(),12000);
     document.head.append(script);
   }
+  function fitKeyboard(){
+    const viewport=window.visualViewport,keyboard=viewport&&window.innerHeight-viewport.height>150;
+    dialog.classList.toggle('mail-keyboard',Boolean(keyboard&&dialog.open));
+    if(keyboard){dialog.style.setProperty('--mail-height',viewport.height+'px');dialog.style.setProperty('--mail-top',viewport.offsetTop+'px');}
+  }
+  window.visualViewport?.addEventListener('resize',fitKeyboard);
+  window.visualViewport?.addEventListener('scroll',fitKeyboard);
   document.addEventListener('click', event => {
     const link = event.target.closest('[data-mail-open]');
     if (!link || typeof dialog.showModal !== 'function') return;
@@ -43,7 +51,7 @@
     const context = document.getElementById('quick-guestbook-context');
     context.hidden = !heading; context.textContent = heading ? `关于《${heading.textContent.trim()}》` : '';
     form.elements.message.maxLength = Math.max(1,1000-prefix.length);
-    dialog.showModal(); document.body.style.overflow = 'hidden'; verify();
+    dialog.showModal(); document.body.style.overflow = 'hidden';fitKeyboard(); verify();
   });
   dialog.querySelector('[data-mail-close]').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {
@@ -51,7 +59,7 @@
     if (event.target === dialog && (event.clientX<box.left || event.clientX>box.right || event.clientY<box.top || event.clientY>box.bottom)) dialog.close();
   });
   dialog.addEventListener('close', () => {
-    document.body.style.overflow = overflow || '';
+    document.body.style.overflow = overflow || '';dialog.classList.remove('mail-keyboard');
     if (widget !== null && !busy) { window.turnstile?.remove(widget); widget = null; expire(); }
     opener?.focus({preventScroll:true});
   });

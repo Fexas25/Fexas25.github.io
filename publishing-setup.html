@@ -1,33 +1,15 @@
 ---
 layout: default
-title: 写作页首次配置
+title: 写作与发布说明
 noindex: true
 sitemap: false
 section: writing
-eyebrow: CONNECT YOUR STUDIO
-description: 只需配置一次，之后就能在写作页直接发布和修改。
-portrait: /assets/optimized/portrait-pink.webp
-bubble: 把工作室连接起来。
+description: 发布、修改、备份与私密分享。
 ---
-{% include section-intro.html %}
-<p>当前登录服务：<code>mx-writing-auth</code>；GitHub App：<a href="https://github.com/settings/apps/fexas25-mx-writing">Fexas25 MX Writing</a>。应用只安装在网站仓库。下方配置步骤用于维护或迁移，日常写作不用重复操作。</p>
-<article class="prose">
-<h2>1. 创建登录服务</h2>
-<p>注册并登录 <a href="https://dash.cloudflare.com/">Cloudflare</a>。打开 Workers &amp; Pages，创建一个 Worker，使用简单的 Hello World 模板，名称可以叫 <code>mx-writing-auth</code>。部署后记下它的 HTTPS 地址，例如 <code>https://mx-writing-auth.你的子域.workers.dev</code>。</p>
-<p>打开 Worker 的代码编辑器，把<a href="https://github.com/Fexas25/Fexas25.github.io/blob/main/_publishing/worker.mjs">仓库中的 worker.mjs</a>完整复制进去并部署。服务只用于 GitHub 登录，网站仍由 GitHub Pages 托管。</p>
-<h2>2. 注册你自己的 GitHub App</h2>
-<p>用 Fexas25 登录 <a href="https://github.com/settings/apps/new">GitHub App 创建页面</a>，填写：</p>
-<ul><li>应用名称：取一个尚未被使用的名称，例如 <code>Fexas25 MX Writing</code>。</li><li>Homepage URL：<code>https://fexas25.github.io</code></li><li>Callback URL：你的 Worker 地址加 <code>/callback</code>。</li><li>保留用户令牌过期设置；不需要启用 Device Flow，也不需要设置 Setup URL。</li><li>Webhook：取消勾选 Active。</li><li>Repository permissions → Contents：选择 <strong>Read and write</strong>；Metadata 的只读权限保持默认。其余权限不需要开启。</li><li>安装范围：选择 <strong>Only on this account</strong>。</li></ul>
-<p>创建后，打开应用的 Install App，安装到自己的账号，选择 <strong>Only select repositories</strong>，仅勾选 <code>Fexas25.github.io</code>。这会允许该应用读取和更新这个仓库的内容。</p>
-<h2>3. 填入登录配置</h2>
-<p>在 GitHub App 的 General 页面找到 <strong>Client ID</strong>；在 Credentials → Client secrets 页面点击 New secret，生成 <strong>Client secret</strong>。本网站使用 OAuth 登录，不需要 Private key。</p>
-<p>回到 Worker 的 Settings → Variables and Secrets，添加以下两个值并重新部署：</p>
-<ul><li><code>GITHUB_CLIENT_ID</code>：Client ID，普通文本变量。</li><li><code>GITHUB_CLIENT_SECRET</code>：Client secret，类型必须选择 <strong>Secret</strong>。</li></ul>
-<p>密钥只填写在 Cloudflare 的 Secret 输入框，不要贴到聊天、网站代码或 GitHub 文件中。Worker 地址加 <code>/health</code> 显示 <code>{"configured":true}</code> 表示两个配置项已填入。</p>
-<h2>4. 连接写作页</h2>
-<p>把 Worker 的公开地址告诉我，我可以帮你完成这一步；或者自己编辑仓库的 <a href="https://github.com/Fexas25/Fexas25.github.io/edit/main/editor-config.js">editor-config.js</a>，把 <code>authOrigin</code> 的空字符串改成你的 Worker HTTPS 地址（不要加 <code>/callback</code>），提交后等待网站部署。</p>
-<h2>5. 以后这样使用</h2>
-<p>打开<a href="{{ '/editor.html' | relative_url }}">写作页</a>，点击“登录 GitHub”，在弹窗里授权。新内容填写后点击“发布到网站”；旧内容在列表里选择并点“打开修改”，改好后点“保存修改”。提交成功后等待 Pages 部署即可。</p>
-<p>首次授权时，核对是你刚创建的应用和网站仓库。登录状态只留在当前页面的内存中；刷新、关闭或退出后重新登录。草稿会继续保留。如果远端文章有新修改，系统会提醒你先导出草稿再合并，不会直接覆盖。</p>
-<p>如果登录弹窗没有打开，请允许本站弹出窗口；若提示没有仓库权限，请检查应用是否已安装到网站仓库，且 Contents 权限为读写。<a href="https://github.com/Fexas25/Fexas25.github.io/actions">查看网站部署状态 →</a></p>
-</article>
+<div class="reading-shell"><header class="reading-header"><h1>写作与发布</h1></header><article class="prose">
+<p>服务已配置，日常更新直接使用<a href="/editor.html">写作页 →</a></p>
+<ul><li><strong>新内容：</strong>新建草稿，选择栏目并填写正文，登录 GitHub 后发布。</li><li><strong>修改：</strong>展开“打开已有文章 · GitHub 登录”，选择内容，打开修改后保存。</li><li><strong>配图：</strong>放好光标，点“上传图片”；公开图片上传到仓库，私密图片随正文保存。</li><li><strong>换设备：</strong>在“导入与备份”下载全部草稿，在新设备恢复。草稿只自动保存在当前浏览器。</li><li><strong>密钥访问：</strong>新建时选择该模式，发布后保存链接和密钥。可重新编辑或换密钥；内容不会进入公开列表、搜索或订阅。私密 Markdown 导出是本地明文副本，不要上传公开仓库。</li></ul>
+<p>公开内容提交后需要等待<a href="https://github.com/Fexas25/Fexas25.github.io/actions">自动检查与部署</a>完成；私密内容保存后立即生效。登录状态不随草稿备份，刷新后需重新登录。</p>
+<details><summary>遇到问题</summary><ul><li>登录窗口没打开：允许本站弹出窗口，再试一次。</li><li>提示权限不足：检查 GitHub App 是否安装在网站仓库，Contents 权限是否为读写。</li><li>提示远端内容已改变：先导出当前草稿，再打开最新内容合并，避免覆盖新修改。</li><li>网络中断：保留草稿，恢复网络后重试。公开发布与图片上传会先检查是否已提交。</li><li>密钥遗失：登录，打开对应私密内容，再更换密钥。旧密钥随即失效。</li></ul></details>
+<details><summary>维护与迁移</summary><p>登录服务为 <code>mx-writing-auth</code>，代码和配置位于仓库 <code>_publishing/</code>；前端公开地址位于 <code>editor-config.js</code>。</p><p><a href="https://github.com/settings/apps/fexas25-mx-writing">Fexas25 MX Writing</a> 只安装在网站仓库，使用 Contents 读写与 Metadata 只读权限。回调为登录 Worker 地址加 <code>/callback</code>，当前流程不需要 Private key。</p><p>Worker 使用 <code>GITHUB_CLIENT_ID</code> 变量和 <code>GITHUB_CLIENT_SECRET</code> Secret。密钥只留在 Cloudflare，不放入仓库或草稿。迁移时同步更新 GitHub App 回调与前端地址。</p><p>私密正文与访问密钥摘要存放在 <code>mx-community</code> 的 D1 中，详见<a href="/community-setup.html">留言、翻译与私密服务说明</a>。不要把已公开内容直接当作私密内容，旧版本可能仍保留在公开仓库历史里。</p></details>
+</article></div>

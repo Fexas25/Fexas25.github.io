@@ -78,7 +78,7 @@ document.querySelectorAll('[data-reading-content]').forEach(article => {
     dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
     dialog.addEventListener('close', () => {
       document.body.style.overflow = previousOverflow;
-      preview.removeAttribute('src'); opener?.focus();
+      preview.removeAttribute('src'); opener?.focus({preventScroll:true});
     });
     zoom.addEventListener('click', () => {
       const expanded = zoom.getAttribute('aria-pressed') !== 'true';

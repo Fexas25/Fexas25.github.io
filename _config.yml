@@ -53,10 +53,6 @@ exclude:
   - .vscode/
   - .cursor/
 
-# Include
-include:
-  - _pages
-
 # Defaults
 defaults:
   - scope:
@@ -84,7 +80,3 @@ defaults:
       type: art
     values:
       layout: post
-  - scope:
-      path: "_pages"
-    values:
-      layout: page

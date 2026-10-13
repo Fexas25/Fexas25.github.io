@@ -8,6 +8,8 @@
   const imagePreviews = new Map();
   function invalidatePublish() {
     publishRevision++;
+    $('github-result').hidden=true;
+    $('image-upload-status').textContent='';
     $('publish-panel').hidden = true;
     $('publish-source').value = '';
   }
@@ -19,7 +21,10 @@
     $('blog-topic-field').hidden = $('post-category').value !== 'competitive-programming';
     $('post-category').disabled = Boolean(currentRecord);
     $('post-visibility').disabled = Boolean(currentRecord);
-    $('private-note').hidden = $('post-visibility').value !== 'private';
+    const privateMode=$('post-visibility').value==='private';
+    $('private-note').hidden = !privateMode;
+    const help=privateMode?'私密图片 · 嵌入正文，单张最多 512 KB':'公开图片 · 单张最多 5 MB';
+    if($('image-upload-help').textContent!==help){$('image-upload-help').textContent=help;$('image-upload-status').textContent='';}
     $('prepare-publish').disabled = $('post-visibility').value === 'private';
     $('editing-status').textContent = currentRecord ? `正在修改：${currentRecord.path}（保留原文件名）` : '正在新建内容';
     const category = $('post-category').value;
@@ -51,8 +56,7 @@
   let dirty = false;
   const drafts = window.MXDrafts;
   function draftStatus(message) {
-    $('draft-status').textContent = message;
-    $('draft-library-status').textContent = message;
+    for(const id of ['draft-status','draft-library-status'])if($(id).textContent!==message)$(id).textContent=message;
   }
   const categoryNames = {blog:'碎碎念','competitive-programming':'博客',projects:'作品 · 项目 / AI 工作流','game-jam':'作品 · 游戏开发',art:'作品 · 绘画创作'};
   const timeFormatter = new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});

@@ -1,16 +1,14 @@
 ---
 layout: default
-title: 留言与翻译配置
+title: 留言与服务说明
 noindex: true
 sitemap: false
-description: 一次配置，启用免登录留言和自动翻译。
+description: 留言审核、自动翻译与私密分享的日常维护。
 ---
-<div class="reading-shell"><header class="reading-header"><h1>留言与翻译配置</h1></header><article class="prose"><p><strong>当前已配置：</strong>留言与翻译使用 <code>mx-community</code> Worker，数据库为 <code>mx-community</code>。日常更新文章无需重复配置，下方步骤用于以后维护或迁移。</p><p>这两个功能共用独立的 Cloudflare Worker，不涉及 GitHub 登录发布。只需维护中文文章；English 按钮自动翻译网页文字并缓存。未配置时保留原文，留言不可提交。</p><h2>1. 注册与免费计划</h2><p>在 <a href="https://dash.cloudflare.com/sign-up">Cloudflare</a> 注册账号，保持 Workers Free。不要开通付费订阅。Workers AI 有每日免费额度；免费额度耗尽后翻译会暂时不可用，页面保留原文。程序还设置了每天最多 200 个未缓存翻译请求，缓存命中不调用模型；这个应用限制不等同于 Cloudflare 的计费单位。</p><h2>2. 创建数据库</h2><p>在仓库的 <code>_community</code> 文件夹执行：</p><pre><code>npx wrangler login
-npx wrangler d1 create mx-community</code></pre><p>浏览器登录由你本人完成。将返回的 database_id 填入 <code>_community/wrangler.jsonc</code>，替换 REPLACE_AFTER_CREATION，再执行：</p><pre><code>npx wrangler d1 execute mx-community --remote --file=schema.sql</code></pre><h2>3. 添加防刷验证</h2><p>在 Cloudflare 控制台打开 Turnstile，创建 Managed 类型组件，允许域名 <code>fexas25.github.io</code>。记下公开的 Site key，Secret key 只存到 Worker：</p><pre><code>npx wrangler secret put TURNSTILE_SECRET
-npx wrangler secret put RATE_SECRET</code></pre><p>第二个密钥使用随机长字符串，用于限流标识；不要提交到 GitHub。若 Cloudflare 提示接受协议，由你本人确认。</p><h2>4. 发布并连接</h2><pre><code>npx wrangler deploy</code></pre><p>把生成的 HTTPS Worker 地址和公开 Site key 填入根目录 <code>community-config.js</code> 的 origin 与 siteKey。提交到 GitHub，等待自动部署完成。无需写入 API Token 或任何密钥。</p><h2>5. 审核留言</h2><p><a href="https://mx-guestbook-admin.liuwanting830.workers.dev/">打开留言管理页 ↗</a>，输入管理员邮箱，使用邮件验证码登录。写作页也有“管理留言”入口。</p><ul><li><strong>待审核：</strong>点击“通过”后公开；可以勾选多条后批量通过。</li><li><strong>已公开：</strong>点击“隐藏”，留言会回到待审核区。</li><li><strong>回收站：</strong>移入后不再公开，随时可以恢复到待审核区。</li></ul><p>管理页仅允许已配置的管理员邮箱进入。关闭页面不等于退出登录，使用公共设备时请点击“退出登录”。登录过期后重新获取验证码即可。</p><details><summary>维护与备用审核方式</summary><p>管理服务为 <code>mx-guestbook-admin</code>，与访客留言和翻译的 <code>mx-community</code> 分开部署，共用现有数据库。管理员邮箱只保存在管理 Worker 的 <code>ADMIN_EMAIL</code> 密钥和 Access 允许规则中。更换邮箱时需要同时修改两处。</p><p>维护代码在 <code>_community/admin</code>。执行 <code>npm ci</code>、<code>npm test</code> 和 <code>npm run build</code> 完成检查；部署使用 <code>npx wrangler deploy</code>，首次部署需设置 <code>ADMIN_EMAIL</code> 密钥并创建对应 Access 应用。</p><p>如管理页暂时不可用，可在 Cloudflare D1 Console 查看并审核：</p><pre><code>SELECT id,name,message,created FROM messages WHERE approved=0 ORDER BY id DESC;
--- 将 123 替换为要公开的留言 ID：
-UPDATE messages SET approved=1 WHERE id=123;
--- 隐藏该留言：
-UPDATE messages SET approved=0 WHERE id=123;
--- 移入回收站（保留记录）：
-UPDATE messages SET approved=-1 WHERE id=123;</code></pre></details><h2>6. 验证</h2><p>提交一条测试留言，在控制台审核后确认手机与另一台设备都能看到。打开一篇文章点击 English，确认正文翻译和切回中文正常；新增文章也走相同流程。翻译属于机器翻译，原文始终可查看，代码、输入内容和私人草稿不会发送到翻译服务。</p><p><a href="https://developers.cloudflare.com/workers-ai/platform/pricing/">Workers AI 免费额度</a> · <a href="https://developers.cloudflare.com/d1/get-started/">D1 文档</a> · <a href="https://developers.cloudflare.com/turnstile/get-started/">Turnstile 文档</a></p></article></div>
+<div class="reading-shell"><header class="reading-header"><h1>留言与服务</h1></header><article class="prose">
+<p><a href="https://mx-guestbook-admin.liuwanting830.workers.dev/">打开留言审核 →</a> · <a href="/editor.html">返回写作页 →</a></p>
+<p>使用管理员邮箱和邮件验证码登录。待审核留言点击“通过”后公开；“隐藏”可撤回公开状态；回收站中的留言可以恢复。支持勾选后批量处理。</p>
+<details><summary>翻译与密钥访问</summary><p>只需维护原文，右上角 English 会自动翻译并缓存公开内容。代码、输入内容、草稿和私密正文不参与自动翻译。暂时无法翻译时会保留原文，可使用 Retry 重试。</p><p>私密内容保存在独立后端，需同时持有链接和密钥才能打开，不进入公开仓库或列表。密钥不存入草稿备份；遗失后登录写作页更换。</p><p>现有配置保留每日新翻译请求上限，额度不足时保留原文，无需为日常使用开通付费订阅。</p></details>
+<details><summary>服务与配置位置</summary><ul><li><code>_community/</code>：留言、翻译和私密访问 Worker；<code>schema.sql</code> 定义 D1 表，<code>wrangler.jsonc</code> 记录现有数据库绑定。</li><li><code>community-config.js</code>：公开 Worker 地址和 Turnstile Site key。</li><li><code>_community/admin/</code>：独立留言管理页，共用现有 D1 数据库，受 Cloudflare Access 保护。</li><li><code>_publishing/</code>：GitHub 登录服务，与留言管理登录分开。</li></ul><p>现有 Worker 和数据库均名为 <code>mx-community</code>，管理服务为 <code>mx-guestbook-admin</code>。日常发布文章不用重新建库或配置账号。</p><p>发布社区服务时需同时包含 <code>worker.mjs</code> 与 <code>private.mjs</code>。保留现有 D1、AI 绑定及 <code>TURNSTILE_SECRET</code>、<code>RATE_SECRET</code>；数据库结构更新使用现有 <code>schema.sql</code>，不要重建或清空已有数据库。</p><p>更换管理员邮箱时，同时更新管理 Worker 的 <code>ADMIN_EMAIL</code> Secret 和 Access 允许规则。关闭页面不等于退出登录，公共设备使用完请点“退出登录”。</p></details>
+<details><summary>维护检查</summary><p>网站每次推送都会先检查构建、链接、搜索信息、关键功能与手机浏览器，全部通过才部署。管理服务还有独立的登录与权限检查。</p><p>维护服务后，核对留言可进入待审核区、通过后可见，翻译可恢复原文，错误密钥无法打开私密内容。测试只用无个人信息的内容，完成后清理测试记录。</p><p><a href="https://dash.cloudflare.com/">Cloudflare 控制台</a> · <a href="https://github.com/Fexas25/Fexas25.github.io/actions">网站检查与部署</a></p></details>
+</article></div>

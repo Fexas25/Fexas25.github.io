@@ -1,0 +1,31 @@
+MX 网站维护索引
+
+日常更新
+- /editor.html：发布、修改、图片上传、草稿导入与备份、密钥分享。
+- /publishing-setup.html：简短使用说明和登录服务维护信息。
+- /community-setup.html：留言审核入口及社区服务维护信息。
+
+源代码
+- _posts：碎碎念；_cp：博客；_projects、_gamejam、_art：作品。
+- _includes、_layouts：共用页面结构；根目录 CSS/JS：页面与互动。
+- _publishing：GitHub 登录服务。
+- _community：留言、翻译、私密内容；其 admin 子目录：留言审核。
+- _checks：持续集成与浏览器测试，不作为网站页面发布。
+- _design、picture、image、audio：保留的角色源图与个人原始素材。
+
+检查与部署
+- npm ci --prefix _checks
+- npm test --prefix _checks
+- 正式 Jekyll 构建到 _site 后运行：
+  python _checks/links.py _site
+  python _checks/seo.py _site
+  python _checks/search-index.py _site
+  npm run test:browser --prefix _checks
+- 自动部署以 .github/workflows/pages.yml 为准；浏览器测试模拟后端，不提交真实留言或占用翻译额度。
+- 网站检查不自动部署 Cloudflare Worker；后端改动需要单独验证和部署，保留原绑定、Secret 与数据库记录。
+
+整理约定
+- 临时截图、演示脚本和人工测试输出放在仓库外；生成目录按 .gitignore 排除。
+- 不删除仅因当前页面未引用的个人原始素材、角色源图或站点验证文件。
+- 私密正文不得提交到公开仓库；导出的本地副本和草稿备份也需妥善保存。
+- 本次删除了已无引用的旧 theme.css/theme.js；当前主题由 home.css、content.css 和各功能样式维护。
