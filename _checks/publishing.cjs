@@ -25,7 +25,7 @@ const pause=()=>new Promise(r=>setTimeout(r,25));
 
  const dom=new JSDOM(fs.readFileSync(path.join(root,'editor.html'),'utf8'),{url:'https://fexas25.github.io/editor.html',runScripts:'outside-only'}),w=dom.window;
  w.AbortSignal=AbortSignal;w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;
- w.MX_PUBLISH={authOrigin:origin};w.MXContent={folders:{blog:'_posts'}};
+ w.MX_PUBLISH={authOrigin:origin};w.MXContent={folders:{blog:'_posts'},parse:()=>({metadata:{}})};
  let record=null,latest=null,writes=0,networkFailure=false,openedURL='',popup;
  const file={folder:'_posts',filename:'2026-10-13-test.md',text:'---\ntitle: 测试\n---\n\n正文'};
  w.MXEditor={record:()=>record,exportDocument:()=>file,committed:(f,sha)=>{record={sha};},newDocument:()=>{},load:()=>{}};

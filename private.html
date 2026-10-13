@@ -1,0 +1,18 @@
+---
+layout: default
+title: 密钥访问
+description: 输入密钥，打开分享给你的内容。
+permalink: /private/
+noindex: true
+sitemap: false
+scripts:
+  - /vendor-js/marked.js
+  - /vendor-js/purify.js
+  - /vendor-js/js-yaml.js
+  - /editor-content.js
+script: /private-reader.js
+---
+<section class="private-reader" data-private-content translate="no">
+<form id="private-unlock"><h1>有人留了一份分享给你</h1><label for="access-key">访问密钥</label><input id="access-key" type="password" required autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="43" /><button class="primary-link" type="submit">打开看看</button><p id="private-status" role="status"></p></form>
+<article id="private-document" hidden><button id="private-lock" type="button">收起来</button><h1 id="private-title"></h1><div id="private-body" class="post-content"></div><a id="private-project" class="primary-link" hidden rel="noopener noreferrer" target="_blank">打开作品 ↗</a></article>
+</section>

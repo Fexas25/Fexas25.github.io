@@ -34,6 +34,8 @@ jobs:
           npm ci --prefix _community/admin
           npm test --prefix _community/admin
           npm run build --prefix _community/admin
+      - name: Prevent private content in public build
+        run: node _checks/private-source.cjs
       - name: Build production site
         id: build
         uses: actions/jekyll-build-pages@v1

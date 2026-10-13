@@ -1,21 +1,26 @@
+import {privateRequest} from './private.mjs';
 const encoder=new TextEncoder();
 async function digest(value){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(value)))].map(b=>b.toString(16).padStart(2,'0')).join('');}
-async function body(request){
+async function body(request,limit=8192){
   if(!request.headers.get('Content-Type')?.startsWith('application/json'))throw new Error('type');
   const reader=request.body?.getReader();if(!reader)throw Error('body');let size=0,chunks=[];
-  while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>8192){await reader.cancel();throw Error('size');}chunks.push(value);}
+  while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>limit){await reader.cancel();throw Error('size');}chunks.push(value);}
   const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 export default {async fetch(request,env){
   const origin=env.SITE_ORIGIN||'https://fexas25.github.io';
-  const headers={'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Vary':'Origin','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
+  const headers={'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Vary':'Origin','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'};
   const reply=(value,status=200)=>new Response(JSON.stringify(value),{status,headers});
   if(request.headers.get('Origin')&&request.headers.get('Origin')!==origin)return reply({error:'origin'},403);
-  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type'}});
+  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization'}});
   if(!env.DB)return reply({error:'not configured'},503);
   const path=new URL(request.url).pathname, now=Math.floor(Date.now()/1000);
   try{
+    if(['/private/manage','/private/read'].includes(path)){
+      if(request.headers.get('Origin')!==origin)return reply({error:'origin required'},403);
+      return await privateRequest(request,env,{body,reply,path,now});
+    }
     if(path==='/messages'&&request.method==='GET'){
       const raw=new URL(request.url).searchParams.get('before');const before=raw&&/^\d+$/.test(raw)?Number(raw):Number.MAX_SAFE_INTEGER;
       const {results}=await env.DB.prepare('SELECT id,name,message,created FROM messages WHERE approved=1 AND id<? ORDER BY id DESC LIMIT 31').bind(before).all();

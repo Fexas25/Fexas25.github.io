@@ -11,13 +11,16 @@
     $('publish-panel').hidden = true;
     $('publish-source').value = '';
   }
-  const ids = ['post-title','post-tags','post-topic','post-category','post-date','work-type','work-url','work-description','work-cover'];
+  const ids = ['post-visibility','post-title','post-tags','post-topic','post-category','post-date','work-type','work-url','work-description','work-cover'];
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
   const isWork = () => ['projects','game-jam','art'].includes($('post-category').value);
   function updateFields() {
     $('work-fields').hidden = !isWork();
     $('blog-topic-field').hidden = $('post-category').value !== 'competitive-programming';
     $('post-category').disabled = Boolean(currentRecord);
+    $('post-visibility').disabled = Boolean(currentRecord);
+    $('private-note').hidden = $('post-visibility').value !== 'private';
+    $('prepare-publish').disabled = $('post-visibility').value === 'private';
     $('editing-status').textContent = currentRecord ? `正在修改：${currentRecord.path}（保留原文件名）` : '正在新建内容';
     const category = $('post-category').value;
     $('manage-category').href = `${repository}/tree/main/${folders[category] || '_posts'}`;
@@ -103,6 +106,8 @@
     ids.forEach(id => $(id).value = typeof meta[id] === 'string' ? meta[id] : '');
     if (typeof meta['post-tags'] !== 'string') $('post-tags').value = window.MXContent.tags(currentRecord?.metadata.tags || importedMetadata?.tags).join(', ');
     if (currentRecord) $('post-category').value = currentRecord.category;
+    if (!['private','public'].includes($('post-visibility').value)) $('post-visibility').value = 'public';
+    if (currentRecord?.privateId) $('post-visibility').value = 'private';
     if (!folders[$('post-category').value]) $('post-category').value = 'blog';
     if (!$('post-date').value) $('post-date').value = today();
     if (!$('post-topic').value) $('post-topic').value = window.MXContent.topic(currentRecord?.metadata || importedMetadata || {});
@@ -119,12 +124,13 @@
   }
   function preserveCurrent() {
     if (activeDraft && !dirty) return true;
-    return !(activeDraft || ids.some(id=>!['post-category','post-date','post-topic','work-type'].includes(id) && $(id).value) || $('markdown-input').value) || saveDraft();
+    return !(activeDraft || ids.some(id=>!['post-visibility','post-category','post-date','post-topic','work-type'].includes(id) && $(id).value) || $('markdown-input').value) || saveDraft();
   }
   function blankDocument() {
     dirty = false;
     activeDraft = null; currentRecord = null; importedMetadata = null;
     ['post-title','post-tags','post-topic','markdown-input','work-url','work-description','work-cover'].forEach(id => $(id).value = '');
+    $('post-visibility').value = 'public';
     $('post-date').value = today(); $('work-type').value = 'creative'; $('post-topic').value = 'notes';
     invalidatePublish(); updateFields(); preview(); refreshLibrary();
   }
@@ -147,12 +153,14 @@
       lines.push(`type: ${$('work-type').value}`);
       for (const [key,value] of [['external_url',link],['description',$('work-description').value.trim()],['cover',cover]]) if(value) lines.push(`${key}: ${JSON.stringify(value)}`);
     }
+    if ($('post-visibility').value === 'private' || currentRecord?.privateId) lines.push('private: true');
     lines.push('---','',body,'');
     const file = {folder:folders[category],filename:`${category === 'blog' ? date+'-' : ''}${slugify(title)}.md`,text:lines.join('\n')};
     const record = currentRecord || (importedMetadata ? {path:`${file.folder}/${file.filename}`,category,metadata:importedMetadata,sha:''} : null);
     return window.MXContent.update(file,record);
   }
   function showPublish(file, message) {
+    if($('post-visibility').value==='private'||currentRecord?.privateId){$('publish-panel').hidden=true;return;}
     $('publish-panel').hidden = false;
     $('publish-status').textContent = message;
     $('publish-path').textContent = `${file.folder}/${file.filename}`;
@@ -163,6 +171,7 @@
   }
   $('prepare-publish').addEventListener('click', async () => {
     const status = $('export-status'); status.hidden = true;
+    if ($('post-visibility').value === 'private' || currentRecord?.privateId) { status.hidden=false; status.textContent='私密内容请使用密钥发布，不能复制到公开仓库。'; return; }
     if (!$('writing-form').reportValidity()) return;
     try {
       const file = exportDocument(), revision = ++publishRevision;
@@ -257,7 +266,7 @@
       if (!/\.(md|markdown|mdown)$/i.test(file.name)) throw Error('请选择 .md、.markdown 或 .mdown 文件。');
       const parsed = window.MXContent.importMarkdown(await file.text(),file.name,$('post-category').value);
       if (!preserveCurrent()) throw Error('当前内容尚未保存，请先导出备份，再导入。');
-      const meta = {'post-topic':window.MXContent.topic(parsed.metadata),'post-tags':window.MXContent.tags(parsed.metadata.tags).join(', '),'post-title':parsed.title,'post-category':parsed.category,'post-date':parsed.date || today(),'work-type':parsed.metadata.type || 'creative','work-url':parsed.metadata.external_url || '','work-description':parsed.metadata.description || '','work-cover':parsed.metadata.cover || '',__imported:parsed.metadata};
+      const meta = {'post-visibility':parsed.metadata.private===true?'private':'public','post-topic':window.MXContent.topic(parsed.metadata),'post-tags':window.MXContent.tags(parsed.metadata.tags).join(', '),'post-title':parsed.title,'post-category':parsed.category,'post-date':parsed.date || today(),'work-type':parsed.metadata.type || 'creative','work-url':parsed.metadata.external_url || '','work-description':parsed.metadata.description || '','work-cover':parsed.metadata.cover || '',__imported:parsed.metadata};
       const item = {id:drafts.id(),body:parsed.body,meta};
       drafts.save(item);
       showDraft(item);
@@ -287,10 +296,12 @@
       setTimeout(()=>URL.revokeObjectURL(url),30000);
       showPublish(file, '文件已导出。点击“上传已导出的文件”，拖入刚下载的 Markdown 文件并提交即可。');
       $('manual-copy').hidden = false;
-      status.textContent = `已导出 ${file.filename}。发布步骤和对应文件夹入口在下方。`;
+      status.textContent = $('post-visibility').value==='private'||currentRecord?.privateId ? `已导出本地私密副本 ${file.filename}，请妥善保存，不要上传公开仓库。` : `已导出 ${file.filename}。发布步骤和对应文件夹入口在下方。`;
     } catch(error) { status.textContent = error.message; }
   });
   window.MXEditor = {
+    draftId: () => activeDraft,
+    privateRevision(sha) { if(currentRecord?.privateId){currentRecord.sha=sha;saveDraft();} },
     imageTarget() {
       const input = $('markdown-input');
       return {draft:activeDraft, body:input.value, start:input.selectionStart, end:input.selectionEnd};
@@ -316,6 +327,7 @@
       const meta = record.metadata;
       currentRecord = record;
       $('post-category').value = record.category;
+      $('post-visibility').value = record.privateId ? 'private' : 'public';
       $('post-title').value = String(meta.title || '');
       $('post-tags').value = window.MXContent.tags(meta.tags).join(', ');
       $('post-topic').value = window.MXContent.topic(meta);
@@ -331,8 +343,9 @@
       try { drafts.save(item); showDraft(item); draftStatus('已新建草稿，上一篇已保留。'); }
       catch (error) { draftStatus(error.message); }
     },
-    committed(file, sha) {
+    committed(file, sha, privateId) {
       currentRecord = window.MXContent.parse(file.text, `${file.folder}/${file.filename}`, sha);
+      if (privateId) currentRecord.privateId = privateId;
       updateFields(); saveDraft();
     }
   };
