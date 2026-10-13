@@ -3,6 +3,7 @@
   const scene = document.querySelector('[data-buddy-scene]');
   if (!scene) return;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  const reading = !!document.querySelector('.reading-shell');
   const message = scene.querySelector('.buddy-message');
   const speech = scene.querySelector('.buddy-speech');
   const plane = scene.querySelector('.buddy-plane');
@@ -282,7 +283,7 @@
       const length = Math.hypot(dx, dy);
       const step = Math.min(length, dt * (width <= 700 ? 16 : 23));
       const x = actor.x + dx / (length || 1) * step, y = actor.y + dy / (length || 1) * step;
-      if (length < 1 || !safe(actor, x, y)) { actor.target = null; actor.pause = now + 2500 + Math.random() * 2500; }
+      if (length < 1 || !safe(actor, x, y)) { actor.target = null; actor.pause = now + (reading ? 5500 : 3000) + Math.random() * (reading ? 4000 : 2500); }
       else paint(actor, x, y);
     });
     if (!motion.matches || drag) frame = requestAnimationFrame(tick);
@@ -329,7 +330,7 @@
   addEventListener('scroll', () => {
     scene.classList.add('is-scrolling');
     clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => { refresh(); scene.classList.remove('is-scrolling'); }, 160);
+    scrollTimer = setTimeout(() => { refresh(); scene.classList.remove('is-scrolling'); }, 650);
   }, { passive: true });
   addEventListener('resize', scheduleRefresh, { passive: true });
   new ResizeObserver(scheduleRefresh).observe(document.body);

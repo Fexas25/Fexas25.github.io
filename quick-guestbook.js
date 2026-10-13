@@ -40,7 +40,17 @@
     const viewport=window.visualViewport,keyboard=viewport&&window.innerHeight-viewport.height>150;
     dialog.classList.toggle('mail-keyboard',Boolean(keyboard&&dialog.open));
     if(keyboard){dialog.style.setProperty('--mail-height',viewport.height+'px');dialog.style.setProperty('--mail-top',viewport.offsetTop+'px');}
+    if(dialog.open)requestAnimationFrame(()=>{
+      const active=document.activeElement;
+      if(!dialog.open||!active?.matches('input,textarea,select')||!dialog.contains(active))return;
+      const box=dialog.getBoundingClientRect(),field=active.getBoundingClientRect();
+      const top=Math.max(box.top,viewport?.offsetTop||0)+16;
+      const bottom=Math.min(box.bottom,(viewport?.offsetTop||0)+(viewport?.height||innerHeight))-16;
+      if(field.top<top)dialog.scrollTop+=field.top-top;
+      else if(field.bottom>bottom)dialog.scrollTop+=Math.min(field.bottom-bottom,field.top-top);
+    });
   }
+  dialog.addEventListener('focusin',fitKeyboard);
   window.visualViewport?.addEventListener('resize',fitKeyboard);
   window.visualViewport?.addEventListener('scroll',fitKeyboard);
   document.addEventListener('click', event => {

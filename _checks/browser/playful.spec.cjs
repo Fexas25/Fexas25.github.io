@@ -37,6 +37,7 @@ test('内页点击小图案会清理，输入区不触发，减少动态效果�
   await page.goto('/editor.html');
   await page.emulateMedia({ reducedMotion:'no-preference' });
   await page.locator('textarea').first().click();
+  await expect(page.locator('.is-drifting')).toHaveCount(0);
   await expect(page.locator('.studio-click-spark')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
 });

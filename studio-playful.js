@@ -5,7 +5,13 @@
   const marks = [...ornaments.querySelectorAll('.studio-mark')];
   const floaters = [...document.querySelectorAll('.shelf-character, .studio-ornaments')];
   const visible = new Set();
-  const sync = () => floaters.forEach(el => el.classList.toggle('is-drifting', visible.has(el) && !document.hidden && !reduced.matches));
+  const sync = () => {
+    const quiet=!!document.querySelector('dialog[open]')||document.activeElement?.matches('input,textarea,select,[contenteditable]');
+    floaters.forEach(el => el.classList.toggle('is-drifting', visible.has(el) && !document.hidden && !reduced.matches && !quiet));
+  };
+  document.addEventListener('focusin',sync);
+  document.addEventListener('focusout',()=>queueMicrotask(sync));
+  new MutationObserver(sync).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open']});
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(({target, isIntersecting}) => isIntersecting ? visible.add(target) : visible.delete(target));
@@ -34,9 +40,10 @@
     if (event.target.closest('input,textarea,select,button,a,summary,label,[contenteditable],pre,code,[data-buddy-scene],.prose,.guestbook-message')) return;
     if (getSelection()?.toString()) return;
     const now = performance.now();
-    if (now-last<140) return;
+    const touch=event.pointerType==='touch';
+    if (now-last<(touch?280:180)) return;
     last = now;
-    if (timers.size>=8) remove(timers.keys().next().value);
+    if (timers.size>=(touch?3:5)) remove(timers.keys().next().value);
     const spark = document.createElement('span');
     spark.className = 'studio-click-spark';
     spark.style.setProperty('--spark-x', `${event.clientX}px`);

@@ -1,5 +1,20 @@
 const {test,expect}=require('@playwright/test');
 
+test('软键盘缩小并移动可视区域时，留言输入仍在弹窗内可见',async({page})=>{
+ await page.goto('/guestbook/');await page.locator('[data-guestbook-write]').click();
+ const input=page.locator('#quick-guestbook [name=message]');await input.fill('键盘打开后继续写');
+ await page.evaluate(()=>{
+  Object.defineProperties(visualViewport,{height:{configurable:true,value:340},offsetTop:{configurable:true,value:50}});
+  visualViewport.dispatchEvent(new Event('resize'));
+ });
+ const dialog=page.locator('#quick-guestbook');await expect(dialog).toHaveClass(/mail-keyboard/);
+ await expect.poll(async()=>{const d=await dialog.boundingBox(),i=await input.boundingBox();return d.y>=50&&d.y+d.height<=391&&i.y>=d.y&&i.y+Math.min(i.height,60)<=d.y+d.height;}).toBe(true);
+ await expect(input).toHaveValue('键盘打开后继续写');
+ await page.evaluate(()=>{delete visualViewport.height;delete visualViewport.offsetTop;visualViewport.dispatchEvent(new Event('resize'));});
+ await expect(dialog).not.toHaveClass(/mail-keyboard/);
+ await dialog.locator('[data-mail-close]').click();await expect(page.locator('[data-guestbook-write]')).toBeFocused();
+});
+
 test('睡猫留言按需验证、保留输入、恢复焦点和小屏提交',async({page})=>{
  await page.addInitScript(()=>sessionStorage.setItem('mx-studio-intro-seen-v2','1'));
  let loads=0, posts=0, fail=true, payload;
