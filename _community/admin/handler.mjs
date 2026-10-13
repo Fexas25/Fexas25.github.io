@@ -28,12 +28,24 @@ export function createHandler(verify=authenticate) {
         const state=url.searchParams.get('state')||'pending', before=url.searchParams.get('before');
         if(!Object.hasOwn(states,state) || (before && (!/^\d+$/.test(before)||!Number.isSafeInteger(Number(before)))))return json({error:'参数无效。'},400);
         const results=await env.DB.batch([
-          env.DB.prepare('SELECT id,name,message,created,approved FROM messages WHERE approved=? AND id<? ORDER BY id DESC LIMIT 31').bind(states[state],before?Number(before):Number.MAX_SAFE_INTEGER),
+          env.DB.prepare("SELECT m.id,m.name,m.message,m.created,m.approved,COALESCE(r.body,'') AS reply,r.updated AS reply_updated,COALESCE(r.revision,0) AS reply_revision FROM messages m LEFT JOIN message_replies r ON r.message_id=m.id WHERE m.approved=? AND m.id<? ORDER BY m.id DESC LIMIT 31").bind(states[state],before?Number(before):Number.MAX_SAFE_INTEGER),
           env.DB.prepare('SELECT approved,COUNT(*) AS count FROM messages GROUP BY approved')
         ]);
         const rows=results[0].results,counts={pending:0,published:0,trash:0};
         for(const [name,value] of Object.entries(states))counts[name]=results[1].results.find(r=>r.approved===value)?.count||0;
         return json({messages:rows.slice(0,30),next:rows.length>30?String(rows[29].id):'',counts});
+      }
+      if(url.pathname==='/api/reply' && request.method==='POST') {
+        if(request.headers.get('Origin')!==env.ADMIN_ORIGIN || request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
+        const data=await readBody(request);
+        if(!data || !Number.isSafeInteger(data.id) || data.id<1 || !['pending','published'].includes(data.from) || typeof data.reply!=='string' || data.reply.length>1000 || !Number.isSafeInteger(data.revision) || data.revision<0)return json({error:'回复参数无效，最多 1000 字。'},400);
+        const reply=data.reply.trim(),updated=Math.floor(Date.now()/1000);
+        // Check both parent visibility and reply revision in the same atomic write.
+        const result=await env.DB.prepare(`INSERT INTO message_replies(message_id,body,updated,revision)
+          SELECT m.id,?,?,1 FROM messages m WHERE m.id=? AND m.approved=? AND COALESCE((SELECT revision FROM message_replies WHERE message_id=m.id),0)=?
+          ON CONFLICT(message_id) DO UPDATE SET body=excluded.body,updated=excluded.updated,revision=message_replies.revision+1`).bind(reply,updated,data.id,states[data.from],data.revision).run();
+        if(!result.meta.changes)return json({error:'留言或回复已变化，请载入最新回复后再修改。'},409);
+        return json({reply,reply_updated:updated,reply_revision:data.revision+1});
       }
       if(url.pathname==='/api/moderate' && request.method==='POST') {
         if(request.headers.get('Origin')!==env.ADMIN_ORIGIN || request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);

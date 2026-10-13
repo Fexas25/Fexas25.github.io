@@ -49,3 +49,5 @@
 .guestbook-board .guestbook-message{transition:transform .2s ease,box-shadow .2s ease}
 @media(hover:hover) and (pointer:fine){.guestbook-board .guestbook-message:hover{transform:translateY(-3px);box-shadow:0 8px 20px #65566d12}}
 @media(prefers-reduced-motion:reduce){.guestbook-board .guestbook-message{transition:none}.guestbook-board .guestbook-message:hover{transform:none}}
+
+.guestbook-reply{margin-top:16px;padding:13px 0 0 14px;border-top:1px dashed var(--note-line);border-left:2px solid var(--note-tape)}.guestbook-reply>strong{font-size:12px;font-weight:600;color:#987486}.guestbook-board .guestbook-reply p{margin-top:5px;font-size:14px;line-height:1.8}

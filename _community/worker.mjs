@@ -23,7 +23,7 @@ export default {async fetch(request,env){
     }
     if(path==='/messages'&&request.method==='GET'){
       const raw=new URL(request.url).searchParams.get('before');const before=raw&&/^\d+$/.test(raw)?Number(raw):Number.MAX_SAFE_INTEGER;
-      const {results}=await env.DB.prepare('SELECT id,name,message,created FROM messages WHERE approved=1 AND id<? ORDER BY id DESC LIMIT 31').bind(before).all();
+      const {results}=await env.DB.prepare("SELECT m.id,m.name,m.message,m.created,COALESCE(r.body,'') AS reply,r.updated AS reply_updated FROM messages m LEFT JOIN message_replies r ON r.message_id=m.id WHERE m.approved=1 AND m.id<? ORDER BY m.id DESC LIMIT 31").bind(before).all();
       return reply({messages:results.slice(0,30),next:results.length>30?String(results[29].id):''});
     }
     if(request.method!=='POST'||!['/messages','/translate'].includes(path))return reply({error:'not found'},404);

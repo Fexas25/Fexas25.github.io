@@ -51,3 +51,31 @@ test('moderation is paginated, parameterized, reversible and protected from stal
  assert.equal((await handle(req('/api/messages?state=__proto__'),env)).status,400);
  db.close();
 });
+
+
+test('owner replies validate authorization, revisions and parent visibility without changing messages',async()=>{
+ const {db,binding}=database(),env={...envBase,DB:binding},handle=createHandler(async()=>({email:env.ADMIN_EMAIL}));
+ const reply=(data,headers={})=>req('/api/reply',{method:'POST',headers:{Origin:env.ADMIN_ORIGIN,'Content-Type':'application/json','X-MX-Admin':'1',...headers},body:JSON.stringify(data)});
+ const initial={id:1,reply:'Meow! <script>hello</script>',revision:0,from:'pending'};
+ assert.equal((await createHandler()(reply(initial),env)).status,401);
+ assert.equal((await handle(reply(initial,{Origin:'https://evil.example'}),env)).status,403);
+ assert.equal((await handle(reply({...initial,reply:'字'.repeat(1001)}),env)).status,400);
+ assert.equal((await handle(reply({...initial,id:999}),env)).status,409);
+ const saved=await (await handle(reply(initial),env)).json();assert.equal(saved.reply_revision,1);
+ assert.equal(db.prepare('SELECT approved FROM messages WHERE id=1').get().approved,0);
+ const {default:publicWorker}=await import('../worker.mjs');
+ const visible=async()=> (await (await publicWorker.fetch(new Request('https://community.example/messages'),{DB:binding})).json()).messages;
+ assert.equal((await visible()).length,0,'pending replies remain private');
+ await handle(post({ids:[1],action:'publish',from:'pending'}),env);
+ assert.equal((await visible())[0].reply,initial.reply);
+ assert.equal((await handle(reply({...initial,reply:'overwrite',from:'published'}),env)).status,409);
+ const updated=await handle(reply({...initial,reply:'谢谢！',revision:1,from:'published'}),env);assert.equal(updated.status,200);
+ assert.equal((await visible())[0].reply,'谢谢！');
+ await handle(post({ids:[1],action:'hide',from:'published'}),env);assert.equal((await visible()).length,0);
+ assert.equal((await handle(reply({...initial,revision:2,from:'published'}),env)).status,409);
+ assert.equal((await handle(reply({...initial,reply:'',revision:2}),env)).status,200);
+ await handle(post({ids:[1],action:'publish',from:'pending'}),env);assert.equal((await visible())[0].reply,'');
+ await handle(post({ids:[1],action:'trash',from:'published'}),env);
+ assert.equal((await handle(reply({...initial,revision:3,from:'published'}),env)).status,409);
+ assert.equal(db.prepare('SELECT COUNT(*) AS n FROM messages').get().n,35);db.close();
+});

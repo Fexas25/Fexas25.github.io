@@ -15,3 +15,18 @@ test('留言审核窄屏、批量操作、回收站与安全显示',async({page}
  await page.getByRole('button',{name:'回收站 1',exact:true}).click();await page.getByRole('button',{name:'恢复待审核',exact:true}).click();await expect(page.locator('.card')).toHaveCount(0);
  await expect(page.getByRole('button',{name:'待审核 1',exact:true})).toBeVisible();
 });
+
+
+test('管理页回复保存、冲突保留、重载与撤回适配手机',async({page})=>{
+ const {page:html}=await import('../../_community/admin/ui.mjs');let row={id:1,name:'访客',message:'来玩啦',created:1700000000,approved:1,reply:'',reply_revision:0},fail=true;
+ await page.route('**/admin-test',r=>r.fulfill({contentType:'text/html',body:html('reply-test')}));
+ await page.route('**/api/messages?*',r=>r.fulfill({json:{messages:new URL(r.request().url()).searchParams.get('state')==='published'?[row]:[],next:'',counts:{pending:0,published:1,trash:0}}}));
+ await page.route('**/api/reply',async r=>{const body=r.request().postDataJSON();await new Promise(resolve=>setTimeout(resolve,150));if(fail)return r.fulfill({status:409,json:{error:'回复已变化'}});row={...row,reply:body.reply,reply_revision:row.reply_revision+1};return r.fulfill({json:row});});
+ await page.goto('/admin-test');await page.getByRole('button',{name:'已公开 1',exact:true}).click();await page.locator('summary').click();await page.getByLabel('MX 的回复').fill('谢谢来玩 <img src=x>');
+ await page.getByRole('button',{name:'保存回复',exact:true}).click();await expect(page.locator('#status')).toContainText('输入已保留');await expect(page.getByLabel('MX 的回复')).toHaveValue('谢谢来玩 <img src=x>');
+ await page.getByRole('button',{name:'刷新',exact:true}).click();await expect(page.getByLabel('MX 的回复')).toHaveValue('谢谢来玩 <img src=x>');
+ row={...row,reply:'另一设备的回复',reply_revision:1};page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'载入最新回复'}).click();await expect(page.getByLabel('MX 的回复')).toHaveValue('另一设备的回复');
+ fail=false;await page.getByLabel('MX 的回复').fill('谢谢你呀！');await page.getByRole('button',{name:'保存回复',exact:true}).click();await expect(page.locator('#status')).toHaveText('回复已保存。');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'撤回回复'}).click();await expect(page.locator('#status')).toContainText('原留言保留');await expect(page.locator('.body')).toHaveText('来玩啦');
+});

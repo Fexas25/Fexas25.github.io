@@ -30,10 +30,10 @@ test('留言未配置不可提交，配置后验证、保留失败内容和审�
  await page.route('https://challenges.cloudflare.com/**',r=>r.fulfill({contentType:'text/javascript',body:'window.turnstile={render:(s,o)=>{if(!window.challenge)o.callback("verified");window.challenge=o;return 1},reset:()=>{},remove:()=>{}};window.mxQuickGuestbookChallenge();'}));
  let fail=true;
  const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
- await page.route('https://community.test/**',r=>r.request().method()==='OPTIONS'?r.fulfill({status:204,headers}):r.request().method()==='GET'?r.fulfill({headers,json:{messages:[{name:'<img src=x>',message:'<script>alert(1)</script>',created:100}],next:''}}):r.fulfill({headers,status:fail?503:201,json:fail?{error:'unavailable'}:{pending:true}}));
+ await page.route('https://community.test/**',r=>r.request().method()==='OPTIONS'?r.fulfill({status:204,headers}):r.request().method()==='GET'?r.fulfill({headers,json:{messages:[{name:'<img src=x>',message:'<script>alert(1)</script>',reply:'MX 回复 <img src=x> '+ '长回复'.repeat(60),created:100}],next:''}}):r.fulfill({headers,status:fail?503:201,json:fail?{error:'unavailable'}:{pending:true}}));
  await page.reload();await page.locator('[data-guestbook-write]').click();
  await expect(page.locator('[type=submit]')).toBeEnabled();
- await expect(page.locator('.guestbook-message img')).toHaveCount(0);
+ await expect(page.locator('.guestbook-message img')).toHaveCount(0);await expect(page.locator('.guestbook-reply')).toContainText('MX 回复 <img src=x>');
  await page.locator('[name=name]').fill('MX');await page.locator('[name=message]').fill('一条留言');
  await page.locator('[type=submit]').click();
  await expect(page.locator('#quick-guestbook-status')).toContainText('内容已保留');
