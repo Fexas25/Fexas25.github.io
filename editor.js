@@ -5,6 +5,7 @@
   const repository = 'https://github.com/Fexas25/Fexas25.github.io';
   let publishRevision = 0;
   let currentRecord = null;
+  const imagePreviews = new Map();
   function invalidatePublish() {
     publishRevision++;
     $('publish-panel').hidden = true;
@@ -29,7 +30,17 @@
     $('word-count').textContent = `${value.replace(/\s/g,'').length} 字`;
     const output = $('preview-content');
     if (!value.trim()) { output.textContent = '写点什么，预览就会出现在这里。'; return; }
-    if (window.marked?.parse && window.DOMPurify?.sanitize) output.innerHTML = window.DOMPurify.sanitize(window.marked.parse(value), {FORBID_TAGS:['form','input','button','style'],FORBID_ATTR:['style']});
+    if (window.marked?.parse && window.DOMPurify?.sanitize) {
+      const fragment = window.DOMPurify.sanitize(window.marked.parse(value), {FORBID_TAGS:['form','input','button','style'],FORBID_ATTR:['style'],RETURN_DOM_FRAGMENT:true});
+      fragment.querySelectorAll('img').forEach(img => {
+        const path = img.getAttribute('src');
+        if (/^\/picture\/uploads\/[a-f0-9]{64}\.(jpg|png|webp|gif)$/.test(path)) {
+          // The repository is ready before Pages finishes deploying the image.
+          img.src = imagePreviews.get(path) || 'https://raw.githubusercontent.com/Fexas25/Fexas25.github.io/main' + path;
+        }
+      });
+      output.replaceChildren(fragment);
+    }
     else output.textContent = value;
   }
   let activeDraft = null;
@@ -280,6 +291,22 @@
     } catch(error) { status.textContent = error.message; }
   });
   window.MXEditor = {
+    imageTarget() {
+      const input = $('markdown-input');
+      return {draft:activeDraft, body:input.value, start:input.selectionStart, end:input.selectionEnd};
+    },
+    insertImage(path, file, target) {
+      const input = $('markdown-input');
+      if (target.draft !== activeDraft || target.body !== input.value) throw Error('当前草稿已改变，图片已上传。请重新选择原图插入，不会重复上传。');
+      if (imagePreviews.has(path)) URL.revokeObjectURL(imagePreviews.get(path));
+      imagePreviews.set(path, URL.createObjectURL(file));
+      if (imagePreviews.size > 30) {
+        const oldest = imagePreviews.keys().next().value;
+        URL.revokeObjectURL(imagePreviews.get(oldest)); imagePreviews.delete(oldest);
+      }
+      input.setRangeText(`\n\n![图片](${path})\n\n`, target.start, target.end, 'end');
+      preview(); saveDraft();
+    },
     exportDocument,
     record: () => currentRecord,
     hasContent: () => Boolean($('post-title').value.trim() || $('markdown-input').value.trim() || $('work-url').value.trim()),

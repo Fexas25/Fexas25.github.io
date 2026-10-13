@@ -18,6 +18,7 @@
     $('github-logout').hidden = !token;
     $('github-logout').disabled = busy;
     $('github-publish').disabled = busy || !serviceReady;
+    $('image-upload').disabled = busy || !serviceReady;
     $('github-publish').textContent = busy ? '处理中…' : token ? (window.MXEditor.record() ? '保存修改' : '发布到网站') : '登录后发布';
     ['github-load','github-new','github-refresh','github-article'].forEach(id => $(id).disabled = busy);
     $('writing-form').inert = busy;
@@ -35,9 +36,9 @@
     controls();
   }
   async function api(path, options = {}) {
-    const response = await fetch(apiRoot + path, {...options,cache:'no-store',headers:{Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(token ? {Authorization:`Bearer ${token}`} : {}),...(options.body ? {'Content-Type':'application/json'} : {})}});
+    const response = await fetch(apiRoot + path, {...options,signal:AbortSignal.timeout(60000),cache:'no-store',headers:{Accept:'application/vnd.github+json',...options.headers,'X-GitHub-Api-Version':'2022-11-28',...(token ? {Authorization:`Bearer ${token}`} : {}),...(options.body ? {'Content-Type':'application/json'} : {})}});
     if (!response.ok) {
-      if (response.status === 401) { token = ''; controls(); }
+      if (response.status === 401) { token = ''; $('github-status').textContent = '登录已失效，请重新登录。'; controls(); }
       const messages = {401:'登录已失效，请重新登录。',403:'GitHub 拒绝访问，请检查应用是否安装到网站仓库并拥有 Contents 读写权限，或稍后再试。',404:'未找到内容，可能已被移动或删除，或应用尚未安装到网站仓库。',409:'文章已在其他地方更新。请先导出当前草稿，再重新打开最新文章合并修改。',422:'提交未成功，文件可能已存在或内容不符合要求，请刷新列表后检查。'};
       const error = new Error(messages[response.status] || `GitHub 请求失败（${response.status}），请稍后重试。`); error.status = response.status; throw error;
     }
@@ -46,6 +47,63 @@
   const pathURL = path => '/contents/' + path.split('/').map(encodeURIComponent).join('/');
   function decode(content) { return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(atob(content.replace(/\s/g,'')), c => c.charCodeAt(0))); }
   function encode(content) { let binary = ''; for (const byte of new TextEncoder().encode(content)) binary += String.fromCharCode(byte); return btoa(binary); }
+  let imageTarget = null;
+  $('image-upload').addEventListener('click', () => {
+    if (busy) return;
+    if (!token) {
+      $('image-upload-status').textContent = '请先完成 GitHub 登录，再点“上传图片”选择图片。';
+      $('published-content').open = true; $('github-login').click(); return;
+    }
+    imageTarget = window.MXEditor.imageTarget();
+    $('image-file').click();
+  });
+  $('image-file').addEventListener('change', async () => {
+    const file = $('image-file').files[0];
+    $('image-file').value = '';
+    if (!file || busy) return;
+    const status = $('image-upload-status'), target = imageTarget;
+    if (!token) { status.textContent = '请先登录 GitHub，再选择图片。'; return; }
+    if (!target) { status.textContent = '请点“上传图片”重新选择。'; return; }
+    busy = true; controls(); status.textContent = '正在检查图片…';
+    try {
+      if (!file.size || file.size > 5 * 1024 * 1024) throw Error('请选择非空且不超过 5 MB 的图片。');
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const starts = signature => signature.every((byte, i) => bytes[i] === byte);
+      const ascii = (a,b) => String.fromCharCode(...bytes.slice(a,b));
+      const ext = starts([137,80,78,71,13,10,26,10]) ? 'png' : starts([255,216,255]) ? 'jpg' : /^GIF8[79]a$/.test(ascii(0,6)) ? 'gif' : ascii(0,4)==='RIFF' && ascii(8,12)==='WEBP' ? 'webp' : '';
+      if (!ext) throw Error('支持 JPG、PNG、WebP 和 GIF；HEIC 请先转为 JPG。');
+      // Decode before uploading, so renamed or damaged files do not enter the repo.
+      const local = URL.createObjectURL(file);
+      try {
+        await new Promise((resolve,reject) => {
+          const img = new Image(), timer = setTimeout(() => { img.src=''; reject(Error('图片读取超时，请换一张图片。')); },10000);
+          img.onload = () => { clearTimeout(timer); resolve(); };
+          img.onerror = () => { clearTimeout(timer); reject(Error('图片无法读取，请重新导出后再试。')); };
+          img.src = local;
+        });
+      } finally { URL.revokeObjectURL(local); }
+      const hex = data => [...new Uint8Array(data)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+      const hash = hex(await crypto.subtle.digest('SHA-256',bytes));
+      const path = `picture/uploads/${hash}.${ext}`;
+      const prefix = new TextEncoder().encode(`blob ${bytes.length}\0`), gitBytes = new Uint8Array(prefix.length + bytes.length);
+      gitBytes.set(prefix); gitBytes.set(bytes,prefix.length);
+      const expectedSha = hex(await crypto.subtle.digest('SHA-1',gitBytes));
+      status.textContent = '正在上传图片…';
+      let existing = null;
+      try { existing = await api(pathURL(path)+'?ref=main',{headers:{Accept:'application/vnd.github.object+json'}}); }
+      catch (error) { if (error.status !== 404) throw error; }
+      if (existing && (existing.type !== 'file' || existing.sha !== expectedSha)) throw Error('图片路径已有不同内容，本次未覆盖，请联系站主检查。');
+      if (!existing) {
+        let binary = '';
+        for (let i=0; i<bytes.length; i+=32768) binary += String.fromCharCode(...bytes.subarray(i,i+32768));
+        await api(pathURL(path),{method:'PUT',body:JSON.stringify({message:`Upload image ${hash.slice(0,12)}`,branch:'main',content:btoa(binary)})});
+      }
+      window.MXEditor.insertImage('/'+path,file,target);
+      status.textContent = '图片已插入正文。文章写好后，点发布或保存修改。';
+    } catch (error) {
+      status.textContent = error instanceof TypeError || error.name === 'TimeoutError' ? '网络中断或超时。请重新选择原图重试，系统会先检查是否已上传。' : error.message;
+    } finally { busy = false; controls(); }
+  });
   async function listArticles() {
     const version = ++listing;
     try {
