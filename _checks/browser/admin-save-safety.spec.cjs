@@ -35,7 +35,7 @@ test('读取项目包时锁定操作，坏包不会丢掉此前选择的完整�
 test('发布中离开有保护，后续改动还原后地址转回文章',async({page})=>{
  await page.goto(admin+'/write');await page.locator('#post-title').fill('地址同步');await page.locator('#markdown-input').fill('提交正文');
  let release;await page.route('**/api/documents',async r=>{if(r.request().postDataJSON().action==='save'){const response=await r.fetch();await new Promise(resolve=>release=resolve);await r.fulfill({response});}else await r.continue();});
- await page.locator('#publish').click();await expect.poll(()=>typeof release).toBe('function');
+ await page.locator('#publish').click();await expect.poll(()=>typeof release).toBe('function');await expect(page.locator('#post-category')).toBeDisabled();
  expect(await page.evaluate(()=>{const event=new Event('beforeunload',{cancelable:true});dispatchEvent(event);return event.defaultPrevented;})).toBe(true);
  await page.locator('#markdown-input').fill('后续改动');release();await expect(page.locator('#status')).toContainText('已保存到网站');await expect(page).toHaveURL(/draft=/);
  await page.locator('#markdown-input').fill('提交正文');await expect(page).toHaveURL(/articles\/edit\?id=/);expect(await page.evaluate(()=>MXDrafts.state().items)).toHaveLength(0);
@@ -132,4 +132,24 @@ test('草稿备份读取另一页最新内容，读取异常不下载旧备份�
  const other=await context.newPage();await other.goto(admin+'/write?draft='+draft);await other.locator('#markdown-input').fill('另一页最新正文');await other.goto(admin+'/write');await other.locator('#post-title').fill('另一页新增');await other.locator('#markdown-input').fill('差异内容');
  await page.getByText('备份与恢复文章草稿',{exact:true}).click();const event=page.waitForEvent('download');await page.locator('#backup').click();const exported=JSON.parse(await downloadText(await event));expect(exported.items.map(d=>d.body).sort()).toEqual(['另一页最新正文','差异内容'].sort());expect((await page.evaluate(()=>MXDrafts.state().items))[0].body).toBe('旧正文');
  let downloads=0;page.on('download',()=>downloads++);await page.evaluate(()=>localStorage.setItem('mx-writing-drafts-v1','{broken'));await page.locator('#backup').click();await expect(page.locator('#status')).toContainText('无法读取草稿库');expect(downloads).toBe(0);expect((await page.evaluate(()=>MXDrafts.state().items))[0].body).toBe('旧正文');await other.close();await overflow(page);
+});
+
+for(const category of ['competitive-programming','art'])test(category+' 导出覆盖旧栏目，重新导入保持栏目和正文',async({page})=>{
+ const work=category==='art';await page.goto(admin+(work?'/projects/article':'/write'));
+ await page.locator('#markdown-file').setInputFiles({name:'old.md',mimeType:'text/markdown',buffer:Buffer.from('---\ncategory: '+(work?'projects':'blog')+'\ntitle: 原有文章\nprivate: true\n---\n\n原有正文')});
+ await page.locator('#post-category').selectOption(category);const event=page.waitForEvent('download');await page.locator('#export').click();const text=await downloadText(await event);
+ await page.goto(admin+(work?'/projects/article':'/write'));await page.locator('#markdown-file').setInputFiles({name:'again.md',mimeType:'text/markdown',buffer:Buffer.from(text)});
+ await expect(page.locator('#post-category')).toHaveValue(category);await expect(page.locator('#markdown-input')).toHaveValue('原有正文');await expect(page.locator('#post-visibility')).toHaveValue('private');await overflow(page);
+});
+
+test('首次发布失败后栏目恢复可选，原草稿保留',async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('失败保留');await page.locator('#markdown-input').fill('原正文');await page.locator('#post-category').selectOption('competitive-programming');
+ await page.route('**/api/documents',r=>r.abort());await page.locator('#publish').click();await expect(page.locator('#publish')).toBeEnabled();await expect(page.locator('#post-category')).toBeEnabled();await expect(page.locator('#post-category')).toHaveValue('competitive-programming');expect((await page.evaluate(()=>MXDrafts.state().items))[0].body).toBe('原正文');await overflow(page);
+});
+
+test('慢网核对并行且不锁删除，删除后迟到结果不改列表，差异草稿保留',async({page})=>{
+ await page.goto(admin+'/write');await page.evaluate(()=>{for(let i=0;i<4;i++)MXDrafts.save({id:'slow-'+i,meta:{'post-title':'慢网草稿'+i,'post-category':'blog',__publishId:'doc-'+i},body:'差异正文'+i});});
+ const pending=[];await page.route('**/api/documents',async r=>{await new Promise(resolve=>pending.push(resolve));await r.fulfill({status:503,json:{error:'暂时不可用'}});});
+ await page.goto(admin+'/drafts');await expect.poll(()=>pending.length).toBe(3);await expect(page.locator('#status')).toContainText('正在核对');const first=page.locator('article').filter({has:page.getByRole('heading',{name:'慢网草稿0',exact:true})});await expect(first.getByRole('button',{name:'删除草稿'})).toBeEnabled();page.once('dialog',d=>d.accept());await first.getByRole('button',{name:'删除草稿'}).click();
+ for(const done of pending)done();await expect(page.locator('#status')).toContainText('已删除本机草稿');await expect(page.getByRole('heading',{name:'慢网草稿0',exact:true})).toHaveCount(0);expect((await page.evaluate(()=>MXDrafts.state().items)).map(d=>d.body).sort()).toEqual(['差异正文1','差异正文2','差异正文3']);await overflow(page);
 });

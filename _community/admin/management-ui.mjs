@@ -27,21 +27,26 @@ export function draftsClient(){
  $('search').oninput=render;$('filter').onchange=render;
  $('backup').onclick=()=>{try{const blob=new Blob([drafts.backup()],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='mx-writing-drafts-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);status('已备份本机文章草稿；项目草稿保存在后台。');}catch(e){status(e.message);}};
  $('restore').onclick=()=>$('backup-file').click();$('backup-file').onchange=async()=>{if(deleting){$('backup-file').value='';return;}try{const f=$('backup-file').files[0];if(!f)return;if(f.size>30*1024*1024)throw Error('备份文件过大。');drafts.restore(drafts.validateBackup(JSON.parse(await f.text())));render();refresh('已恢复，原有草稿保留。');}catch(e){status(e.message);}finally{$('backup-file').value='';}};
- async function reconcile(request){
+ async function reconcile(request,message){
   let removed=0,unverified=0;
-  for(const d of [...drafts.state().items]){
-   const documentId=d.meta.__record?.documentId||d.meta.__publishId;if(!documentId)continue;
-   try{const row=await window.MXAdminApi('documents',{action:'read',id:documentId});if(request!==refreshId)return;if(window.MXWriting.equalDraft(d,row)&&JSON.stringify(drafts.state().items.find(x=>x.id===d.id))===JSON.stringify(d)){drafts.remove(d.id);removed++;}}
-   catch{unverified++;}
+  const queue=[...drafts.state().items].filter(d=>d.meta.__record?.documentId||d.meta.__publishId);
+  if(queue.length)status((message?message+' ':'')+'正在核对草稿，可继续编辑或删除。');
+  async function next(){
+   while(request===refreshId&&queue.length){
+    const d=queue.shift(),documentId=d.meta.__record?.documentId||d.meta.__publishId;
+    try{const row=await window.MXAdminApi('documents',{action:'read',id:documentId});if(request!==refreshId)return;if(window.MXWriting.equalDraft(d,row)&&JSON.stringify(drafts.state().items.find(x=>x.id===d.id))===JSON.stringify(d)){drafts.remove(d.id);removed++;}}
+    catch{unverified++;}
+   }
   }
-  if(request===refreshId&&removed){render();status('已清理 '+removed+' 篇与线上内容完全一致的草稿。'+(unverified?'未能核对的草稿已保留。':''));}
+  await Promise.all(Array.from({length:Math.min(3,queue.length)},next));
+  if(request===refreshId){render();status([message,removed?'已清理 '+removed+' 篇与线上内容完全一致的草稿。':'',unverified?'未能核对的草稿已保留。':''].filter(Boolean).join(' '));}
  }
  async function refresh(message=''){
   if(deleting)return;
   const request=++refreshId;
   if(!drafts.reload()){status(drafts.error());return;}
   loading=true;projects=[];render();status('正在加载…');
-  try{const r=await window.MXAdminApi('projects',{action:'list',state:'draft'});if(request!==refreshId)return;projects=r.projects;render();status(message);await reconcile(request);}
+  try{const r=await window.MXAdminApi('projects',{action:'list',state:'draft'});if(request!==refreshId)return;projects=r.projects;loading=false;render();await reconcile(request,message);}
   catch(e){if(request===refreshId)status(e.message);}
   finally{if(request===refreshId){loading=false;render();}}
  }

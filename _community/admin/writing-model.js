@@ -4,7 +4,7 @@
  const stamp=(meta,body)=>JSON.stringify([fields.map(k=>meta[k]||''),body]);
  function exported(meta,body,record,imported,id){
   const content=window.MXContent,category=meta['post-category'],folder=content.folders[category],title=meta['post-title'].trim();if(!title)throw Error('请填写标题。');
-  const value={...imported,title,date:meta['post-date'],tags:content.tags(meta['post-tags'])};
+  const value={...imported,category,title,date:meta['post-date'],tags:content.tags(meta['post-tags'])};
   if(meta['post-visibility']==='private')value.private=true;else delete value.private;
   if(record&&String(imported.date||'').slice(0,10)===value.date)value.date=imported.date;
   if(category==='competitive-programming')value.topic=meta['post-topic'];
@@ -15,7 +15,7 @@
  function equalDocument(file,visibility,row){
   if(row.deletedAt||row.visibility!==visibility||file.title!==row.document.title||file.folder!==row.document.folder||file.filename!==row.document.filename)return false;
   const parse=f=>window.MXContent.parse(f.text,f.folder+'/'+f.filename,'compare');
-  const a=parse(file),b=parse(row.document);delete a.metadata.private;delete b.metadata.private;return a.body===b.body&&JSON.stringify(canonical(a.metadata))===JSON.stringify(canonical(b.metadata));
+  const a=parse(file),b=parse(row.document);delete a.metadata.private;delete b.metadata.private;a.metadata.category??=a.category;b.metadata.category??=b.category;return a.body===b.body&&JSON.stringify(canonical(a.metadata))===JSON.stringify(canonical(b.metadata));
  }
  function equalDraft(d,row){try{return equalDocument(exported(d.meta,d.body,d.meta.__record,d.meta.__imported||{},d.meta.__publishId||row.id),d.meta['post-visibility']||'public',row);}catch{return false;}}
  function preview(target,markdown,base,privateMode){
