@@ -86,3 +86,33 @@ test('草稿删除区分本机与回收站，项目请求中防止重复删除',
  let release,count=0;await page.route('**/api/projects',async r=>{if(r.request().postDataJSON().action==='trash'){count++;const response=await r.fetch();await new Promise(resolve=>release=resolve);await r.fulfill({response});}else await r.continue();});
  page.once('dialog',async d=>{expect(d.message()).toContain('可在已发布项目的回收站恢复');await d.accept();});await project.getByRole('button',{name:'移入回收站'}).click();await expect.poll(()=>typeof release).toBe('function');await expect(project.getByRole('button')).toBeDisabled();await expect(page.locator('#refresh')).toBeDisabled();await page.locator('#search').fill('可恢复');await expect(project.getByRole('button')).toBeDisabled();release();await expect(project).toHaveCount(0);expect(count).toBe(1);await page.locator('#search').fill('');await expect(article).toBeVisible();await overflow(page);
 });
+
+
+for(const type of ['article','project'])for(const committed of [false,true])test(type+' 保存失败后取消换密钥，核实 '+committed,async({page})=>{
+ const isArticle=type==='article',api=isArticle?'documents':'projects',save=isArticle?'#publish':'#publish-project';
+ await page.goto(admin+(isArticle?'/write':'/projects/new'));
+ if(isArticle){await page.locator('#post-title').fill('取消换密钥');await page.locator('#markdown-input').fill('保留正文');await page.locator('#post-visibility').selectOption('private');}
+ else{await page.locator('#title').fill('取消换密钥');await page.locator('#slug').fill('cancel-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');}
+ await page.locator(save).click();await expect(page.locator('#share-key')).not.toHaveValue('');const old=await page.locator('#share-key').inputValue();const id=new URL(page.url()).searchParams.get('id');let pending,once=false,sent=[];
+ await page.route('**/api/'+api,async r=>{const d=r.request().postDataJSON();if(d.action==='save'){sent.push(d);if(!once){once=true;pending=d.key;if(committed)await r.fetch();return r.abort('failed');}}await r.continue();});
+ await page.locator('#rotate').check();await page.locator(save).click();await expect(page.locator(save)).toBeEnabled();expect(pending).toHaveLength(43);await page.locator('#rotate').uncheck();await page.locator(save).click();await expect(page.locator('#status')).toContainText(isArticle?'已保存到网站':'已发布');expect(sent.at(-1).key).toBeUndefined();
+ expect(await page.evaluate(async({api,id,key})=>(await MXAdminApi(api,{action:'check-key',id,key})).matches,{api,id,key:committed?pending:old})).toBe(true);
+ expect(await page.evaluate(async({api,id,key})=>(await MXAdminApi(api,{action:'check-key',id,key})).matches,{api,id,key:committed?old:pending})).toBe(false);
+ if(committed)await expect(page.locator('#share-key')).toHaveValue(pending);else await expect(page.locator('#share-key')).not.toHaveValue(pending);
+ await noStoredKey(page,pending);await overflow(page);
+});
+
+test('文章核对旧请求不能覆盖新选择或导入内容',async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('旧请求');await page.locator('#markdown-input').fill('原正文');await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');
+ await page.evaluate(async()=>{const id=new URL(location.href).searchParams.get('id'),row=await MXAdminApi('documents',{action:'read',id}),r=MXContent.parse(row.document.text,row.document.folder+'/'+row.document.filename,'old-revision');r.documentId=id;r.visibility=row.visibility;const meta=Object.fromEntries(MXWriting.fields.map(k=>[k,document.getElementById(k).value]));MXDrafts.save({id:'stale',body:'保留差异',meta:{...meta,__record:r,__imported:r.metadata}});});
+ await page.goto(admin+'/write?draft=stale');await expect(page.locator('#link-confirm')).toBeEnabled();let release;
+ await page.route('**/api/documents',async r=>{if(r.request().postDataJSON().action==='read'){const response=await r.fetch();await new Promise(resolve=>release=resolve);await r.fulfill({response});}else await r.continue();});
+ await page.locator('#link-load').click();await expect.poll(()=>typeof release).toBe('function');await page.locator('#link-choice').dispatchEvent('change');let response=page.waitForResponse('**/api/documents');release();await (await response).finished();await page.evaluate(()=>new Promise(requestAnimationFrame));await expect(page.locator('#link-confirm')).toBeDisabled();
+ release=null;await page.locator('#link-load').click();await expect.poll(()=>typeof release).toBe('function');await page.locator('#markdown-file').setInputFiles({name:'new.md',mimeType:'text/markdown',buffer:Buffer.from('# 新文档\n\n新正文')});await expect(page).toHaveURL(/write\?draft=/);response=page.waitForResponse('**/api/documents');release();await (await response).finished();await page.evaluate(()=>new Promise(requestAnimationFrame));await expect(page.locator('#link-panel')).toBeHidden();await expect(page.locator('#markdown-input')).toHaveValue(/新正文/);await expect(page.locator('#link-confirm')).toBeDisabled();expect((await page.evaluate(()=>MXDrafts.state().items)).some(d=>d.body==='保留差异')).toBe(true);await overflow(page);
+});
+
+test('项目草稿加载期间不能打断列表，加载后删除本机草稿保留项目',async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('待删除本机');await page.locator('#markdown-input').fill('本机正文');
+ let release;await page.route('**/api/projects',async r=>{await new Promise(resolve=>release=resolve);await r.fulfill({json:{projects:[{id:'11111111-1111-4111-8111-111111111111',title:'等待加载的项目',updated:100,revision:'v1'}]}});});
+ await page.goto(admin+'/drafts');await expect.poll(()=>typeof release).toBe('function');const button=page.getByRole('button',{name:'删除草稿'});await expect(button).toBeDisabled();release();await expect(page.getByRole('heading',{name:'等待加载的项目'})).toBeVisible();await expect(button).toBeEnabled();page.once('dialog',d=>d.accept());await button.click();await expect(page.getByRole('heading',{name:'待删除本机'})).toHaveCount(0);await expect(page.getByRole('heading',{name:'等待加载的项目'})).toBeVisible();await overflow(page);
+});

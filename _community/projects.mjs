@@ -1,3 +1,4 @@
+import {verifyKey} from './private.mjs';
 export const PROJECT_ORIGIN='https://mx-projects.liuwanting830.workers.dev';
 export const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 export const hash=async value=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -11,6 +12,7 @@ export async function manageProjects(data,env,reply){
  if(data?.action==='list'){const {results}=await db.prepare('SELECT * FROM projects WHERE '+(data.trash?'deleted_at>0':'deleted_at=0')+(data.trash?"":data.state==="draft"?" AND state='draft'":" AND state='published'")+' ORDER BY updated DESC').all();return reply({projects:results.map(projectSummary)});}
  if(!uuid.test(data?.id||''))return reply({error:'项目编号无效。'},400);
  const row=await db.prepare('SELECT * FROM projects WHERE id=?').bind(data.id).first();
+ if(data.action==='check-key')return reply({matches:Boolean(row&&await verifyKey(row.id,data.key,row.key_hash))});
  if(data.action==='read')return row?reply({...projectSummary(row),description:row.description,externalUrl:row.external_url,version:row.version,entry:row.entry}):reply({error:'项目不存在。'},404);
  if(data.action==='preview'){
   if(!row||row.deleted_at||row.kind==='static'&&!row.version)return reply({error:'请先保存完整项目草稿。'},400);

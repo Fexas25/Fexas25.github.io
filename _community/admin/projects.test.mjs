@@ -15,6 +15,7 @@ test('project packages enforce all file paths, keys, sessions, preview and rever
  for(const path of ['../secret','/secret','a\\b','a/%2e%2e/z','.env'])assert.equal((await admin({action:'upload-file',id,upload,path,base64:'eA=='})).status,400);
  for(const [path,body] of [['index.html','<h1>PRIVATE CONTENT</h1>'],['secret.js','PRIVATE SCRIPT'],['image.png','PRIVATE IMAGE']])assert.equal((await admin({action:'upload-file',id,upload,path,base64:Buffer.from(body).toString('base64')})).status,200);
  r=await admin(data);assert.equal(r.status,201);data.revision=(await r.json()).revision;
+ assert.deepEqual(await (await admin({action:'check-key',id,key})).json(),{matches:true});assert.deepEqual(await (await admin({action:'check-key',id,key:'wrong'})).json(),{matches:false});
  assert.equal((await read()).status,404);assert.equal((await projectCatalog(env.DB)).length,0);
  const preview=await (await admin({action:'preview',id})).json();r=await read('_preview?'+new URL(preview.url).searchParams);assert.equal(r.status,303);const previewCookie=r.headers.get('Set-Cookie').split(';')[0];assert((await (await read('',previewCookie)).text()).includes('PRIVATE CONTENT'));
  data.state='published';r=await admin(data);data.revision=(await r.json()).revision;

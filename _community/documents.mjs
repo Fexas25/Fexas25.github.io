@@ -42,6 +42,7 @@ export async function manageDocuments(data,db,reply){
  }
  if(!uuid.test(data?.id||''))return reply({error:'参数无效。'},400);
  const row=await db.prepare('SELECT * FROM documents WHERE id=?').bind(data.id).first();
+ if(data.action==='check-key')return reply({matches:Boolean(row&&await verifyKey(row.id,data.key,row.key_hash))});
  if(data.action==='read')return row?reply({...summary(row),document:JSON.parse(row.document),revision:row.revision,deletedAt:row.deleted_at}):reply({error:'未找到内容。'},404);
  if(['trash','restore'].includes(data.action)){
   if(!row)return reply({error:'未找到内容。'},404);

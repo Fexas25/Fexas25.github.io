@@ -17,6 +17,7 @@ test('documents share one Access-protected source; private bodies never enter pu
  let r=await admin(data);assert.equal(r.status,201);let saved=await r.json();assert.equal((await read()).status,200);
  r=await admin({...data,revision:saved.revision,visibility:'private',key});assert.equal(r.status,200);saved=await r.json();
  for(const keyValue of [undefined,'wrong','x'.repeat(43)]){r=await read(keyValue);assert.equal(r.status,403);assert(!(await r.text()).includes('secret body'));}
+ assert.deepEqual(await (await admin({action:'check-key',id,key})).json(),{matches:true});assert.deepEqual(await (await admin({action:'check-key',id,key:'wrong'})).json(),{matches:false});
  r=await read(key);assert.equal((await r.json()).document.text,'secret body');assert.equal(r.headers.get('Cache-Control'),'no-store');
  const list=await (await worker.fetch(new Request('https://worker.example/documents'),env)).json();assert.equal(list.documents[0].title,'A title');assert.equal(list.documents[0].visibility,'private');assert(!JSON.stringify(list).includes('secret body'));assert(!JSON.stringify(list).includes(key));
  assert.equal((await admin({...data,revision:'old'})).status,409);
