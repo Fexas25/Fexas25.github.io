@@ -1,5 +1,5 @@
 import {manageDocuments} from '../documents.mjs';
-import {dashboard,writing,management,drafts,projectWriting} from './hub.mjs';
+import {dashboard,writing,management,drafts,projectWriting,help} from './hub.mjs';
 import {manageProjects} from '../projects.mjs';
 import {authenticate} from './auth.mjs';
 import {page} from './ui.mjs';
@@ -34,9 +34,9 @@ export function createHandler(verify=authenticate) {
       return new Response(page(nonce),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
     }
     if(request.method==='GET'&&url.pathname==='/documents')return new Response(null,{status:302,headers:{...common,Location:'/articles'}});
-    if(request.method==='GET'&&['/','/write','/articles','/articles/edit','/drafts','/projects','/projects/new','/projects/edit','/projects/article'].includes(url.pathname)){
+    if(request.method==='GET'&&['/','/write','/articles','/articles/edit','/drafts','/projects','/projects/new','/projects/edit','/projects/article','/help'].includes(url.pathname)){
       const nonce=crypto.randomUUID();
-      return new Response(url.pathname==='/'?dashboard(nonce):url.pathname==='/drafts'?drafts(nonce):url.pathname==='/articles'?management(nonce):url.pathname==='/projects'?management(nonce,true):['/projects/new','/projects/edit'].includes(url.pathname)?projectWriting(nonce,url.pathname.endsWith('/edit')):writing(nonce,url.pathname!=='/write',url.pathname==='/projects/article'),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}' https://fexas25.github.io; style-src 'nonce-${nonce}' https://fexas25.github.io; connect-src 'self'; img-src https: data: blob:; font-src https://fexas25.github.io; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
+      return new Response(url.pathname==='/'?dashboard(nonce):url.pathname==='/help'?help(nonce):url.pathname==='/drafts'?drafts(nonce):url.pathname==='/articles'?management(nonce):url.pathname==='/projects'?management(nonce,true):['/projects/new','/projects/edit'].includes(url.pathname)?projectWriting(nonce,url.pathname.endsWith('/edit')):writing(nonce,url.pathname!=='/write',url.pathname==='/projects/article'),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; img-src https: data: blob:; font-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
     }
     try {
       if(url.pathname==='/api/project-file'&&request.method==='POST'){

@@ -3,7 +3,7 @@ const {JSDOM}=require('jsdom');
 const root=require('path').resolve(__dirname,'..') + '/' ;
 const key='mx-writing-drafts-v1';
 function page(saved={}){
- const dom=new JSDOM(fs.readFileSync(root+'editor.html','utf8'),{url:'https://test.local/editor.html',runScripts:'outside-only'}),w=dom.window;
+ const dom=new JSDOM(fs.readFileSync(root+'_checks/fixtures/legacy-editor.html','utf8'),{url:'https://test.local/editor.html',runScripts:'outside-only'}),w=dom.window;
  for(const [k,v] of Object.entries(saved))w.localStorage.setItem(k,v);
  w.confirm=()=>true;
  for(const f of ['vendor-js/marked.js','vendor-js/purify.js','vendor-js/js-yaml.js','editor-content.js','editor-drafts.js','editor.js'])w.eval(fs.readFileSync(root+f,'utf8'));

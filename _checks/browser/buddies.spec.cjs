@@ -188,8 +188,9 @@ test('键盘自由移动、编辑时让开、窗口改变后不遮挡', async ({
   await page.setViewportSize({ width: 320, height: 780 });
   await page.waitForTimeout(350);
   await unobstructed(page);
-  await page.goto('/editor.html');
-  await page.locator('#markdown-input').focus();
+  await page.goto('/guestbook/');
+  await page.locator('[data-guestbook-write]').click();
+  await page.locator('[name=message]').focus();
   await expect(page.locator('[data-buddy]')).not.toBeVisible();
   await expect(page.locator('.shelf-character .portrait')).toBeVisible();
 });

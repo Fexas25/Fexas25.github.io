@@ -180,57 +180,6 @@ test('抽签页首次签到及刷新后的记录', async ({ page }) => {
   await expect(page.locator('#checkin-btn')).toBeDisabled();
 });
 
-test('多篇草稿筛选、继续写、刷新和备份恢复', async ({ page, browser }) => {
-  await page.goto('/editor.html');
-  await page.locator('#post-title').fill('手机草稿甲');
-  await page.locator('#markdown-input').fill('第一篇 **保留内容**');
-  await page.locator('#draft-new').click();
-  await page.locator('#post-title').fill('手机草稿乙');
-  await page.locator('#post-category').selectOption('projects');
-  await page.locator('#markdown-input').fill('第二篇工作流');
-  await page.locator('#draft-find > summary').click();
-  await page.locator('#draft-search').fill('草稿甲');
-  await expect(page.locator('#markdown-input')).toHaveValue('第二篇工作流');
-  await page.locator('#draft-open').click();
-  await expect(page.locator('#markdown-input')).toHaveValue('第一篇 **保留内容**');
-  await page.locator('#draft-filter-clear').click();
-  await page.locator('#draft-category-filter').selectOption('projects');
-  await expect(page.locator('#draft-select option')).toHaveCount(1);
-  await expect(page.locator('#draft-selection-info')).toContainText('编辑');
-  await noOverflow(page);
-  await page.locator('#draft-tools > summary').click();
-  const downloadPromise = page.waitForEvent('download');
-  await page.locator('#draft-backup-export').click();
-  const download = await downloadPromise;
-  const backup = await fs.promises.readFile(await download.path());
-  expect(JSON.parse(backup).items).toHaveLength(2);
-  await page.reload();
-  await expect(page.locator('#markdown-input')).toHaveValue('第一篇 **保留内容**');
-  const context = await browser.newContext({ viewport: test.info().project.use.viewport, isMobile: true, hasTouch: true, locale: 'zh-CN', baseURL: 'http://127.0.0.1:4173' });
-  try {
-    const fresh = await context.newPage();
-    fresh.on('pageerror', error => page.__mobileErrors.push(error.message));
-    await fresh.route('https://api.github.com/**', route => route.fulfill({ json: { tree: [] } }));
-    await fresh.goto('/editor.html');
-    await fresh.locator('#draft-tools > summary').click();
-    const chooserPromise = fresh.waitForEvent('filechooser');
-    await fresh.locator('#draft-backup-import').click();
-    await (await chooserPromise).setFiles({ name: 'backup.json', mimeType: 'application/json', buffer: backup });
-    await expect(fresh.locator('#draft-backup-status')).toContainText('新增 2 篇');
-    await expect(fresh.locator('#draft-select option')).toHaveCount(2);
-    await fresh.locator('#draft-find > summary').click();
-    await fresh.locator('#draft-search').fill('草稿乙');
-    await fresh.locator('#draft-open').click();
-    await expect(fresh.locator('#markdown-input')).toHaveValue('第二篇工作流');
-    await noOverflow(fresh);
-  } catch (error) {
-    const fresh = context.pages()[0];
-    if (fresh) await test.info().attach('恢复草稿时的页面', { body: await fresh.screenshot(), contentType: 'image/png' });
-    throw error;
-  } finally { await context.close(); }
-});
-
-
 test('开屏等待点击、进入后不重复打断', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#studio-intro')).toBeVisible();

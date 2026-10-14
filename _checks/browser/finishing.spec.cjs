@@ -29,13 +29,3 @@ test('留言弹窗适应键盘可视区域，关闭恢复焦点和滚动',async(
  await page.evaluate(()=>{delete visualViewport.height;delete visualViewport.offsetTop;visualViewport.dispatchEvent(new Event('resize'));});
  await page.locator('.meow-mail-entry').click();await dialog.locator('[data-mail-write]').click();await expect(dialog).not.toHaveClass(/mail-keyboard/);await expect(dialog.locator('[name=message]')).toHaveValue('键盘弹出时继续写');await page.keyboard.press('Escape');await expect(dialog).toBeHidden();
 });
-
-test('图片提示与可见性一致，切换草稿不残留旧状态',async({page})=>{
- await page.route('https://api.github.com/**',r=>r.fulfill({json:{tree:[]},headers}));await page.goto('/editor.html');
- await expect(page.locator('#image-upload-help')).toHaveText('公开图片 · 单张最多 5 MB');await expect(page.locator('#image-upload-status')).toBeHidden();
- await page.locator('#post-title').fill('保留的草稿');await page.locator('#markdown-input').fill('正文');await page.locator('#post-visibility').selectOption('private');await expect(page.locator('#image-upload-help')).toHaveText('私密图片 · 嵌入正文，单张最多 512 KB');
- await page.evaluate(()=>{document.getElementById('github-result').hidden=false;document.getElementById('github-result').textContent='上一份内容的结果';});
- await page.locator('#draft-new').click();await expect(page.locator('#github-result')).toBeHidden();await expect(page.locator('#image-upload-help')).toContainText('公开图片');
- await page.locator('#draft-select').selectOption({label:await page.locator('#draft-select option').evaluateAll(options=>options.find(o=>o.textContent.includes('保留的草稿')).textContent)});await page.locator('#draft-open').click();await expect(page.locator('#post-visibility')).toHaveValue('private');await expect(page.locator('#markdown-input')).toHaveValue('正文');
- expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
-});

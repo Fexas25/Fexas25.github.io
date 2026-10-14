@@ -17,3 +17,5 @@ _community/dist/
 
 _community/admin/project-client.mjs
 _project-backup/
+
+_community/admin/core-client.mjs

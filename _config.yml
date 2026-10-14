@@ -43,6 +43,10 @@ plugins:
 
 # Exclude from processing
 exclude:
+  - editor.js
+  - editor-github.js
+  - editor-config.js
+  - editor.css
   - _project-backup
   - music/
   - Gemfile

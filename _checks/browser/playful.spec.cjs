@@ -34,7 +34,8 @@ test('内页点击小图案会清理，输入区不触发，减少动态效果�
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await expect(page.locator('.studio-click-spark')).toHaveCount(0);
   await expect(page.locator('.is-drifting')).toHaveCount(0);
-  await page.goto('/editor.html');
+  await page.goto('/guestbook/');
+  await page.locator('[data-guestbook-write]').click();
   await page.emulateMedia({ reducedMotion:'no-preference' });
   await page.locator('textarea').first().click();
   await expect(page.locator('.is-drifting')).toHaveCount(0);

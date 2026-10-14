@@ -1,76 +1,24 @@
 ---
 layout: default
-title: 写点什么
+title: 旧草稿迁移
 noindex: true
 sitemap: false
 section: writing
-eyebrow: A QUIET CORNER TO WRITE
-description: 写作、草稿和 Markdown。
+eyebrow: DRAFT MIGRATION
+description: 下载旧草稿备份，在管理后台继续写作。
 portrait: /assets/optimized/portrait-pink.webp
-bubble: 灵感来了，记下来吧。
-stylesheet: /editor.css
+bubble: 把草稿带到新家。
 scripts:
-  - /vendor-js/marked.js
-  - /vendor-js/purify.js
-  - /vendor-js/js-yaml.js
-  - /editor-config.js
-  - /editor-content.js
   - /editor-drafts.js
-  - /editor.js
-script: /editor-github.js
+  - /editor-migration.js
 ---
 {% include section-intro.html %}
-<p class="archive" id="admin-migration">写作和内容管理已集中到 <a href="https://mx-guestbook-admin.liuwanting830.workers.dev/">管理中心 ↗</a>。文章和作品请在管理中心编辑；此页用于恢复旧草稿。旧草稿仍在此浏览器中：在下方“导入与备份”下载全部草稿，再到管理中心恢复。</p>
-<section class="archive draft-library" aria-labelledby="draft-heading">
-<h2 id="draft-heading">我的草稿本</h2>
-<div class="draft-controls"><label for="draft-select">选择草稿</label><select id="draft-select"><option value="">还没有草稿</option></select><button type="button" id="draft-open">继续写</button><button type="button" id="draft-new">新建草稿</button></div>
-<p id="draft-selection-info"></p><details class="simple-disclosure" id="draft-find"><summary>查找草稿</summary><div class="draft-filters"><label for="draft-search">按标题查找<input id="draft-search" type="search" placeholder="输入草稿标题…" autocomplete="off" /></label><label for="draft-category-filter">筛选栏目<select id="draft-category-filter"><option value="">全部栏目</option><option value="blog">碎碎念</option><option value="competitive-programming">博客</option><option value="projects">作品 · 项目 / AI 工作流</option><option value="game-jam">作品 · 游戏开发</option><option value="art">作品 · 绘画创作</option></select></label><button type="button" id="draft-filter-clear">清除筛选</button></div>
-<p id="draft-filter-status" role="status" aria-live="polite"></p>
-</details>
-<details class="simple-disclosure" id="draft-tools"><summary>导入与备份</summary><div class="draft-controls"><button type="button" id="markdown-import">导入 Markdown ↑</button><input id="markdown-file" type="file" accept=".md,.markdown,.mdown,text/markdown,text/plain" hidden /></div><p id="draft-library-status" role="status" aria-live="polite">导入 Markdown 会另存为新草稿。</p>
-<div class="draft-controls draft-backup-controls"><button type="button" id="draft-backup-export">备份全部草稿 ↓</button><button type="button" id="draft-backup-import">恢复草稿备份 ↑</button><input id="draft-backup-file" type="file" accept=".json,application/json" hidden /></div>
-<p>换设备前下载备份，在新设备恢复。恢复会保留原草稿；私密正文中嵌入的图片会随备份保留，外部图片仍为链接。</p>
-<p id="draft-backup-status" role="status" aria-live="polite"></p></details>
+<section class="archive" id="draft-tools">
+<h2>把旧草稿带到后台</h2>
+<p>请使用以前写作的浏览器打开本页。这里只下载备份，不会删除或修改原有草稿。</p>
+<p id="migration-status" role="status">正在读取旧草稿…</p>
+<button class="primary-link" id="draft-backup-export" type="button">下载旧草稿备份 ↓</button>
+<p>下载后，回到管理后台的「草稿管理」，展开「备份与恢复文章草稿」并选择「恢复备份」。原有草稿会保留。</p>
+<a class="quiet-link" href="https://mx-guestbook-admin.liuwanting830.workers.dev/drafts" target="_blank" rel="noopener noreferrer">打开后台草稿管理 ↗</a>
 </section>
-
-<form id="writing-form" class="writing-form">
-<section class="archive editor-settings" aria-label="文章信息"><div class="editor-fields"><label>标题<input id="post-title" maxlength="200" placeholder="给这段记录起个名字" required /></label><label>栏目<select id="post-category"><option value="blog">碎碎念</option><option value="competitive-programming">博客 · 学习与创作</option><option value="projects">作品 · 项目 / AI 工作流</option><option value="game-jam">作品 · 游戏开发</option><option value="art">作品 · 绘画创作</option></select></label><label>日期<input id="post-date" type="date" required /></label></div>
-<div class="editor-fields tag-field" id="blog-topic-field" hidden><label>博客分类<select id="post-topic"><option value="notes">技术随笔</option><option value="leetcode">LeetCode</option><option value="atcoder">AtCoder</option><option value="algorithm">算法与竞赛</option><option value="game-dev">游戏开发</option><option value="ai">AI 工作流</option></select></label></div>
-<div class="editor-fields tag-field"><label>标签（可选，用逗号分隔）<input id="post-tags" placeholder="例如：算法，LeetCode" /></label></div>
-<div id="work-fields" class="editor-fields work-fields" hidden><label>作品分类<select id="work-type"><option value="creative">创作</option><option value="game">小游戏 / 互动</option><option value="ai">AI 工作流</option></select></label><label>作品链接<input id="work-url" placeholder="https://… 或 /games/…" /></label><label>一句话介绍<input id="work-description" placeholder="作品做了什么，有什么有趣的地方" /></label><label>封面地址（可选）<input id="work-cover" placeholder="/picture/… 或 https://…" /></label></div></section>
-<section class="editor-privacy"><label>可见性<select id="post-visibility"><option value="public">公开</option><option value="private">密钥访问 · 仅标题可搜索</option></select></label><p id="private-note" hidden>正文仅保存在私密服务；外部链接和已公开素材仍由原站控制。草稿与导出文件仍保存在你的设备上。</p></section>
-<section class="editor-workspace" aria-label="写作与预览"><div class="editor-toolbar" role="group" aria-label="Markdown 工具"><button type="button" data-format="bold">粗体</button><button type="button" data-format="italic">斜体</button><button type="button" data-format="heading">标题</button><button type="button" data-format="list">列表</button><button type="button" data-format="code">代码</button><button type="button" data-format="link">链接</button><button type="button" data-format="image">图片链接</button><button type="button" id="image-upload" disabled>上传图片 ↑</button><input type="file" id="image-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden /></div><p id="image-upload-help" class="image-upload-status">公开图片 · 单张最多 5 MB</p><p id="image-upload-status" class="image-upload-status" role="status" aria-live="polite"></p><div class="editor-columns"><div class="editor-panel"><label for="markdown-input" class="editor-panel-title">写下灵感 <span id="word-count">0 字</span></label><textarea id="markdown-input" placeholder="在这里写 Markdown…&#10;&#10;# 今天的小事&#10;&#10;把想说的话留在这里。"></textarea></div><div class="editor-preview"><h2 class="editor-panel-title">看看效果</h2><div id="preview-content" class="prose"></div></div></div></section>
-<div class="editor-actions"><div><button class="primary-link" type="button" id="github-publish" disabled>登录后发布</button><button type="submit">导出 Markdown ↓</button><details class="simple-disclosure editor-more" id="editor-more"><summary>更多操作</summary><div><button type="button" id="prepare-publish">复制发布内容</button><button type="button" id="restore-draft">恢复已保存内容</button><button type="button" id="clear-editor">删除当前草稿</button></div></details></div><p id="draft-status" role="status" aria-live="polite">草稿保存在当前浏览器。</p></div>
-<section id="private-share" class="private-share" hidden><label>访问链接<input id="private-link" readonly /></label><label id="private-key-label">访问密钥<input id="private-key" readonly autocomplete="off" /></label><button type="button" id="private-copy-link">复制链接</button><button type="button" id="private-copy-key">复制密钥</button><button type="button" id="private-rotate">更换访问密钥</button><p id="private-share-status" role="status">链接和密钥请分别保存、发送。关闭后不会保留密钥，可重新生成。</p></section>
-<p id="github-result" class="export-status" role="status" aria-live="polite" hidden></p>
-<p id="export-status" class="export-status" role="status" aria-live="polite" hidden></p>
-<section id="publish-panel" class="publish-panel" aria-labelledby="publish-heading" hidden>
-<h2 id="publish-heading">再一步，把内容放到网站上。</h2>
-<p id="publish-status" role="status" aria-live="polite"></p>
-<p>发布位置：<code id="publish-path"></code></p>
-<div id="manual-copy" hidden><label for="publish-source">完整发布内容（包含文章信息，请全部复制）</label><textarea id="publish-source" readonly rows="8"></textarea></div>
-<ol><li>打开下面的 GitHub 页面，用 <strong>Fexas25</strong> 登录，确认文件名。</li><li>在正文编辑区粘贴完整内容，点击 <strong>Commit changes…</strong>，填写说明，例如“新增一篇碎碎念”，选择直接提交到 <strong>main</strong>，再确认提交。</li><li>等待 <a href="https://github.com/Fexas25/Fexas25.github.io/actions" target="_blank" rel="noopener noreferrer">网站部署</a>显示绿色成功标记，再刷新网站。</li></ol>
-<div class="publish-links"><a id="publish-new" class="primary-link" target="_blank" rel="noopener noreferrer">去 GitHub 粘贴发布 ↗</a><a id="publish-upload" class="quiet-link" target="_blank" rel="noopener noreferrer">上传已导出的文件 ↗</a></div>
-<p class="publish-note">这里准备的是新内容。若 GitHub 提示文件已存在，请从下方“管理当前栏目”打开原文件修改，避免重复发布。</p>
-</section>
-<details class="simple-disclosure" id="published-content"><summary>打开已有文章 · GitHub 登录</summary><section class="github-panel archive" aria-labelledby="github-heading">
-<div class="github-heading"><div><h2 id="github-heading">我的内容</h2><p id="github-status" role="status" aria-live="polite">登录 GitHub 后，可以直接发布或修改文章。</p></div><div class="publish-links"><button type="button" id="github-login" class="primary-link">登录 GitHub</button><button type="button" id="github-logout" hidden>退出登录</button></div></div>
-<p id="github-setup" hidden>首次使用需要站主完成 GitHub App 与登录服务配置。<a href="{{ '/publishing-setup.html' | relative_url }}">查看一次性配置步骤 →</a></p>
-<div class="github-library"><label for="github-article">选择已有文章</label><select id="github-article"><option value="">正在读取文章列表…</option></select><button type="button" id="github-load">打开修改</button><button type="button" id="github-refresh">刷新列表</button></div>
-<p id="editing-status" class="publish-note" role="status">正在新建内容</p>
-</section></details>
-<p class="editor-service-links"><a href="https://mx-guestbook-admin.liuwanting830.workers.dev/">管理中心 ↗</a><a href="https://mx-guestbook-admin.liuwanting830.workers.dev/messages">管理留言 ↗</a><a href="/publishing-setup.html">使用说明</a></p>
-<details class="publish-help"><summary>发布、修改和配图操作指南</summary>
-<p><strong>导入与草稿：</strong>在“我的草稿本”点击“导入 Markdown”，选择小于 2 MB 的 .md、.markdown 或 .mdown 文件。含 YAML 的文件会自动填入文章信息；普通 Markdown 会使用当前栏目，并从一级标题或文件名提取标题。导入文件会另存为新草稿。选择草稿后点击“继续写”，也可以“新建草稿”；删除只影响当前这篇本地草稿，不会删除网站文章。多标签页同时编辑发生冲突时，请先导出当前内容，再刷新。</p>
-<p><strong>直接发布：</strong>登录 GitHub，填写内容后点击“发布到网站”。要修改旧文章，先在“我的内容”选择文章并点“打开修改”，完成后点“保存修改”。提交成功后等待网站部署即可。登录只保留在当前页面内存中，刷新或关闭后需要重新登录；草稿和当前编辑的文章信息会保留。</p>
-<p><strong>密钥访问：</strong>新建文章或作品时，将“可见性”设为“密钥访问”，登录后发布。链接与密钥请分别保存、发送；标题可被搜索，正文需要密钥；正文不进入公开仓库。登录后可从“我的内容”重新打开修改或更换密钥；旧密钥随即失效。已有文章也可切换为密钥访问，部署完成后原网址需要密钥；GitHub 历史、搜索缓存和原有公开图片可能保留旧内容。私密模式选图会嵌入正文，单图限 512 KB；不会上传公开图库。私密正文不参与自动翻译。</p>
-<p><strong>备用发布：</strong>填写标题、栏目、日期和正文，点击“复制并准备发布”，再按上方提示粘贴到 GitHub。也可以“导出 Markdown”，点击出现的上传入口，拖入下载的文件，等上传完成后提交。保留生成的文件名和开头两行 <code>---</code> 之间的文章信息。</p>
-<p><strong>更新作品：</strong>选择作品栏目，填写分类、作品链接和介绍；正文可以写使用说明，也可以只填链接。发布后，作品卡片会自动显示在对应分类与首页最近作品中。</p>
-<p><strong>修改已有内容：</strong>点击“管理当前栏目”，打开原来的 <code>.md</code> 文件，点击铅笔图标（Edit），修改正文或作品链接，再点“Commit changes…”提交。修改旧内容时保留原文件名，这样原来的文章地址也能继续使用。</p>
-<p><strong>上传图片：</strong>登录 GitHub 后，在正文中放好光标，点工具栏“上传图片”并从电脑或手机相册选图。上传成功会自动插入 Markdown 并保存草稿；文章仍需点击发布或保存修改。图片会公开存入网站仓库，同一张图会复用；上传失败可重新选择原图重试。支持 JPG、PNG、WebP、GIF，单张最多 5 MB；HEIC 请先转为 JPG。</p><p><strong>图片链接：</strong>也可以把图片上传到 <a href="https://github.com/Fexas25/Fexas25.github.io/upload/main/picture" target="_blank" rel="noopener noreferrer">picture 图片文件夹</a>并提交，建议使用简单英文文件名，例如 <code>my-drawing.jpg</code>。正文写 <code>![图片说明](/picture/my-drawing.jpg)</code>；作品封面填 <code>/picture/my-drawing.jpg</code>。</p>
-<p><strong>草稿与上线：</strong>草稿只保存在当前浏览器，清理浏览器数据后可能丢失，长文建议额外导出备份。提交后通常需要几分钟部署；如果没有更新，先检查“查看部署状态”是否成功，再强制刷新。碎碎念请使用今天或过去的日期，未来日期不会立即公开显示。</p>
-<p>文件夹由栏目自动选择：碎碎念 <code>_posts/</code>，博客 <code>_cp/</code>，项目与 AI <code>_projects/</code>，游戏开发 <code>_gamejam/</code>，绘画 <code>_art/</code>。</p>
-<div class="publish-links"><a id="manage-category" class="quiet-link" href="https://github.com/Fexas25/Fexas25.github.io/tree/main/_posts" target="_blank" rel="noopener noreferrer">管理当前栏目 ↗</a><a class="quiet-link" href="https://github.com/Fexas25/Fexas25.github.io/actions" target="_blank" rel="noopener noreferrer">查看部署状态 ↗</a></div>
-</details>
-</form>
-<noscript><p class="empty-note">请启用 JavaScript，使用预览、草稿和导出功能。</p></noscript>
+<noscript><p>请启用 JavaScript 读取本机旧草稿。</p></noscript>

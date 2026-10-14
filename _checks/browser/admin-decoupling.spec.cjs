@@ -1,0 +1,19 @@
+const {test,expect}=require('@playwright/test');
+const fs=require('node:fs');
+const admin='http://127.0.0.1:4175';
+const key='mx-writing-drafts-v1';
+const library={version:1,active:'old-one',items:[{id:'old-one',body:'旧正文 **保留**',meta:{'post-title':'旧草稿','post-category':'blog','post-visibility':'private'},updatedAt:'2026-10-01T10:00:00Z'}]};
+
+test('旧页只迁移草稿，导出不改原数据，后台离线于主站仍能恢复与写作',async({page})=>{
+ await page.addInitScript(({key,library})=>{if(location.port==='4173'){localStorage.setItem(key,JSON.stringify(library));sessionStorage.setItem('mx-studio-intro-seen-v2','1');}},{key,library});
+ await page.goto('/editor.html');await expect(page.locator('#writing-form,#github-publish')).toHaveCount(0);await expect(page.locator('#migration-status')).toContainText('1 篇');const downloadPromise=page.waitForEvent('download');await page.locator('#draft-backup-export').click();const backup=fs.readFileSync(await (await downloadPromise).path());expect(JSON.parse(backup).items[0].body).toBe(library.items[0].body);expect(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key)).toEqual(library);
+ const external=[];await page.route('**/*',r=>{if(!r.request().url().startsWith(admin)){external.push(r.request().url());return r.abort();}return r.continue();});
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('后台原有草稿');await page.locator('#markdown-input').fill('不要覆盖');await page.goto(admin+'/drafts');await page.locator('summary').filter({hasText:'备份与恢复文章草稿'}).click();await page.locator('#backup-file').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:backup});await expect(page.locator('#status')).toContainText('已恢复');await expect(page.locator('.hub-card')).toHaveCount(2);await page.locator('#search').fill('旧草稿');await expect(page.locator('.hub-card')).toHaveCount(1);await page.getByRole('link',{name:'继续编辑'}).click();await expect(page.locator('#markdown-input')).toHaveValue(library.items[0].body);await expect(page.locator('#post-visibility')).toHaveValue('private');await expect(page.locator('#preview-content')).toContainText('旧正文');await page.reload();await expect(page.locator('#markdown-input')).toHaveValue(library.items[0].body);
+ await page.goto(admin+'/drafts');await page.locator('summary').filter({hasText:'备份与恢复文章草稿'}).click();const dl=page.waitForEvent('download');await page.locator('#backup').click();expect(JSON.parse(fs.readFileSync(await(await dl).path(),'utf8')).items).toHaveLength(2);
+ for(const route of ['/','/articles','/projects','/projects/new','/messages','/help']){await page.goto(admin+route);await expect(page.locator('.hub-nav')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);const wrong=await page.locator('a[href^="https:"]').evaluateAll(links=>links.filter(a=>a.target!=='_blank').map(a=>a.href));expect(wrong).toEqual([]);expect(await page.locator('script[src]').count()).toBe(0);}
+ expect(external).toEqual([]);
+});
+
+test('后台保存失败保留输入，另页重登，重试成功',async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('重试文章 '+test.info().project.name);await page.locator('#markdown-input').fill('网络异常也保留正文');let denied=true;await page.route('**/api/documents',r=>denied?r.fulfill({status:401,json:{error:'expired'}}):r.continue());await page.locator('#publish').click();await expect(page.locator('#session-help')).toBeVisible();await expect(page.locator('#session-help a')).toHaveAttribute('target','_blank');await expect(page.locator('#markdown-input')).toHaveValue('网络异常也保留正文');denied=false;await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');await expect(page.locator('#session-help')).toBeHidden();
+});
