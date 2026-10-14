@@ -58,3 +58,31 @@ test('项目真实冲突保留本页，取消核对不覆盖，确认后显式�
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'核对线上版本'}).click();await expect(page.locator('#status')).toContainText('已核对');expect(await page.evaluate(async id=>(await MXAdminApi('projects',{action:'read',id})).title,id)).toBe('另一页更新');
  await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('已发布');expect(await page.evaluate(async id=>(await MXAdminApi('projects',{action:'read',id})).title,id)).toBe('本页修改');await overflow(page);
 });
+
+
+test('旧项目草稿核对后跟随发布状态，旧密钥不回显也不自动轮换',async({page})=>{
+ await page.goto(admin+'/projects/new');await page.locator('#title').fill('状态同步');await page.locator('#slug').fill('state-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('已保存到项目草稿');const id=new URL(page.url()).searchParams.get('id'),oldKey=await page.locator('#share-key').inputValue();
+ await page.evaluate(async id=>{const r=await MXAdminApi('projects',{action:'read',id});await MXAdminApi('projects',{...r,action:'save',state:'published',key:'B'.repeat(43)});},id);
+ await page.locator('#title').fill('本页新标题');await page.locator('#save-project').click();await expect(page.getByRole('button',{name:'核对线上版本'})).toBeVisible();await expect(page.locator('#share-key')).toHaveValue('');
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'核对线上版本'}).click();await expect(page.locator('#save-project')).toBeHidden();await expect(page.locator('#publish-project')).toHaveText('保存修改');await expect(page).toHaveURL(/projects\/edit/);
+ let sent;await page.route('**/api/projects',async r=>{if(r.request().postDataJSON().action==='save')sent=r.request().postDataJSON();await r.continue();});
+ await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('已发布');expect(sent.state).toBe('published');expect(sent.key).toBeUndefined();await expect(page.locator('#share-key')).toHaveValue('');await noStoredKey(page,oldKey);await overflow(page);
+});
+
+test('文章冲突原地核对且保留草稿，取消不覆盖，旧密钥清除',async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('文章冲突');await page.locator('#markdown-input').fill('第一版');await page.locator('#post-visibility').selectOption('private');await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');const id=new URL(page.url()).searchParams.get('id');const oldKey=await page.locator('#share-key').inputValue();
+ await page.evaluate(async id=>{const r=await MXAdminApi('documents',{action:'read',id});await MXAdminApi('documents',{action:'save',id,revision:r.revision,visibility:r.visibility,key:'C'.repeat(43),document:{...r.document,text:r.document.text.replace('第一版','另一页正文')},metadata:{date:r.date,tags:r.tags,topic:r.topic,type:r.type}});},id);
+ await page.locator('#markdown-input').fill('本页差异正文');await page.locator('#publish').click();await expect(page.locator('#link-latest')).toHaveValue('另一页正文');await expect(page.locator('#publish')).toBeDisabled();await expect(page.locator('#link-choice')).toBeDisabled();await expect(page.locator('#share-key')).toHaveValue('');expect((await page.evaluate(()=>MXDrafts.state().items))[0].body).toBe('本页差异正文');
+ page.once('dialog',d=>d.dismiss());await page.locator('#link-confirm').click();await expect(page.locator('#publish')).toBeDisabled();
+ page.once('dialog',d=>d.accept());await page.locator('#link-confirm').click();await expect(page.locator('#markdown-input')).toHaveValue('本页差异正文');expect((await page.evaluate(()=>MXDrafts.state().items))[0].body).toBe('本页差异正文');
+ expect(await page.evaluate(async id=>(await MXAdminApi('documents',{action:'read',id})).document.text,id)).toContain('另一页正文');
+ let sent;await page.route('**/api/documents',async r=>{if(r.request().postDataJSON().action==='save')sent=r.request().postDataJSON();await r.continue();});await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');expect(sent.key).toBeUndefined();await expect(page.locator('#share-key')).toHaveValue('');await noStoredKey(page,oldKey);await overflow(page);
+});
+
+test('草稿删除区分本机与回收站，项目请求中防止重复删除',async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('本机保留');await page.locator('#markdown-input').fill('不要误删');await page.goto(admin+'/projects/new');await page.locator('#title').fill('可恢复草稿');await page.locator('#slug').fill('delete-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('已保存到项目草稿');
+ await page.goto(admin+'/drafts');const article=page.locator('.hub-card').filter({hasText:'本机保留'}),project=page.locator('.hub-card').filter({hasText:'可恢复草稿'});await expect(project).toBeVisible();
+ page.once('dialog',async d=>{expect(d.message()).toContain('无法从回收站恢复');await d.dismiss();});await article.getByRole('button',{name:'删除草稿'}).click();await expect(article).toBeVisible();
+ let release,count=0;await page.route('**/api/projects',async r=>{if(r.request().postDataJSON().action==='trash'){count++;const response=await r.fetch();await new Promise(resolve=>release=resolve);await r.fulfill({response});}else await r.continue();});
+ page.once('dialog',async d=>{expect(d.message()).toContain('可在已发布项目的回收站恢复');await d.accept();});await project.getByRole('button',{name:'移入回收站'}).click();await expect.poll(()=>typeof release).toBe('function');await expect(project.getByRole('button')).toBeDisabled();await expect(page.locator('#refresh')).toBeDisabled();await page.locator('#search').fill('可恢复');await expect(project.getByRole('button')).toBeDisabled();release();await expect(project).toHaveCount(0);expect(count).toBe(1);await page.locator('#search').fill('');await expect(article).toBeVisible();await overflow(page);
+});
