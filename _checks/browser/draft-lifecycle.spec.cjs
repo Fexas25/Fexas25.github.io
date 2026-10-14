@@ -14,7 +14,7 @@ test('发布清理对应草稿，保存期间输入保留；失败不清理，�
 test('只清理与线上完全一致的旧草稿，差异及无法确认的草稿保留；不跳前台',async({page})=>{
  await page.goto(admin+'/write');await page.locator('#post-title').fill('清理核对');await page.locator('#markdown-input').fill('线上正文');await page.locator('#publish').click();await expect(page.locator('#draft-status')).toContainText('没有待保存');
  await page.evaluate(async()=>{const id=new URLSearchParams(location.search).get('id'),row=await MXAdminApi('documents',{action:'read',id}),r=MXContent.parse(row.document.text,row.document.folder+'/'+row.document.filename,row.revision);r.documentId=id;r.visibility=row.visibility;const meta=Object.fromEntries(MXWriting.fields.map(k=>[k,document.getElementById(k).value]));meta.__record=r;meta.__imported=r.metadata;meta.__publishId=id;MXDrafts.save({id:'equal',meta,body:r.body});MXDrafts.save({id:'different',meta:{...meta,'post-title':'保留的不同草稿'},body:'有价值的新内容'});MXDrafts.save({id:'unknown',meta:{...meta,__record:{...r,documentId:crypto.randomUUID()},__publishId:crypto.randomUUID()},body:r.body});});
- await page.goto(admin+'/drafts');await expect.poll(async()=>(await drafts(page)).map(d=>d.id).sort()).toEqual(['different','unknown']);await expect(page.locator('a[href*="editor.html"]')).toHaveCount(0);await expect(page.locator('.hub-card')).toHaveCount(2);await overflow(page);
+ await page.goto(admin+'/drafts');await page.locator('#filter').selectOption('articles');await expect.poll(async()=>(await drafts(page)).map(d=>d.id).sort()).toEqual(['different','unknown']);await expect(page.locator('a[href*="editor.html"]')).toHaveCount(0);await expect(page.locator('.hub-card')).toHaveCount(2);await overflow(page);
 });
 
 test('旧关联草稿在后台核对后保存，相对链接预览另开且私密图片不请求外站',async({page})=>{
