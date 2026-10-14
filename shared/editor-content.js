@@ -39,6 +39,7 @@
     for (const field of ['title','date','topic','type','external_url','description','cover']) {
       if (metadata[field] !== undefined && typeof metadata[field] !== 'string') throw Error(`文章信息 ${field} 必须是文本。`);
     }
+    if (metadata.private !== undefined && typeof metadata.private !== 'boolean') throw Error('private 必须为 true 或 false，请确认隐私设置。');
     tags(metadata.tags);
     const date = (metadata.date || filename.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || '').slice(0,10);
     if (date && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0,10) !== date)) throw Error('文章日期不正确，请使用 YYYY-MM-DD。');

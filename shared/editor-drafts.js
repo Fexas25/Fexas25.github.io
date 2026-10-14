@@ -88,11 +88,15 @@
     error: () => failure,
     validateBackup,
     backup(current) {
-      if (failure) throw Error(failure);
+      // Read the latest shared storage without changing this editor's snapshot
+      // or weakening its protection against another tab's writes.
+      const previous={raw,library,failure};let latest;
+      try { if(!reload())throw Error(failure);latest=library; }
+      finally { raw=previous.raw;library=previous.library;failure=previous.failure; }
       // Include an unsaved editing copy without replacing the last saved version.
-      const items = current ? merge(library.items,[current]).items : library.items;
+      const items = current ? merge(latest.items,[current]).items : latest.items;
       if (items.length > 1000) throw Error('草稿数量超过单份备份上限（1000 篇），请先分别导出部分文章。');
-      return JSON.stringify({format:'mx-writing-backup',version:1,exportedAt:new Date().toISOString(),active:library.active,items},null,2);
+      return JSON.stringify({format:'mx-writing-backup',version:1,exportedAt:new Date().toISOString(),active:latest.active,items},null,2);
     },
     restore(incoming) {
       const result = merge(library.items,incoming.items);
