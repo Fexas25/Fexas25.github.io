@@ -45,6 +45,14 @@ async function page(query = '', fail = false) {
   const unknown = await page('?tag=没有这个标签');assert.equal(unknown.cards().length,0);unknown.close();
   const error = await page('',true);assert.equal(error.w.document.querySelector('[data-search-fallback]').hidden,false);assert.equal(error.form.hidden,true);
   error.w.document.querySelector('.search-retry').click();await wait();assert.equal(error.cards().length,20);error.close();
+  for(const [target,valid] of [['https://mx-projects.liuwanting830.workers.dev/p/demo/',true],['https://evil.example/p/demo/',false],['https://mx-projects.liuwanting830.workers.dev/other/',false]]){
+    const hosted=new JSDOM(source('search/index.html'),{url:'https://test.local/search/?q=私密项目',runScripts:'outside-only'}),w=hosted.window;
+    w.MX_COMMUNITY={origin:'https://content.test'};
+    w.fetch=async url=>({ok:true,json:async()=>String(url).endsWith('/documents')?{documents:[{id:'11111111-1111-4111-8111-111111111111',title:'私密项目',url:target,visibility:'private',folder:'_projects',content:'PRIVATE BODY MUST NEVER APPEAR',tags:[],date:'2026-10-14'}]}:[]});
+    w.eval(source('search.js'));await wait();const link=w.document.querySelector('[data-search-results] .entry-link');
+    if(valid){assert.equal(link.href,target);assert.match(w.document.querySelector('[data-search-results]').textContent,/需要密钥/);assert(!w.document.body.textContent.includes('PRIVATE BODY MUST NEVER APPEAR'));}else assert.equal(link,null);
+    w.close();
+  }
   const archive = new JSDOM(`<section data-browser><select data-year-filter><option value="">全部</option></select><select data-tag-filter><option value="">全部</option></select><h3 data-month-marker>2026</h3><article data-entry data-year="2026" data-tags='["算法"]'></article><h3 data-month-marker>2025</h3><article data-entry data-year="2025" data-tags='["日常"]'></article><p data-no-results hidden></p><p data-result-status></p></section>`,{runScripts:'outside-only'});
   archive.window.eval(source('content.js'));const year = archive.window.document.querySelector('select');year.value='2025';year.dispatchEvent(new archive.window.Event('change'));
   assert.equal(archive.window.document.querySelector('[data-month-marker]').hidden,true);assert.equal(archive.window.document.querySelectorAll('[data-entry]')[1].hidden,false);archive.window.close();

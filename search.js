@@ -162,9 +162,10 @@
       }
       entries = data.map(entry => {
         const url = new URL(entry.url, location.origin);
-        if (url.origin !== location.origin || !['http:','https:'].includes(url.protocol) || typeof entry.title !== 'string' || typeof entry.content !== 'string') throw Error('invalid entry');
+        const hostedProject=Boolean(entry.backendId)&&url.origin==='https://mx-projects.liuwanting830.workers.dev'&&/^\/p\/[a-z0-9][a-z0-9-]{0,59}\/$/.test(url.pathname)&&!url.username&&!url.password&&!url.search;
+        if ((!hostedProject&&url.origin !== location.origin) || !['http:','https:'].includes(url.protocol) || typeof entry.title !== 'string' || typeof entry.content !== 'string') throw Error('invalid entry');
         const tags = Array.isArray(entry.tags) ? entry.tags.filter(tag => typeof tag === 'string') : [];
-        return {...entry, date:entry.date || '', tags, url:url.pathname + url.search + url.hash, searchText:normalize([entry.title,entry.content,...tags].join(' '))};
+        return {...entry, date:entry.date || '', tags, url:hostedProject?url.href:url.pathname + url.search + url.hash, searchText:normalize([entry.title,entry.content,...tags].join(' '))};
       }).sort((a,b) => b.date.localeCompare(a.date));
       for (const [key, values] of [['year', entries.map(entry => entry.date.slice(0,4)).filter(Boolean).sort().reverse()], ['tag', entries.flatMap(entry => entry.tags).sort()]]) {
         for (const value of new Set(values)) if(![...fields[key].options].some(o=>o.value===value))fields[key].add(new Option(value, value));
