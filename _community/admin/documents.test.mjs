@@ -6,8 +6,8 @@ import {createHandler} from './handler.mjs';
 import worker from '../worker.mjs';
 test('documents share one Access-protected source; private bodies never enter public catalog',async()=>{
  const db=new DatabaseSync(':memory:');db.exec(readFileSync(new URL('../schema.sql',import.meta.url),'utf8'));
- const DB={prepare(sql){const s=db.prepare(sql);const wrap=(a=[])=>({bind:(...v)=>wrap(v),first:async()=>s.get(...a)||null,all:async()=>({results:s.all(...a)}),run:async()=>({meta:s.run(...a)})});return wrap();}};
- const env={DB,ADMIN_ORIGIN:'https://admin.example',ADMIN_EMAIL:'owner',ACCESS_ISSUER:'https://access.example',ACCESS_AUD:'aud',SITE_ORIGIN:'https://fexas25.github.io',RATE_SECRET:'test'};
+ const DB={async batch(statements){db.exec('BEGIN');try{const result=[];for(const statement of statements)result.push(statement.runSync());db.exec('COMMIT');return result;}catch(e){db.exec('ROLLBACK');throw e;}},prepare(sql){const s=db.prepare(sql);const wrap=(a=[])=>({bind:(...v)=>wrap(v),first:async()=>s.get(...a)||null,all:async()=>({results:s.all(...a)}),run:async()=>({meta:s.run(...a)}),runSync:()=>({meta:s.run(...a)})});return wrap();}};
+ const env={KEY_VAULT_SECRET:'V'.repeat(43)+'=',KEY_VIEW_PIN:'test-confirm',DB,ADMIN_ORIGIN:'https://admin.example',ADMIN_EMAIL:'owner',ACCESS_ISSUER:'https://access.example',ACCESS_AUD:'aud',SITE_ORIGIN:'https://fexas25.github.io',RATE_SECRET:'test'};
  const handle=createHandler(async()=>({email:'owner'})),id=crypto.randomUUID(),key=Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64url');
  const data={action:'save',id,visibility:'public',document:{title:'A title',folder:'_projects',filename:'a.md',text:'secret body'},metadata:{date:'2026-10-13',tags:['test'],type:'ai'}};
  const admin=(body,headers={})=>handle(new Request(env.ADMIN_ORIGIN+'/api/documents',{method:'POST',headers:{Origin:env.ADMIN_ORIGIN,'X-MX-Admin':'1','Content-Type':'application/json',...headers},body:JSON.stringify(body)}),env);

@@ -1,3 +1,4 @@
+const {reveal}=require('../key-view.cjs');
 const {test,expect}=require('@playwright/test');
 const admin='http://127.0.0.1:4175';
 const overflow=async page=>expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
@@ -20,7 +21,7 @@ test('导入切换至独立草稿地址，刷新保留正文并清除旧分享�
 
 test('项目草稿隐藏正式链接，发布后才显示，密钥保持可保存',async({page})=>{
  await page.goto(admin+'/projects/new');await page.locator('#title').fill('链接草稿');await page.locator('#slug').fill('flow-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');
- await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('已保存到项目草稿');await expect(page.locator('#share-link')).toBeHidden();await expect(page.locator('#copy-link')).toBeHidden();await expect(page.locator('#share-key')).not.toHaveValue('');await expect(page.locator('#preview-project')).toBeEnabled();
+ await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('已保存到项目草稿');await expect(page.locator('#share-link')).toBeHidden();await expect(page.locator('#copy-link')).toBeHidden();await reveal(page);await expect(page.locator('#preview-project')).toBeEnabled();
  await page.locator('#publish-project').click();await expect(page.locator('#share-link')).toBeVisible();await expect(page.locator('#copy-link')).toBeVisible();await expect(page.locator('#share-link')).not.toHaveValue('');await overflow(page);
 });
 

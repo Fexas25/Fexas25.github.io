@@ -36,3 +36,5 @@ CREATE TABLE IF NOT EXISTS project_sessions (
  token_hash TEXT PRIMARY KEY, project_id TEXT NOT NULL, key_hash TEXT NOT NULL, expires INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS project_session_expiry ON project_sessions(expires);
+
+CREATE TABLE IF NOT EXISTS admin_key_vault (kind TEXT NOT NULL, id TEXT NOT NULL, key_hash TEXT NOT NULL, ciphertext TEXT NOT NULL, PRIMARY KEY(kind,id));

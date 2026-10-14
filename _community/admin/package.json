@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "esbuild worker.mjs --bundle --format=esm --platform=browser --outfile=dist/worker.mjs",
-    "test": "node --test admin.test.mjs documents.test.mjs projects.test.mjs",
+    "test": "node --test admin.test.mjs documents.test.mjs projects.test.mjs key-vault.test.mjs",
     "prebuild": "node prepare.mjs",
     "pretest": "node prepare.mjs"
   },

@@ -7,7 +7,7 @@ export const mimeFor=path=>({html:'text/html; charset=utf-8',htm:'text/html; cha
 export const projectSummary=r=>({id:r.id,slug:r.slug,title:r.title,description:r.visibility==='public'?r.description:'',category:r.category,kind:r.kind,visibility:r.visibility,state:r.state,revision:r.revision,updated:r.updated,deletedAt:r.deleted_at,url:PROJECT_ORIGIN+'/p/'+r.slug+'/'});
 export async function projectCatalog(db){const {results}=await db.prepare("SELECT * FROM projects WHERE state='published' AND deleted_at=0 ORDER BY updated DESC").all();return results.map(r=>({...projectSummary(r),folder:'_projects',type:r.category,date:new Date(r.updated*1000).toISOString().slice(0,10),tags:[],content:r.visibility==='public'?r.description:'',readingUrl:PROJECT_ORIGIN+'/p/'+r.slug+'/'}));}
 // Caller must authenticate the admin and enforce same-origin CSRF before calling.
-export async function manageProjects(data,env,reply){
+export async function manageProjects(data,env,reply,commit=statement=>statement.run()){
  const db=env.DB,now=Math.floor(Date.now()/1000);
  if(data?.action==='list'){const {results}=await db.prepare('SELECT * FROM projects WHERE '+(data.trash?'deleted_at>0':'deleted_at=0')+(data.trash?"":data.state==="draft"?" AND state='draft'":" AND state='published'")+' ORDER BY updated DESC').all();return reply({projects:results.map(projectSummary)});}
  if(!uuid.test(data?.id||''))return reply({error:'项目编号无效。'},400);
@@ -66,6 +66,7 @@ export async function manageProjects(data,env,reply){
  const duplicate=await db.prepare('SELECT id FROM projects WHERE slug=? AND id<>?').bind(slug,data.id).first();if(duplicate)return reply({error:'这个网址已被占用，请换一个。'},409);
  const revision=crypto.randomUUID();
  const args=[title.trim(),description,category,kind,externalUrl,visibility,keyHash,state,version,entry,revision,now];
- const result=row?await db.prepare('UPDATE projects SET title=?,description=?,category=?,kind=?,external_url=?,visibility=?,key_hash=?,state=?,version=?,entry=?,revision=?,updated=? WHERE id=? AND revision=?').bind(...args,data.id,row.revision).run():await db.prepare('INSERT OR IGNORE INTO projects(title,description,category,kind,external_url,visibility,key_hash,state,version,entry,revision,updated,id,slug) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(...args,data.id,slug).run();
+ const statement=row?db.prepare('UPDATE projects SET title=?,description=?,category=?,kind=?,external_url=?,visibility=?,key_hash=?,state=?,version=?,entry=?,revision=?,updated=? WHERE id=? AND revision=?').bind(...args,data.id,row.revision):db.prepare('INSERT OR IGNORE INTO projects(title,description,category,kind,external_url,visibility,key_hash,state,version,entry,revision,updated,id,slug) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(...args,data.id,slug);
+ const result=await commit(statement);
  return result.meta.changes?reply({id:data.id,revision,url:PROJECT_ORIGIN+'/p/'+slug+'/'},row?200:201):reply({error:'项目已变化，请刷新后重试。'},409);
 }

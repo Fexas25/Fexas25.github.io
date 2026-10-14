@@ -1,3 +1,4 @@
+import {prepareKey,retainKey,revealKey,keyCommit} from './key-vault.mjs';
 import {manageDocuments} from '../documents.mjs';
 import {dashboard,writing,management,drafts,projectWriting,help} from './hub.mjs';
 import {manageProjects} from '../projects.mjs';
@@ -39,17 +40,21 @@ export function createHandler(verify=authenticate) {
       return new Response(url.pathname==='/'?dashboard(nonce):url.pathname==='/help'?help(nonce):url.pathname==='/drafts'?drafts(nonce):url.pathname==='/articles'?management(nonce):url.pathname==='/projects'?management(nonce,true):['/projects/new','/projects/edit'].includes(url.pathname)?projectWriting(nonce,url.pathname.endsWith('/edit')):writing(nonce,url.pathname!=='/write',url.pathname==='/projects/article'),{headers:{...common,'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; img-src https: data: blob:; font-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`}});
     }
     try {
+      if(url.pathname==='/api/keys'&&request.method==='POST'){
+        if(request.headers.get('Origin')!==env.ADMIN_ORIGIN||request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
+        return await revealKey(await readBody(request),env,json);
+      }
       if(url.pathname==='/api/project-file'&&request.method==='POST'){
         if(request.headers.get('Origin')!==env.ADMIN_ORIGIN||request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
         return await manageProjects({action:'upload-file',id:url.searchParams.get('id'),upload:url.searchParams.get('upload'),path:url.searchParams.get('path'),bytes:await readFileBody(request)},env,json);
       }
       if(url.pathname==='/api/projects'&&request.method==='POST'){
         if(request.headers.get('Origin')!==env.ADMIN_ORIGIN||request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
-        return await manageProjects(await readBody(request,30000),env,json);
+        const data=await readBody(request,30000),prepared=await prepareKey('projects',data,env);const commit=keyCommit('projects',data?.id,prepared,env);const response=await manageProjects(data,env,json,commit.run);if(response.ok){if(!commit.retained())await retainKey('projects',data.id,prepared,env);if(data.action==='check-key'&&(await response.clone().json()).matches)await retainKey('projects',data.id,await prepareKey('projects',{...data,action:'save'},env),env);}return response;
       }
       if(url.pathname==='/api/documents'&&request.method==='POST'){
         if(request.headers.get('Origin')!==env.ADMIN_ORIGIN||request.headers.get('X-MX-Admin')!=='1')return json({error:'请求来源无效。'},403);
-        return await manageDocuments(await readBody(request,2100000),env.DB,json);
+        const data=await readBody(request,2100000),prepared=await prepareKey('documents',data,env);const commit=keyCommit('documents',data?.id,prepared,env);const response=await manageDocuments(data,env.DB,json,commit.run);if(response.ok){if(!commit.retained())await retainKey('documents',data.id,prepared,env);if(data.action==='check-key'&&(await response.clone().json()).matches)await retainKey('documents',data.id,await prepareKey('documents',{...data,action:'save'},env),env);}return response;
       }
       if(url.pathname==='/api/messages' && request.method==='GET') {
         const state=url.searchParams.get('state')||'pending', before=url.searchParams.get('before');

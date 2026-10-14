@@ -1,0 +1,15 @@
+const {test,expect}=require('@playwright/test');
+const {reveal}=require('../key-view.cjs');
+const admin='http://127.0.0.1:4175';
+for(const work of [false,true])test((work?'项目':'文章')+' 密钥持久保存、密码查看、自动隐藏及轮换确认',async({page,context})=>{
+ await page.clock.install();await page.goto(admin+(work?'/projects/new':'/write'));if(work){await page.locator('#title').fill('密钥保管');await page.locator('#slug').fill('vault-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');}else{await page.locator('#post-title').fill('密钥保管');await page.locator('#markdown-input').fill('私密正文');}
+ await page.locator(work?'#visibility':'#post-visibility').selectOption('private');const save=work?'#publish-project':'#publish';await page.locator(save).click();await expect(page.locator('#status')).toContainText(work?'已发布':'已保存到网站');await expect(page.locator('#share-key')).toHaveValue('');await expect(page.locator('#key-label')).toBeHidden();
+ await page.locator('#view-key').click();await page.locator('#key-password').fill('wrong');await page.locator('#key-submit').click();await expect(page.locator('#key-view-status')).toContainText('密码不正确');await expect(page.locator('#share-key')).toHaveValue('');await expect(page.locator('#session-help')).toBeHidden();
+ const key=await reveal(page),url=page.url();expect(key).toHaveLength(43);expect(await page.evaluate(()=>JSON.stringify({...localStorage})+JSON.stringify({...sessionStorage}))).not.toContain(key);
+ await page.clock.fastForward(31000);await expect(page.locator('#share-key')).toHaveValue('');await expect(page.locator('#key-label')).toBeHidden();
+ await page.reload();await expect(page.locator('#share-key')).toHaveValue('');expect(await reveal(page)).toBe(key);
+ const other=await context.newPage();await other.goto(url);expect(await reveal(other)).toBe(key);await other.close();
+ await page.locator('#rotate').check();page.once('dialog',async d=>{expect(d.message()).toContain('旧密钥会对所有人失效');await d.dismiss();});await page.locator(save).click();expect(await reveal(page)).toBe(key);
+ page.once('dialog',d=>d.accept());await page.locator(save).click();await expect(page.locator(save)).toBeEnabled();const next=await reveal(page);expect(next).not.toBe(key);await page.reload();expect(await reveal(page)).toBe(next);
+ await page.locator('#hide-key').click();let release;await page.route('**/api/keys',async r=>{const response=await r.fetch();await new Promise(resolve=>release=resolve);await r.fulfill({response});});await page.locator('#view-key').click();await page.locator('#key-password').fill('test-confirm');await page.locator('#key-submit').click();await expect.poll(()=>typeof release).toBe('function');await page.locator(work?'#title':'#post-title').fill('继续写');release();await expect(page.locator('#key-label')).toBeHidden();await expect(page.locator('#share-key')).toHaveValue('');expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+});

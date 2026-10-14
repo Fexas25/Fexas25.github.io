@@ -29,7 +29,7 @@ export async function publicDocuments(request,env,{reply,body,path,now}){
  return reply({document:JSON.parse(row.document),...summary(row)});
 }
 // Only called after the management site's signed Access assertion and CSRF checks.
-export async function manageDocuments(data,db,reply){
+export async function manageDocuments(data,db,reply,commit=statement=>statement.run()){
  if(data?.action==='list'){
   const {results}=await db.prepare('SELECT id,title,metadata,visibility,public_url,updated,revision,deleted_at FROM documents WHERE '+(data.trash?'deleted_at>0':'deleted_at=0')+' ORDER BY '+(data.trash?'deleted_at':'updated')+' DESC').all();
   return reply({documents:results.map(row=>({...summary(row),revision:row.revision,deletedAt:row.deleted_at}))});
@@ -63,6 +63,7 @@ export async function manageDocuments(data,db,reply){
  if(row&&row.document===document&&row.metadata===metadata&&row.visibility===data.visibility&&row.key_hash===keyHash)return reply({...summary(row),revision:row.revision});
  if(row&&row.revision!==data.revision)return reply({error:'内容已在其他页面更新，请备份当前草稿，再重新载入最新内容。'},409);
  const revision=crypto.randomUUID(),now=Math.floor(Date.now()/1000),url=row?.public_url||'/document/?id='+data.id;
- const result=row?await db.prepare('UPDATE documents SET title=?,document=?,metadata=?,visibility=?,key_hash=?,revision=?,updated=? WHERE id=? AND revision=? AND deleted_at=0').bind(doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,data.id,data.revision).run():await db.prepare('INSERT OR IGNORE INTO documents(id,title,document,metadata,visibility,key_hash,revision,updated,public_url) VALUES(?,?,?,?,?,?,?,?,?)').bind(data.id,doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,url).run();
+ const statement=row?db.prepare('UPDATE documents SET title=?,document=?,metadata=?,visibility=?,key_hash=?,revision=?,updated=? WHERE id=? AND revision=? AND deleted_at=0').bind(doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,data.id,data.revision):db.prepare('INSERT OR IGNORE INTO documents(id,title,document,metadata,visibility,key_hash,revision,updated,public_url) VALUES(?,?,?,?,?,?,?,?,?)').bind(data.id,doc.title.trim(),document,metadata,data.visibility,keyHash,revision,now,url);
+ const result=await commit(statement);
  return result.meta.changes?reply({id:data.id,revision,url,readingUrl:readingUrl(data.id)},row?200:201):reply({error:'内容已变化，请重新载入。'},409);
 }

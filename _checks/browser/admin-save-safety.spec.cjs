@@ -1,3 +1,4 @@
+const {reveal}=require('../key-view.cjs');
 const {test,expect}=require('@playwright/test');
 const admin='http://127.0.0.1:4175';
 const overflow=async page=>expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
@@ -10,17 +11,17 @@ test('手写新文章首次暂存绑定地址，刷新继续同一草稿且保�
 });
 
 test('文章密钥连续保存保持可复制，不进入存储，导入后清除',async({page})=>{
- await page.goto(admin+'/write');await page.locator('#post-title').fill('密钥回归');await page.locator('#markdown-input').fill('私密正文');await page.locator('#post-visibility').selectOption('private');await page.locator('#publish').click();await expect(page.locator('#share-key')).not.toHaveValue('');const key=await page.locator('#share-key').inputValue();
- await page.locator('#post-title').fill('修改标题');await page.locator('#publish').click();await expect(page.locator('#publish')).toBeEnabled();await expect(page.locator('#share-key')).toHaveValue(key);await noStoredKey(page,key);
- await page.locator('#rotate').check();await page.locator('#publish').click();await expect(page.locator('#publish')).toBeEnabled();await expect(page.locator('#share-key')).not.toHaveValue(key);const next=await page.locator('#share-key').inputValue();await noStoredKey(page,next);
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('密钥回归');await page.locator('#markdown-input').fill('私密正文');await page.locator('#post-visibility').selectOption('private');await page.locator('#publish').click();await reveal(page);const key=await reveal(page);
+ await page.locator('#post-title').fill('修改标题');await page.locator('#publish').click();await expect(page.locator('#publish')).toBeEnabled();expect(await reveal(page)).toBe(key);await noStoredKey(page,key);
+ await page.locator('#rotate').check();page.once('dialog',d=>d.accept());await page.locator('#publish').click();await expect(page.locator('#publish')).toBeEnabled();expect(await reveal(page)).not.toBe(key);const next=await reveal(page);await noStoredKey(page,next);
  await page.locator('#markdown-file').setInputFiles({name:'another.md',mimeType:'text/markdown',buffer:Buffer.from('# 另一篇\n\n新内容')});await expect(page.locator('#share-key')).toHaveValue('');await expect(page.locator('#key-label')).toBeHidden();await overflow(page);
 });
 
 test('项目保存响应丢失后可重试，密钥连续保存保留且刷新不回显',async({page})=>{
  await page.goto(admin+'/projects/new');await page.locator('#title').fill('项目重试');await page.locator('#slug').fill('retry-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');
  let lost=false;await page.route('**/api/projects',async r=>{if(r.request().postDataJSON().action==='save'&&!lost){lost=true;await r.fetch();return r.abort('failed');}await r.continue();});
- await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('保存结果尚未确认');await expect(page.locator('#status')).not.toContainText('原线上版本保留');await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('已保存到项目草稿');const key=await page.locator('#share-key').inputValue();expect(key.length).toBe(43);
- await page.locator('#title').fill('继续修改');await page.locator('#save-project').click();await expect(page.locator('#save-project')).toBeEnabled();await expect(page.locator('#share-key')).toHaveValue(key);await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('已发布');await expect(page.locator('#share-key')).toHaveValue(key);await noStoredKey(page,key);
+ await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('保存结果尚未确认');await expect(page.locator('#status')).not.toContainText('原线上版本保留');await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('已保存到项目草稿');const key=await reveal(page);expect(key.length).toBe(43);
+ await page.locator('#title').fill('继续修改');await page.locator('#save-project').click();await expect(page.locator('#save-project')).toBeEnabled();expect(await reveal(page)).toBe(key);await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('已发布');expect(await reveal(page)).toBe(key);await noStoredKey(page,key);
  await page.reload();await expect(page.locator('#title')).toHaveValue('继续修改');await expect(page.locator('#share-key')).toHaveValue('');await overflow(page);
 });
 
@@ -61,7 +62,7 @@ test('项目真实冲突保留本页，取消核对不覆盖，确认后显式�
 
 
 test('旧项目草稿核对后跟随发布状态，旧密钥不回显也不自动轮换',async({page})=>{
- await page.goto(admin+'/projects/new');await page.locator('#title').fill('状态同步');await page.locator('#slug').fill('state-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('已保存到项目草稿');const id=new URL(page.url()).searchParams.get('id'),oldKey=await page.locator('#share-key').inputValue();
+ await page.goto(admin+'/projects/new');await page.locator('#title').fill('状态同步');await page.locator('#slug').fill('state-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');await page.locator('#save-project').click();await expect(page.locator('#status')).toContainText('已保存到项目草稿');const id=new URL(page.url()).searchParams.get('id'),oldKey=await reveal(page);
  await page.evaluate(async id=>{const r=await MXAdminApi('projects',{action:'read',id});await MXAdminApi('projects',{...r,action:'save',state:'published',key:'B'.repeat(43)});},id);
  await page.locator('#title').fill('本页新标题');await page.locator('#save-project').click();await expect(page.getByRole('button',{name:'核对线上版本'})).toBeVisible();await expect(page.locator('#share-key')).toHaveValue('');
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'核对线上版本'}).click();await expect(page.locator('#save-project')).toBeHidden();await expect(page.locator('#publish-project')).toHaveText('保存修改');await expect(page).toHaveURL(/projects\/edit/);
@@ -70,7 +71,7 @@ test('旧项目草稿核对后跟随发布状态，旧密钥不回显也不自�
 });
 
 test('文章冲突原地核对且保留草稿，取消不覆盖，旧密钥清除',async({page})=>{
- await page.goto(admin+'/write');await page.locator('#post-title').fill('文章冲突');await page.locator('#markdown-input').fill('第一版');await page.locator('#post-visibility').selectOption('private');await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');const id=new URL(page.url()).searchParams.get('id');const oldKey=await page.locator('#share-key').inputValue();
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('文章冲突');await page.locator('#markdown-input').fill('第一版');await page.locator('#post-visibility').selectOption('private');await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');const id=new URL(page.url()).searchParams.get('id');const oldKey=await reveal(page);
  await page.evaluate(async id=>{const r=await MXAdminApi('documents',{action:'read',id});await MXAdminApi('documents',{action:'save',id,revision:r.revision,visibility:r.visibility,key:'C'.repeat(43),document:{...r.document,text:r.document.text.replace('第一版','另一页正文')},metadata:{date:r.date,tags:r.tags,topic:r.topic,type:r.type}});},id);
  await page.locator('#markdown-input').fill('本页差异正文');await page.locator('#publish').click();await expect(page.locator('#link-latest')).toHaveValue('另一页正文');await expect(page.locator('#publish')).toBeDisabled();await expect(page.locator('#link-choice')).toBeDisabled();await expect(page.locator('#share-key')).toHaveValue('');expect((await page.evaluate(()=>MXDrafts.state().items))[0].body).toBe('本页差异正文');
  page.once('dialog',d=>d.dismiss());await page.locator('#link-confirm').click();await expect(page.locator('#publish')).toBeDisabled();
@@ -93,12 +94,12 @@ for(const type of ['article','project'])for(const committed of [false,true])test
  await page.goto(admin+(isArticle?'/write':'/projects/new'));
  if(isArticle){await page.locator('#post-title').fill('取消换密钥');await page.locator('#markdown-input').fill('保留正文');await page.locator('#post-visibility').selectOption('private');}
  else{await page.locator('#title').fill('取消换密钥');await page.locator('#slug').fill('cancel-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');}
- await page.locator(save).click();await expect(page.locator('#share-key')).not.toHaveValue('');const old=await page.locator('#share-key').inputValue();const id=new URL(page.url()).searchParams.get('id');let pending,once=false,sent=[];
+ await page.locator(save).click();await reveal(page);const old=await reveal(page);const id=new URL(page.url()).searchParams.get('id');let pending,once=false,sent=[];
  await page.route('**/api/'+api,async r=>{const d=r.request().postDataJSON();if(d.action==='save'){sent.push(d);if(!once){once=true;pending=d.key;if(committed)await r.fetch();return r.abort('failed');}}await r.continue();});
- await page.locator('#rotate').check();await page.locator(save).click();await expect(page.locator(save)).toBeEnabled();expect(pending).toHaveLength(43);await page.locator('#rotate').uncheck();await page.locator(save).click();await expect(page.locator('#status')).toContainText(isArticle?'已保存到网站':'已保存');expect(sent.at(-1).key).toBeUndefined();
+ await page.locator('#rotate').check();page.once('dialog',d=>d.accept());await page.locator(save).click();await expect(page.locator(save)).toBeEnabled();expect(pending).toHaveLength(43);await page.locator('#rotate').uncheck();await page.locator(save).click();await expect(page.locator('#status')).toContainText(isArticle?'已保存到网站':'已保存');expect(sent.at(-1).key).toBeUndefined();
  expect(await page.evaluate(async({api,id,key})=>(await MXAdminApi(api,{action:'check-key',id,key})).matches,{api,id,key:committed?pending:old})).toBe(true);
  expect(await page.evaluate(async({api,id,key})=>(await MXAdminApi(api,{action:'check-key',id,key})).matches,{api,id,key:committed?old:pending})).toBe(false);
- if(committed)await expect(page.locator('#share-key')).toHaveValue(pending);else await expect(page.locator('#share-key')).not.toHaveValue(pending);
+ if(committed)expect(await reveal(page)).toBe(pending);else expect(await reveal(page)).not.toBe(pending);
  await noStoredKey(page,pending);await overflow(page);
 });
 
@@ -120,7 +121,7 @@ test('项目草稿加载期间不能打断列表，加载后删除本机草稿�
 
 async function downloadText(download){const stream=await download.createReadStream(),chunks=[];for await(const c of stream)chunks.push(c);return Buffer.concat(chunks).toString('utf8');}
 for(const work of [false,true])test((work?'作品介绍':'文章')+' Markdown 导出导入保留隐私，转公开不残留私密标记',async({page})=>{
- await page.goto(admin+(work?'/projects/article':'/write'));await page.locator('#post-title').fill('隐私往返');await page.locator('#markdown-input').fill('原有正文');await page.locator('#post-visibility').selectOption('private');await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');const key=await page.locator('#share-key').inputValue();expect(key).toHaveLength(43);
+ await page.goto(admin+(work?'/projects/article':'/write'));await page.locator('#post-title').fill('隐私往返');await page.locator('#markdown-input').fill('原有正文');await page.locator('#post-visibility').selectOption('private');await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');const key=await reveal(page);expect(key).toHaveLength(43);
  let event=page.waitForEvent('download');await page.locator('#export').click();const text=await downloadText(await event);expect(text).toContain('private: true');expect(text).not.toContain(key);
  await page.locator('#markdown-file').setInputFiles({name:'private.md',mimeType:'text/markdown',buffer:Buffer.from(text)});await expect(page.locator('#post-visibility')).toHaveValue('private');await expect(page.locator('#markdown-input')).toHaveValue('原有正文');await expect(page.locator('#share-key')).toHaveValue('');
  await page.locator('#post-visibility').selectOption('public');event=page.waitForEvent('download');await page.locator('#export').click();const publicText=await downloadText(await event);expect(publicText).not.toContain('private: true');await page.locator('#markdown-file').setInputFiles({name:'public.md',mimeType:'text/markdown',buffer:Buffer.from(publicText)});await expect(page.locator('#post-visibility')).toHaveValue('public');await expect(page.locator('#markdown-input')).toHaveValue('原有正文');
@@ -168,9 +169,9 @@ for(const fail of [false,true])test('Markdown 慢读取锁定发布和重复导�
 test('项目提示区分发布、保存和生成密钥，普通保存不误报换密钥',async({page})=>{
  await page.goto(admin+'/projects/new');await page.locator('#title').fill('提示检查');await page.locator('#slug').fill('message-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');
  await page.locator('#publish-project').click();await expect(page.locator('#status')).toHaveText('已发布。');await page.locator('#title').fill('普通修改');await page.locator('#publish-project').click();await expect(page.locator('#status')).toHaveText('已保存。');
- await page.locator('#visibility').selectOption('private');await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('请保存新密钥');const key=await page.locator('#share-key').inputValue();await noStoredKey(page,key);
- await page.locator('#title').fill('密钥不变');await page.locator('#publish-project').click();await expect(page.locator('#status')).toHaveText('已保存。');await expect(page.locator('#share-key')).toHaveValue(key);
- await page.locator('#rotate').check();await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('请保存新密钥');await expect(page.locator('#share-key')).not.toHaveValue(key);await overflow(page);
+ await page.locator('#visibility').selectOption('private');await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('新密钥已保存');const key=await reveal(page);await noStoredKey(page,key);
+ await page.locator('#title').fill('密钥不变');await page.locator('#publish-project').click();await expect(page.locator('#status')).toHaveText('已保存。');expect(await reveal(page)).toBe(key);
+ await page.locator('#rotate').check();page.once('dialog',d=>d.accept());await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('新密钥已保存');expect(await reveal(page)).not.toBe(key);await overflow(page);
 });
 
 for(const privacy of ['public','private','rotated'])test('首次发布丢响应后修改，按原编号核对且不重复 '+privacy,async({page})=>{
@@ -185,6 +186,6 @@ for(const privacy of ['public','private','rotated'])test('首次发布丢响应�
  page.once('dialog',d=>d.accept());await page.locator('#link-confirm').click();await expect(page.locator('#publish')).toBeEnabled();expect(await page.evaluate(async id=>(await MXAdminApi('documents',{action:'read',id})).document.text,first.id)).toContain('首次提交正文');
  await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');expect(saves.every(d=>d.id===first.id)).toBe(true);expect(saves.at(-1).key).toBeUndefined();
  const online=await page.evaluate(async id=>({row:await MXAdminApi('documents',{action:'read',id}),list:await MXAdminApi('documents',{action:'list'})}),first.id);expect(online.row.document.text).toContain('响应丢失后的新正文');expect(online.list.documents.filter(d=>d.title===title)).toHaveLength(1);expect((await page.evaluate(()=>MXDrafts.state().items)).map(d=>d.body)).toEqual(['其他差异保留']);
- if(privacy==='private'){await expect(page.locator('#share-key')).toHaveValue(first.key);expect(await page.evaluate(async d=>(await MXAdminApi('documents',{action:'check-key',id:d.id,key:d.key})).matches,first)).toBe(true);await noStoredKey(page,first.key);}else await expect(page.locator('#share-key')).toHaveValue('');
+ if(privacy==='private'){expect(await reveal(page)).toBe(first.key);expect(await page.evaluate(async d=>(await MXAdminApi('documents',{action:'check-key',id:d.id,key:d.key})).matches,first)).toBe(true);await noStoredKey(page,first.key);}else await expect(page.locator('#share-key')).toHaveValue('');
  if(privacy==='rotated')expect(await page.evaluate(async id=>(await MXAdminApi('documents',{action:'check-key',id,key:'R'.repeat(43)})).matches,first.id)).toBe(true);await overflow(page);
 });

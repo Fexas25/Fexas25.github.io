@@ -2,10 +2,11 @@ export function articleClient(){
  const $=id=>document.getElementById(id),api=window.MXAdminApi,drafts=window.MXDrafts,content=window.MXContent,project=document.body.dataset.mode==='legacy-project';
  const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);};
  let id=null,record=null,imported={},busy=false,dirty=false,pendingKey='',newId=crypto.randomUUID(),baseline=null,readingBase='https://fexas25.github.io/',candidate=null,needsLink=false,conflictId='',linkRequest=0;
+ const keyView=window.MXKeyView(()=>record?.documentId?{kind:'documents',id:record.documentId,visibility:record.visibility}:null);
  async function keyForSave(){
   if(pendingKey&&record?.visibility==='private'&&!$('rotate').checked&&$('post-visibility').value==='private'){
    const result=await api('documents',{action:'check-key',id:record.documentId,key:pendingKey});
-   $('share-key').value=result.matches?pendingKey:'';$('key-label').hidden=!result.matches;
+   $('share-key').value='';$('key-label').hidden=true;
    if(result.matches)$('share').hidden=false;else pendingKey='';
    return '';
   }
@@ -32,10 +33,11 @@ export function articleClient(){
  document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>{const input=$('markdown-input'),start=input.selectionStart,end=input.selectionEnd,v=input.value.slice(start,end)||'文字',pair={bold:['**','**'],italic:['*','*'],heading:['\n## ',''],list:['\n- ',''],code:['`','`'],link:['[','](https://)'],image:['![','](https://)']}[b.dataset.format];input.setRangeText(pair[0]+v+pair[1],start,end,'end');input.focus();change();});
  $('save-draft').onclick=()=>{dirty=true;saveDraft();};
  $('export').onclick=()=>{try{const f=exported(),u=URL.createObjectURL(new Blob([f.text],{type:'text/markdown'})),a=document.createElement('a');a.href=u;a.download=f.filename;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}catch(e){status(e.message);}};
- $('markdown-import').onclick=()=>$('markdown-file').click();$('markdown-file').onchange=async()=>{if(busy)return;let reading=false;try{const f=$('markdown-file').files[0];if(!f)return;if(f.size>1800000)throw Error('Markdown 最多 1.8 MB。');if(!saveDraft())return;reading=true;busy=true;linkRequest++;lock(true);status('正在读取 Markdown…');const r=content.importMarkdown(await f.text(),f.name,$('post-category').value);if(project!==['projects','game-jam','art'].includes(r.category))throw Error('请在对应的文章或作品编辑页导入。');linkRequest++;candidate=null;id=null;record=null;baseline=null;needsLink=false;conflictId='';$('link-choice').disabled=false;$('link-panel').hidden=true;newId=crypto.randomUUID();pendingKey='';readingBase='https://fexas25.github.io/';$('share').hidden=true;$('share-link').value='';$('share-key').value='';$('rotate').checked=false;status('');imported=r.metadata;$('post-category').disabled=false;fill({'post-title':r.title,'post-category':r.category,'post-date':r.date||today(),'post-tags':content.tags(r.metadata.tags).join(', '),'post-topic':content.topic(r.metadata),'post-visibility':r.metadata.private===true?'private':'public','work-type':r.metadata.type||'creative','work-url':r.metadata.external_url||'','work-description':r.metadata.description||'','work-cover':r.metadata.cover||''},r.body);if(change()&&id){history.replaceState(null,'',(project?'/projects/article':'/write')+'?draft='+encodeURIComponent(id));document.querySelector('h1').textContent=project?'编辑作品介绍':'写新文章';}}catch(e){status(e.message);}finally{$('markdown-file').value='';if(reading){busy=false;lock(false);$('publish').disabled=needsLink;}}};
+ $('markdown-import').onclick=()=>$('markdown-file').click();$('markdown-file').onchange=async()=>{if(busy)return;let reading=false;try{const f=$('markdown-file').files[0];if(!f)return;if(f.size>1800000)throw Error('Markdown 最多 1.8 MB。');if(!saveDraft())return;reading=true;busy=true;linkRequest++;lock(true);status('正在读取 Markdown…');const r=content.importMarkdown(await f.text(),f.name,$('post-category').value);if(project!==['projects','game-jam','art'].includes(r.category))throw Error('请在对应的文章或作品编辑页导入。');linkRequest++;candidate=null;id=null;record=null;baseline=null;needsLink=false;conflictId='';$('link-choice').disabled=false;$('link-panel').hidden=true;newId=crypto.randomUUID();pendingKey='';keyView.update();readingBase='https://fexas25.github.io/';$('share').hidden=true;$('share-link').value='';$('share-key').value='';$('rotate').checked=false;status('');imported=r.metadata;$('post-category').disabled=false;fill({'post-title':r.title,'post-category':r.category,'post-date':r.date||today(),'post-tags':content.tags(r.metadata.tags).join(', '),'post-topic':content.topic(r.metadata),'post-visibility':r.metadata.private===true?'private':'public','work-type':r.metadata.type||'creative','work-url':r.metadata.external_url||'','work-description':r.metadata.description||'','work-cover':r.metadata.cover||''},r.body);if(change()&&id){history.replaceState(null,'',(project?'/projects/article':'/write')+'?draft='+encodeURIComponent(id));document.querySelector('h1').textContent=project?'编辑作品介绍':'写新文章';}}catch(e){status(e.message);}finally{$('markdown-file').value='';if(reading){busy=false;lock(false);$('publish').disabled=needsLink;}}};
  $('image-upload').onclick=()=>$('image-file').click();$('image-file').onchange=async()=>{const input=$('markdown-input'),start=input.selectionStart,end=input.selectionEnd,old=input.value;try{let file=$('image-file').files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)||file.size>5*1024*1024)throw Error('请选择 5 MB 以内的 JPG、PNG、WebP 或 GIF。');if(file.size>512*1024){if(file.type==='image/gif')throw Error('GIF 最多 512 KB。');const u=URL.createObjectURL(file);try{const image=new Image();image.src=u;await image.decode();const canvas=document.createElement('canvas'),scale=Math.min(1,1600/Math.max(image.width,image.height));canvas.width=Math.round(image.width*scale);canvas.height=Math.round(image.height*scale);canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);for(const q of [.85,.65,.45,.3]){file=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',q));if(file?.size<=512*1024)break;}}finally{URL.revokeObjectURL(u);}}if(!file||file.size>512*1024)throw Error('请缩小图片后再试。');const src=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});if(old!==input.value)throw Error('正文已变化，请重新选择图片。');input.setRangeText('\n\n![图片]('+src+')\n\n',start,end,'end');change();status('已插入图片，发布后生效。');}catch(e){status(e.message);}finally{$('image-file').value='';}};
  $('publish').onclick=async()=>{
   if(busy||needsLink||!$('writing-form').reportValidity())return;
+  if($('rotate').checked&&!confirm('重新生成后，旧密钥会对所有人失效。确定更换？'))return;keyView.hide();
   busy=true;status('正在保存，请等待结果后再离开。');$('publish').disabled=true;$('markdown-import').disabled=true;$('rotate').disabled=true;$('post-visibility').disabled=true;$('post-category').disabled=true;
   try{
    if(!saveDraft())throw Error('本机暂存失败，请先导出备份再重试。');
@@ -48,16 +50,16 @@ export function articleClient(){
    record=content.parse(f.text,f.folder+'/'+f.filename,saved.revision);record.documentId=saved.id;record.visibility=visibility;newId=saved.id;imported=f.meta;baseline=sentStamp;readingBase=new URL(saved.url||'/', 'https://fexas25.github.io/').href;$('post-category').disabled=true;
    let cleanup='';try{if(snapshot()===sentStamp){if(sentDraft)drafts.remove(sentDraft);id=null;dirty=false;$('draft-status').textContent='已发布，没有待保存的改动。';}else{dirty=true;if(!saveDraft())cleanup=' 后续改动尚未成功暂存，请导出备份。';}}catch(e){cleanup=' 已发布，但本机草稿未清理：'+e.message;}
    history.replaceState(null,'',(project?'/projects/article':'/articles/edit')+(id?'?draft='+encodeURIComponent(id):'?id='+saved.id));
-   $('share').hidden=false;$('share-link').value=saved.readingUrl||'https://mx-community.liuwanting830.workers.dev/read/'+saved.id;$('share-key').value=visibility==='private'?(pendingKey||$('share-key').value):'';$('key-label').hidden=!$('share-key').value;$('rotate').checked=false;pendingKey='';status('已保存到网站。'+cleanup);refresh();
+   $('share').hidden=false;$('share-link').value=saved.readingUrl||'https://mx-community.liuwanting830.workers.dev/read/'+saved.id;$('share-key').value='';$('key-label').hidden=!$('share-key').value;$('rotate').checked=false;pendingKey='';keyView.update();status('已保存到网站。'+cleanup);refresh();
   }catch(e){if(e.status===409){await reviewConflict();}else status(e.message||'连接中断，请重试。');}finally{busy=false;$('publish').disabled=needsLink;$('markdown-import').disabled=false;$('rotate').disabled=false;$('post-visibility').disabled=false;$('post-category').disabled=Boolean(record);}
  };
- for(const name of ['link','key'])$('copy-'+name).onclick=async()=>{const f=$('share-'+name);try{await navigator.clipboard.writeText(f.value);status('已复制。');}catch{f.focus();f.select();status('请长按复制。');}};
+ for(const name of ['link'])$('copy-'+name).onclick=async()=>{const f=$('share-'+name);try{await navigator.clipboard.writeText(f.value);status('已复制。');}catch{f.focus();f.select();status('请长按复制。');}};
  window.addEventListener('pagehide',()=>{pendingKey='';$('share-key').value='';$('key-label').hidden=true;});
  window.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
  async function reviewConflict(){
   const request=++linkRequest;
   $('link-panel').querySelector('summary').textContent='核对线上版本';$('link-panel').querySelector('p').textContent='当前草稿保留，核对原文章的最新版本后再保存。';
-  conflictId=record?.documentId||newId;needsLink=true;candidate=null;baseline=null;
+  keyView.hide();conflictId=record?.documentId||newId;needsLink=true;candidate=null;baseline=null;
   $('publish').disabled=true;$('share-key').value='';$('key-label').hidden=true;
   $('link-panel').hidden=false;$('link-panel').open=true;$('link-choice').replaceChildren(new Option($('post-title').value,conflictId));$('link-choice').disabled=true;$('link-confirm').disabled=true;$('link-latest').value='';
   try{const row=await api('documents',{action:'read',id:conflictId});if(request!==linkRequest)return;await linkedRecord(row);status('线上版本已变化。当前草稿保留，请核对下方最新内容，确认后再保存。');}
@@ -101,7 +103,7 @@ export function articleClient(){
     if(related.length&&confirm('这篇内容有 '+related.length+' 份未发布改动。继续最近编辑的草稿？\n确定：继续草稿；取消：编辑线上版本。其他草稿都会保留。')){location.replace((project?'/projects/article':'/write')+'?draft='+encodeURIComponent(related[0].id));return;}
     loadRecord(row);
    }
-   lock(false);$('publish').disabled=needsLink;$('load-state').hidden=true;refresh();
+   lock(false);$('publish').disabled=needsLink;$('load-state').hidden=true;keyView.update();refresh();
   }catch(e){$('load-state').textContent=e.message;$('load-retry').hidden=false;}
  }
  $('load-retry').onclick=load;
