@@ -4,6 +4,8 @@
   let raw;
   let library = {version:1,active:null,items:[]};
   let failure = '';
+  function reload() {
+  const previous=library;failure='';library={version:1,active:null,items:[]};
   try {
     raw = localStorage.getItem(key);
     if (raw !== null) {
@@ -19,7 +21,10 @@
         library.active = 'legacy';
       }
     }
-  } catch { failure = '无法读取草稿库。原数据未更改，请先导出当前内容备份。'; }
+  } catch { library=previous;failure = '无法读取草稿库。原数据未更改，请先导出当前内容备份。'; }
+  return !failure;
+  }
+  reload();
   function write(next) {
     if (failure) throw Error(failure);
     try {
@@ -79,6 +84,7 @@
   }
   window.MXDrafts = {
     state: () => library,
+    reload,
     error: () => failure,
     validateBackup,
     backup(current) {
