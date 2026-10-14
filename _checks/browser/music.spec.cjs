@@ -19,7 +19,10 @@ test('音乐按需加载、暂停续播、切歌和手机卡片',async({page})=>
  await expect(root.locator('[data-music-title]')).toHaveText(tracks.at(-1).title);expect(await audio.evaluate(el=>el.paused)).toBe(true);
  await audio.evaluate(el=>el.dispatchEvent(new Event('ended')));await expect(root.locator('[data-music-title]')).toHaveText(tracks[0].title);
  await expect.poll(()=>audio.evaluate(el=>!el.paused)).toBe(true);
+ // Wait for the new track and native seek before testing persisted playback.
+ await expect.poll(()=>audio.evaluate(el=>el.readyState>=1)).toBe(true);
  await audio.evaluate(el=>{el.currentTime=12;});
+ await expect.poll(()=>audio.evaluate(el=>!el.seeking&&el.currentTime>=11)).toBe(true);
  await page.evaluate(()=>{const v=document.createElement('video');document.body.append(v);v.dispatchEvent(new Event('play'));});await expect.poll(()=>audio.evaluate(el=>el.paused)).toBe(true);
  const box=await root.locator('.music-panel').boundingBox();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(page.viewportSize().width);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
