@@ -172,3 +172,19 @@ test('项目提示区分发布、保存和生成密钥，普通保存不误报�
  await page.locator('#title').fill('密钥不变');await page.locator('#publish-project').click();await expect(page.locator('#status')).toHaveText('已保存。');await expect(page.locator('#share-key')).toHaveValue(key);
  await page.locator('#rotate').check();await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('请保存新密钥');await expect(page.locator('#share-key')).not.toHaveValue(key);await overflow(page);
 });
+
+for(const privacy of ['public','private','rotated'])test('首次发布丢响应后修改，按原编号核对且不重复 '+privacy,async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('其他草稿');await page.locator('#markdown-input').fill('其他差异保留');await page.goto(admin+'/write');const title='lost-first-'+test.info().project.name+'-'+privacy+'-'+Date.now();await page.locator('#post-title').fill(title);await page.locator('#markdown-input').fill('首次提交正文');if(privacy!=='public')await page.locator('#post-visibility').selectOption('private');
+ let first,readFailed=false;const saves=[];
+ await page.route('**/api/documents',async r=>{const d=r.request().postDataJSON();if(d.action==='save'){saves.push(d);if(!first){first=d;await r.fetch();return r.abort('failed');}}if(d.action==='read'&&!readFailed){readFailed=true;return r.abort('failed');}await r.continue();});
+ await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('连接中断');if(privacy!=='public')await noStoredKey(page,first.key);
+ if(privacy==='rotated')await page.evaluate(async d=>{const row=await MXAdminApi('documents',{action:'list'});const current=row.documents.find(x=>x.id===d.id);await MXAdminApi('documents',{...d,revision:current.revision,key:'R'.repeat(43)});},first);
+ await page.locator('#markdown-input').fill('响应丢失后的新正文');await page.locator('#publish').click();await expect(page.locator('#link-panel')).toBeVisible();await expect(page.locator('#status')).toContainText('点击查看线上版本重试');await expect(page.locator('#publish')).toBeDisabled();await expect(page.locator('#markdown-input')).toHaveValue('响应丢失后的新正文');
+ await page.locator('#link-load').click();await expect(page.locator('#link-latest')).toHaveValue('首次提交正文');await expect(page.locator('#link-choice')).toBeDisabled();await expect(page.locator('#link-choice')).toHaveValue(first.id);
+ page.once('dialog',d=>d.dismiss());await page.locator('#link-confirm').click();await expect(page.locator('#publish')).toBeDisabled();
+ page.once('dialog',d=>d.accept());await page.locator('#link-confirm').click();await expect(page.locator('#publish')).toBeEnabled();expect(await page.evaluate(async id=>(await MXAdminApi('documents',{action:'read',id})).document.text,first.id)).toContain('首次提交正文');
+ await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');expect(saves.every(d=>d.id===first.id)).toBe(true);expect(saves.at(-1).key).toBeUndefined();
+ const online=await page.evaluate(async id=>({row:await MXAdminApi('documents',{action:'read',id}),list:await MXAdminApi('documents',{action:'list'})}),first.id);expect(online.row.document.text).toContain('响应丢失后的新正文');expect(online.list.documents.filter(d=>d.title===title)).toHaveLength(1);expect((await page.evaluate(()=>MXDrafts.state().items)).map(d=>d.body)).toEqual(['其他差异保留']);
+ if(privacy==='private'){await expect(page.locator('#share-key')).toHaveValue(first.key);expect(await page.evaluate(async d=>(await MXAdminApi('documents',{action:'check-key',id:d.id,key:d.key})).matches,first)).toBe(true);await noStoredKey(page,first.key);}else await expect(page.locator('#share-key')).toHaveValue('');
+ if(privacy==='rotated')expect(await page.evaluate(async id=>(await MXAdminApi('documents',{action:'check-key',id,key:'R'.repeat(43)})).matches,first.id)).toBe(true);await overflow(page);
+});
