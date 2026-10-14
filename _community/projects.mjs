@@ -8,7 +8,7 @@ export async function projectCatalog(db){const {results}=await db.prepare("SELEC
 // Caller must authenticate the admin and enforce same-origin CSRF before calling.
 export async function manageProjects(data,env,reply){
  const db=env.DB,now=Math.floor(Date.now()/1000);
- if(data?.action==='list'){const {results}=await db.prepare('SELECT * FROM projects WHERE '+(data.trash?'deleted_at>0':'deleted_at=0')+(data.state==="draft"?" AND state='draft'":" AND state='published'")+' ORDER BY updated DESC').all();return reply({projects:results.map(projectSummary)});}
+ if(data?.action==='list'){const {results}=await db.prepare('SELECT * FROM projects WHERE '+(data.trash?'deleted_at>0':'deleted_at=0')+(data.trash?"":data.state==="draft"?" AND state='draft'":" AND state='published'")+' ORDER BY updated DESC').all();return reply({projects:results.map(projectSummary)});}
  if(!uuid.test(data?.id||''))return reply({error:'项目编号无效。'},400);
  const row=await db.prepare('SELECT * FROM projects WHERE id=?').bind(data.id).first();
  if(data.action==='read')return row?reply({...projectSummary(row),description:row.description,externalUrl:row.external_url,version:row.version,entry:row.entry}):reply({error:'项目不存在。'},404);

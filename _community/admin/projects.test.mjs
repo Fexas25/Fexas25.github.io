@@ -43,3 +43,12 @@ test('nested entry pages retain their relative asset base',async()=>{
  const read=path=>runtime.fetch(new Request('https://runtime.example/p/nested/'+path),env);
  const entry=await read('');assert.equal(entry.status,302);assert.equal(entry.headers.get('Location'),'/p/nested/demo/index.html');assert.equal(await (await read('demo/app.js')).text(),'nested asset');assert.equal((await read('demo/')).status,200);db.close();
 });
+
+test('trashed project drafts can be restored without publishing',async()=>{
+ const {db,env,admin}=setup(),id=crypto.randomUUID();
+ let r=await admin({action:'save',id,title:'Draft',slug:'draft-recovery',description:'',category:'game',kind:'link',externalUrl:'https://example.com/game',visibility:'public',state:'draft'});assert.equal(r.status,201);let data=await r.json();
+ data=await(await admin({action:'trash',id,revision:data.revision})).json();
+ const trash=await(await admin({action:'list',trash:true})).json();assert.equal(trash.projects[0].id,id);assert.equal(trash.projects[0].state,'draft');
+ assert.equal((await admin({action:'restore',id,revision:data.revision})).status,200);
+ assert.equal((await(await admin({action:'list',state:'draft'})).json()).projects.length,1);assert.equal((await projectCatalog(env.DB)).length,0);db.close();
+});
