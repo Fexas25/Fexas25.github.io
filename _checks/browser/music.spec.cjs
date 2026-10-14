@@ -43,3 +43,9 @@ test('英文控制名称、播放失败重试和收起后继续播放',async({pa
  await expect.poll(()=>root.locator('audio').evaluate(el=>!el.paused&&el.currentTime>0)).toBe(true);
  await root.locator('.music-toggle').click();await expect(root.locator('.music-panel')).toBeHidden();expect(await root.locator('audio').evaluate(el=>el.paused)).toBe(false);
 });
+
+test('音乐测试服务器支持原生播放器的字节范围请求',async({request})=>{
+ const html=await(await request.get('/about/')).text();const src=JSON.parse(html.match(/data-music-tracks[^>]*>([\s\S]*?)<\/script>/)[1])[0].src;
+ const response=await request.get(src,{headers:{Range:'bytes=-8'}});expect(response.status()).toBe(206);expect(response.headers()['content-range']).toMatch(/^bytes \d+-\d+\/\d+$/);expect((await response.body()).length).toBe(8);
+ const bad=await request.get(src,{headers:{Range:'bytes=999999999-'}});expect(bad.status()).toBe(416);
+});
