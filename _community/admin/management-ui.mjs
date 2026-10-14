@@ -3,7 +3,7 @@ export async function api(path,data){
  try{r=await fetch('/api/'+path,{method:'POST',credentials:'same-origin',redirect:'error',cache:'no-store',headers:{'Content-Type':'application/json','X-MX-Admin':'1'},body:JSON.stringify(data),signal:AbortSignal.timeout(45000)});}
  catch{const help=document.getElementById('session-help');if(help)help.hidden=false;throw Error('连接中断或登录已过期。当前输入保留，请检查网络或重新登录后重试。');}
  if(r.status===401||r.status===403||!r.headers.get('Content-Type')?.includes('application/json')){const help=document.getElementById('session-help');if(help)help.hidden=false;throw Error('请重新登录后重试。当前输入仍保留。');}
- const value=await r.json();if(!r.ok)throw Error(value.error||'操作失败，请重试。');const help=document.getElementById('session-help');if(help)help.hidden=true;return value;
+ const value=await r.json();if(!r.ok){const error=Error(value.error||'操作失败，请重试。');error.status=r.status;throw error;}const help=document.getElementById('session-help');if(help)help.hidden=true;return value;
 }
 export function managementClient(){
  const $=id=>document.getElementById(id),mode=document.body.dataset.mode,projects=mode==='projects';let rows=[],trash=false,busy=false,loading=false,requestId=0;

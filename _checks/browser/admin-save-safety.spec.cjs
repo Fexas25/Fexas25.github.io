@@ -30,3 +30,31 @@ test('读取项目包时锁定操作，坏包不会丢掉此前选择的完整�
  await expect(page.locator('#status')).toContainText('正在读取');for(const id of ['save-project','publish-project','preview-project'])await expect(page.locator('#'+id)).toBeDisabled();await page.evaluate(()=>releasePackage());await expect(page.locator('#status')).toContainText('已选择 1 个文件');
  await page.locator('#files').setInputFiles({name:'bad.zip',mimeType:'application/zip',buffer:Buffer.from('broken zip')});await expect(page.locator('#status')).toContainText('之前选择的文件保留');await expect(page.locator('#entry')).toHaveValue('index.html');await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('已发布');await overflow(page);
 });
+
+
+test('发布中离开有保护，后续改动还原后地址转回文章',async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('地址同步');await page.locator('#markdown-input').fill('提交正文');
+ let release;await page.route('**/api/documents',async r=>{if(r.request().postDataJSON().action==='save'){const response=await r.fetch();await new Promise(resolve=>release=resolve);await r.fulfill({response});}else await r.continue();});
+ await page.locator('#publish').click();await expect.poll(()=>typeof release).toBe('function');
+ expect(await page.evaluate(()=>{const event=new Event('beforeunload',{cancelable:true});dispatchEvent(event);return event.defaultPrevented;})).toBe(true);
+ await page.locator('#markdown-input').fill('后续改动');release();await expect(page.locator('#status')).toContainText('已保存到网站');await expect(page).toHaveURL(/draft=/);
+ await page.locator('#markdown-input').fill('提交正文');await expect(page).toHaveURL(/articles\/edit\?id=/);expect(await page.evaluate(()=>MXDrafts.state().items)).toHaveLength(0);
+ await page.reload();await expect(page.locator('#markdown-input')).toHaveValue('提交正文');await overflow(page);
+});
+
+test('回收站文章的差异草稿保留可编辑，不能误关联或发布',async({page})=>{
+ await page.goto(admin+'/write');await page.locator('#post-title').fill('回收站关联');await page.locator('#markdown-input').fill('线上正文');await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');const articleId=new URL(page.url()).searchParams.get('id');
+ await page.locator('#markdown-input').fill('差异草稿');const draftId=await page.evaluate(()=>MXDrafts.state().items[0].id);
+ await page.evaluate(async id=>{const row=await MXAdminApi('documents',{action:'read',id});await MXAdminApi('documents',{action:'trash',id,revision:row.revision});},articleId);
+ await page.goto(admin+'/write?draft='+draftId);await expect(page.locator('#status')).toContainText('原文章已在回收站');await expect(page.locator('#link-panel')).toBeHidden();await expect(page.locator('#publish')).toBeDisabled();await page.locator('#markdown-input').fill('继续保留的差异');expect((await page.evaluate(()=>MXDrafts.state().items))[0].body).toBe('继续保留的差异');await expect(page.locator('#publish')).toBeDisabled();await overflow(page);
+});
+
+test('项目真实冲突保留本页，取消核对不覆盖，确认后显式保存',async({page})=>{
+ await page.goto(admin+'/projects/new');await page.locator('#title').fill('最初版本');await page.locator('#slug').fill('conflict-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('已发布');const id=new URL(page.url()).searchParams.get('id');
+ await page.evaluate(async id=>{const r=await MXAdminApi('projects',{action:'read',id});await MXAdminApi('projects',{...r,action:'save',title:'另一页更新'});},id);
+ await page.locator('#title').fill('本页修改');await page.locator('#publish-project').click();await expect(page.getByRole('button',{name:'核对线上版本'})).toBeVisible();await expect(page.locator('#title')).toHaveValue('本页修改');
+ page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'核对线上版本'}).click();await expect(page.getByRole('button',{name:'核对线上版本'})).toBeVisible();
+ expect(await page.evaluate(async id=>(await MXAdminApi('projects',{action:'read',id})).title,id)).toBe('另一页更新');
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'核对线上版本'}).click();await expect(page.locator('#status')).toContainText('已核对');expect(await page.evaluate(async id=>(await MXAdminApi('projects',{action:'read',id})).title,id)).toBe('另一页更新');
+ await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('已发布');expect(await page.evaluate(async id=>(await MXAdminApi('projects',{action:'read',id})).title,id)).toBe('本页修改');await overflow(page);
+});
