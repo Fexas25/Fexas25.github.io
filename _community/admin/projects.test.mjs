@@ -28,7 +28,8 @@ test('project packages enforce all file paths, keys, sessions, preview and rever
  r=await read('image.png',cookie,{headers:{Range:'bytes=0-3'}});assert.equal(r.status,206);assert.equal(await r.text(),'PRIV');
  data.key=key2;r=await admin(data);data.revision=(await r.json()).revision;assert.equal((await read('secret.js',cookie)).status,403);
  r=await unlock(key2);const cookie2=r.headers.get('Set-Cookie').split(';')[0];assert.equal((await read('secret.js',cookie2)).status,200);
- assert.equal((await admin({...data,revision:'stale'})).status,409);
+ assert.equal((await admin({...data,revision:'stale'})).status,200);
+ assert.equal((await admin({...data,title:'Conflicting change',revision:'stale'})).status,409);
  r=await admin({action:'trash',id,revision:data.revision});const deleted=await r.json();assert.equal((await read('secret.js',cookie2)).status,404);assert.equal((await projectCatalog(env.DB)).length,0);
  r=await admin({action:'restore',id,revision:deleted.revision});data.revision=(await r.json()).revision;assert.equal((await read('secret.js',cookie2)).status,200);
  data.visibility='public';r=await admin(data);assert.equal(r.status,200);assert.equal((await read('secret.js')).status,200);
@@ -51,4 +52,17 @@ test('trashed project drafts can be restored without publishing',async()=>{
  const trash=await(await admin({action:'list',trash:true})).json();assert.equal(trash.projects[0].id,id);assert.equal(trash.projects[0].state,'draft');
  assert.equal((await admin({action:'restore',id,revision:data.revision})).status,200);
  assert.equal((await(await admin({action:'list',state:'draft'})).json()).projects.length,1);assert.equal((await projectCatalog(env.DB)).length,0);db.close();
+});
+
+test('lost save responses are retryable without changing versions or accepting conflicts',async()=>{
+ const {db,admin}=setup(),id=crypto.randomUUID(),key='r'.repeat(43);
+ const data={action:'save',id,title:'Retry',slug:'retry-save',description:'body',category:'game',kind:'link',externalUrl:'https://example.com',visibility:'private',state:'draft',key};
+ const created=await(await admin(data)).json();const retry=await admin(data);assert.equal(retry.status,200);assert.equal((await retry.json()).revision,created.revision);
+ const changed={...data,revision:created.revision,title:'New title',state:'published'};const saved=await(await admin(changed)).json();
+ const again=await admin(changed);assert.equal(again.status,200);assert.equal((await again.json()).revision,saved.revision);
+ assert.equal((await admin({...changed,description:'other body'})).status,409);
+ assert.equal((await admin({...changed,key:'s'.repeat(43)})).status,409);
+ assert.equal((await admin(data)).status,409);
+ const row=await(await admin({action:'read',id})).json();assert.equal(row.title,'New title');assert(!JSON.stringify(row).includes(key));
+ await admin({action:'trash',id,revision:saved.revision});assert.equal((await admin(changed)).status,409);db.close();
 });

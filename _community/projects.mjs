@@ -45,10 +45,15 @@ export async function manageProjects(data,env,reply){
  const {title,slug,description='',category,kind,externalUrl='',visibility,state,version='',entry='index.html'}=data;
  if(typeof title!=='string'||!title.trim()||title.length>200||typeof slug!=='string'||! /^[a-z0-9][a-z0-9-]{0,59}$/.test(slug)||typeof description!=='string'||description.length>5000||!['creative','game','ai'].includes(category)||!['static','link'].includes(kind)||!['public','private'].includes(visibility)||!['draft','published'].includes(state)||!filePath(entry))return reply({error:'请检查名称、网址和项目类型。'},400);
  if(row&&slug!==row.slug)return reply({error:'项目网址建立后保持不变。'},400);
- if(row&&row.revision!==data.revision)return reply({error:'项目已在其他页面更新，请刷新后重试。'},409);
+
  if(data.key!==undefined&&!/^[A-Za-z0-9_-]{43}$/.test(data.key))return reply({error:'密钥格式无效。'},400);
  if(visibility==='private'&&!row?.key_hash&&!data.key)return reply({error:'需要生成密钥。'},400);
  if(kind==='link'){try{const u=new URL(externalUrl);if(u.protocol!=='https:'||u.username||u.password)throw Error();}catch{return reply({error:'请输入有效的 HTTPS 项目链接。'},400);}}
+ const keyHash=data.key?await hash(data.id+':'+data.key):row?.key_hash||'';
+ // A lost success response may be retried with the old revision. Only an exact
+ // match is acknowledged; a different payload still requires the current revision.
+ if(row&&row.title===title.trim()&&row.description===description&&row.category===category&&row.kind===kind&&row.external_url===externalUrl&&row.visibility===visibility&&row.key_hash===keyHash&&row.state===state&&row.version===version&&row.entry===entry)return reply({id:row.id,revision:row.revision,url:PROJECT_ORIGIN+'/p/'+row.slug+'/'});
+ if(row&&row.revision!==data.revision)return reply({error:'项目已在其他页面更新，请刷新后重试。'},409);
  if(kind==='static'&&version){
   const u=await db.prepare('SELECT * FROM project_uploads WHERE id=? AND project_id=?').bind(version,data.id).first();
   const f=await db.prepare('SELECT * FROM project_files WHERE upload_id=? AND path=?').bind(version,entry).first();
@@ -57,7 +62,7 @@ export async function manageProjects(data,env,reply){
  }
  if(kind==='static'&&state==='published'&&!version)return reply({error:'请先上传项目文件。'},400);
  const duplicate=await db.prepare('SELECT id FROM projects WHERE slug=? AND id<>?').bind(slug,data.id).first();if(duplicate)return reply({error:'这个网址已被占用，请换一个。'},409);
- const keyHash=data.key?await hash(data.id+':'+data.key):row?.key_hash||'',revision=crypto.randomUUID();
+ const revision=crypto.randomUUID();
  const args=[title.trim(),description,category,kind,externalUrl,visibility,keyHash,state,version,entry,revision,now];
  const result=row?await db.prepare('UPDATE projects SET title=?,description=?,category=?,kind=?,external_url=?,visibility=?,key_hash=?,state=?,version=?,entry=?,revision=?,updated=? WHERE id=? AND revision=?').bind(...args,data.id,row.revision).run():await db.prepare('INSERT OR IGNORE INTO projects(title,description,category,kind,external_url,visibility,key_hash,state,version,entry,revision,updated,id,slug) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(...args,data.id,slug).run();
  return result.meta.changes?reply({id:data.id,revision,url:PROJECT_ORIGIN+'/p/'+slug+'/'},row?200:201):reply({error:'项目已变化，请刷新后重试。'},409);
