@@ -35,3 +35,11 @@ test('project packages enforce all file paths, keys, sessions, preview and rever
  db.close();
 });
 test('six admin destinations have separate responsibilities and protected APIs',async()=>{const {db,env,handler}=setup();for(const path of ['/','/write','/drafts','/articles','/projects','/projects/new','/articles/edit','/projects/edit']){const r=await handler(new Request(env.ADMIN_ORIGIN+path),env);assert.equal(r.status,200);const html=await r.text();assert(!html.includes('id="published-content"'));if(path==='/write'){assert(html.includes('id="writing-form"'));assert(!html.includes('id="items"'));assert(!html.includes('<option value="projects">'));}if(['/articles','/projects','/drafts'].includes(path)){assert(html.includes('id="items"'));assert(!html.includes('id="writing-form"'));}}const denied=createHandler(async()=>{throw Error();});assert.equal((await denied(new Request(env.ADMIN_ORIGIN+'/api/projects',{method:'POST'}),env)).status,401);db.close();});
+
+test('nested entry pages retain their relative asset base',async()=>{
+ const {db,env,admin}=setup(),id=crypto.randomUUID();const upload=(await (await admin({action:'upload-start',id})).json()).upload;
+ for(const [path,text] of [['demo/index.html','<script src="app.js"></script>'],['demo/app.js','nested asset']])assert.equal((await admin({action:'upload-file',id,upload,path,base64:Buffer.from(text).toString('base64')})).status,200);
+ const saved=await admin({action:'save',id,title:'Nested',slug:'nested',category:'game',kind:'static',visibility:'public',state:'published',version:upload,entry:'demo/index.html'});assert.equal(saved.status,201);
+ const read=path=>runtime.fetch(new Request('https://runtime.example/p/nested/'+path),env);
+ const entry=await read('');assert.equal(entry.status,302);assert.equal(entry.headers.get('Location'),'/p/nested/demo/index.html');assert.equal(await (await read('demo/app.js')).text(),'nested asset');assert.equal((await read('demo/')).status,200);db.close();
+});

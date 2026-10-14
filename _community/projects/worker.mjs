@@ -50,7 +50,8 @@ export default {async fetch(request,env){
   }
   if(!parts[2])return new Response(null,{status:302,headers:{...common,Location:base}});
   if(row.kind==='link')return screen(row.title,`<p>${escape(row.description)}</p><a class="button" href="${escape(row.external_url)}" rel="noopener noreferrer">打开项目 ↗</a>`);
-  path=path||row.entry;if(!filePath(path))return screen('找不到这个文件','',404);
+  if(!path&&row.entry.includes('/'))return new Response(null,{status:302,headers:{...common,Location:base+row.entry.split('/').map(encodeURIComponent).join('/')}});
+  path=path||row.entry;if(path.endsWith('/'))path+='index.html';if(!filePath(path))return screen('找不到这个文件','',404);
   const file=await env.DB.prepare('SELECT size,mime FROM project_files WHERE upload_id=? AND path=?').bind(row.version,path).first();
   if(!file)return screen('找不到这个文件','',404);
   let value=await env.PROJECT_FILES.get(row.version+'/'+path,'arrayBuffer');
