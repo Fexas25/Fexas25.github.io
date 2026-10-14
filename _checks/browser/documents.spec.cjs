@@ -7,6 +7,7 @@ const row={id,title:'后台文章',folder:'_posts',date:'2026-10-13',tags:[],vis
 test('后台独立文章编辑、密钥切换、图片和新建入口',async({page})=>{
  const {writing}=await import('../../_community/admin/hub.mjs');let saved={...row},writes=[];
  await page.route('https://fexas25.github.io/**',r=>r.fulfill({path:path.join(root,new URL(r.request().url()).pathname)}));
+ await page.route('**/articles/edit*',r=>r.fulfill({contentType:'text/html',body:writing('test',true)}));
  await page.route('**/admin-write*',r=>r.fulfill({contentType:'text/html',body:writing('test',true)}));
  await page.route('**/api/documents',r=>{const d=r.request().postDataJSON();if(d.action==='read')return r.fulfill({json:saved});writes.push(d);saved={...saved,...d,revision:'v'+(writes.length+1)};return r.fulfill({json:saved});});
  await page.goto('/admin-write?id='+id);await expect(page.locator('#markdown-input')).toHaveValue(/原有正文/);

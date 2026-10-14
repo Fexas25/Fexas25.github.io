@@ -10,6 +10,6 @@ scripts:
   - /vendor-js/marked.js
   - /vendor-js/purify.js
   - /vendor-js/js-yaml.js
-  - /editor-content.js
+  - /shared/editor-content.js
 script: /document-reader.js
 ---

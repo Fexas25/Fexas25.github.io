@@ -10,9 +10,18 @@
   const a=make('article',null,work?'portfolio-card':'entry-card');a.dataset.backendEntry='';if(doc.slug)a.dataset.projectSlug=doc.slug;a.dataset.entry='';a.dataset.year=doc.date.slice(0,4);a.dataset.tags=JSON.stringify(doc.tags);a.dataset.search=doc.title;a.dataset.category=work?(doc.folder==='_gamejam'?'game':doc.type):doc.topic;
   const copy=work?make('div',null,'portfolio-copy'):a;
   const meta=make('div',null,'entry-meta');meta.append(make('time',doc.date.replaceAll('-','.')));if(doc.visibility==='private')meta.append(make('span','需要密钥'));
-  const link=make('a',null,'entry-link');link.href=new URL(doc.url,site).href;link.append(make('h2',doc.title));if(doc.content)link.append(make('p',doc.content.slice(0,110)));copy.append(meta,link);
+  const link=make('a',null,'entry-link');link.href=new URL(doc.url,site).href;link.append(make('h2',doc.title));if(doc.visibility!=='private'&&doc.content)link.append(make('p',doc.content.slice(0,110)));copy.append(meta,link);
   if(work){const art=make('div',null,'portfolio-art art-'+doc.type);art.setAttribute('aria-hidden','true');art.append(make('span',doc.slug==='dad-birthday'?'♡':doc.type==='game'?'＋':doc.type==='ai'?'✧':'✿'));if(doc.slug==='dad-birthday'){art.classList.add('birthday-cover');art.append(make('i','Happy Birthday'));}a.append(art,copy);}
   const tags=make('div',null,'entry-tags');for(const tag of doc.tags){const link=make('a','# '+tag);link.href=site+'/search/?tag='+encodeURIComponent(tag);tags.append(link);}copy.append(tags);return a;
+ }
+ function homeCard(doc){
+  const card=make('article',null,'work-card');card.dataset.backendEntry='';if(doc.slug)card.dataset.projectSlug=doc.slug;
+  const locked=doc.visibility==='private',url=new URL(doc.url,site).href;
+  const cover=make('a',null,'work-cover new-work-cover new-work-'+doc.type);cover.href=url;cover.setAttribute('aria-label',(locked?'解锁作品：':'查看作品：')+doc.title);cover.append(make('span',locked?'✧':doc.type==='game'?'＋':doc.type==='ai'?'✧':'✿'));
+  if(!locked&&doc.slug==='dad-birthday'){cover.classList.add('birthday-cover');cover.replaceChildren(make('span','♡'));}
+  const info=make('div',null,'work-info'),meta=make('div',null,'work-meta');meta.append(make('time',doc.date.replaceAll('-','.')));if(locked)meta.append(make('span','需要密钥','work-lock'));
+  const title=make('h3'),link=make('a',doc.title);link.href=url;title.append(link);info.append(meta,title);if(!locked&&doc.content)info.append(make('p',doc.content.slice(0,90)));
+  const enter=make('a',locked?'输入密钥 →':'打开作品 →','quiet-link');enter.href=url;info.append(enter);card.append(cover,info);return card;
  }
  let busy=false;const notice=make('div',null,'catalog-retry'),message=make('span'),retry=make('button','重试','quiet-link');notice.setAttribute('role','status');retry.type='button';notice.append(message,retry);retry.addEventListener('click',load);
  async function load(){if(busy)return;busy=true;retry.disabled=true;message.textContent='正在加载…';
@@ -40,7 +49,7 @@
     for(const doc of documents.filter(x=>x.folder===folder).slice(0,limit)){const link=make('a',null,folder==='_posts'?'moment':'blog-row');link.href=new URL(doc.url,site).href;const copy=make('div');copy.append(make('h3',doc.title),make('p',doc.date+(doc.visibility==='private'?' · 需要密钥':'')));if(folder==='_posts'&&doc.content)copy.append(make('p',doc.content.slice(0,92)));link.append(copy);target.append(link);}
    }
    const grid=document.querySelector('.works-grid');grid.querySelectorAll('[data-backend-entry]').forEach(e=>e.remove());
-   for(const doc of documents.filter(x=>!['_posts','_cp'].includes(x.folder)).slice(0,3)){const node=card(doc,true);node.classList.add('work-card');grid.append(node);}
+   for(const doc of documents.filter(x=>!['_posts','_cp'].includes(x.folder)).slice(0,3)){grid.append(homeCard(doc));}
   }
   notice.remove();
  }catch{

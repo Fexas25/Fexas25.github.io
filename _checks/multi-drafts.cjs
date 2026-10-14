@@ -6,7 +6,7 @@ function page(saved={}){
  const dom=new JSDOM(fs.readFileSync(root+'_checks/fixtures/legacy-editor.html','utf8'),{url:'https://test.local/editor.html',runScripts:'outside-only'}),w=dom.window;
  for(const [k,v] of Object.entries(saved))w.localStorage.setItem(k,v);
  w.confirm=()=>true;
- for(const f of ['vendor-js/marked.js','vendor-js/purify.js','vendor-js/js-yaml.js','editor-content.js','editor-drafts.js','editor.js'])w.eval(fs.readFileSync(root+f,'utf8'));
+ for(const f of ['vendor-js/marked.js','vendor-js/purify.js','vendor-js/js-yaml.js','shared/editor-content.js','shared/editor-drafts.js','editor.js'])w.eval(fs.readFileSync(root+f,'utf8'));
  const $=id=>w.document.getElementById(id),input=(id,value)=>{$(id).value=value;$(id).dispatchEvent(new w.Event('input'))};
  async function upload(text,name='test.md'){Object.defineProperty($('markdown-file'),'files',{configurable:true,value:[{name,size:text.length,text:async()=>text}]});$('markdown-file').dispatchEvent(new w.Event('change'));await new Promise(r=>setTimeout(r,5));}
  return {w,$,input,upload,close:()=>w.close(),saved:()=>Object.fromEntries(Object.entries(w.localStorage))};

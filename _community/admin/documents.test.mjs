@@ -43,5 +43,14 @@ test('documents share one Access-protected source; private bodies never enter pu
  r=await admin({action:'trash',id,revision:saved.revision});saved=await r.json();assert.equal((await read()).status,404);
  await admin({action:'restore',id,revision:saved.revision});assert.equal((await read()).status,200);
  const bad={...data,id:crypto.randomUUID(),metadata:{date:'bad',tags:[]}};assert.equal((await admin(bad)).status,400);
+ // Legacy association must resolve exactly one active document, never guess by title.
+ assert.equal((await admin({action:'resolve',path:'../a.md'})).status,400);
+ assert.equal((await admin({action:'resolve',path:'_projects/missing.md'})).status,404);
+ assert.equal((await (await admin({action:'resolve',path:'_projects/a.md'})).json()).id,id);
+ const duplicateId=crypto.randomUUID();await admin({...data,id:duplicateId});
+ assert.equal((await admin({action:'resolve',path:'_projects/a.md'})).status,404);
+ const duplicate=await (await admin({action:'read',id:duplicateId})).json();
+ await admin({action:'trash',id:duplicateId,revision:duplicate.revision});
+ assert.equal((await (await admin({action:'resolve',path:'_projects/a.md'})).json()).id,id);
  db.close();
 });

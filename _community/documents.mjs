@@ -34,6 +34,12 @@ export async function manageDocuments(data,db,reply){
   const {results}=await db.prepare('SELECT id,title,metadata,visibility,public_url,updated,revision,deleted_at FROM documents WHERE '+(data.trash?'deleted_at>0':'deleted_at=0')+' ORDER BY '+(data.trash?'deleted_at':'updated')+' DESC').all();
   return reply({documents:results.map(row=>({...summary(row),revision:row.revision,deletedAt:row.deleted_at}))});
  }
+ if(data?.action==='resolve'){
+  if(typeof data.path!=='string'||!/^_(posts|cp|projects|gamejam|art)\/[-\p{L}\p{N}_.]+\.md$/u.test(data.path))return reply({error:'旧文章路径无效。'},400);
+  const [folder,filename]=data.path.split('/');const {results}=await db.prepare("SELECT * FROM documents WHERE deleted_at=0 AND json_extract(document,'$.folder')=? AND json_extract(document,'$.filename')=? LIMIT 2").bind(folder,filename).all();
+  if(results.length!==1)return reply({error:'无法唯一匹配旧文章，请选择对应内容。'},404);
+  const row=results[0];return reply({...summary(row),document:JSON.parse(row.document),revision:row.revision,deletedAt:row.deleted_at});
+ }
  if(!uuid.test(data?.id||''))return reply({error:'参数无效。'},400);
  const row=await db.prepare('SELECT * FROM documents WHERE id=?').bind(data.id).first();
  if(data.action==='read')return row?reply({...summary(row),document:JSON.parse(row.document),revision:row.revision,deletedAt:row.deleted_at}):reply({error:'未找到内容。'},404);

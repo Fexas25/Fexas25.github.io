@@ -19,10 +19,10 @@ export function client() {
     $('#more').hidden=!next;
   }
   async function api(path,options={}){
-    const response=await fetch(path,{credentials:'same-origin',redirect:'error',signal:AbortSignal.timeout(15000),...options});
+    let response;try{response=await fetch(path,{credentials:'same-origin',redirect:'error',signal:AbortSignal.timeout(15000),...options});}catch{$('#login').hidden=false;throw Error('连接中断或登录已过期，当前回复保留。请检查网络或另页登录后重试。');}
     if(response.status===401||response.status===403){$('#login').hidden=false;throw Error('登录已过期，请重新登录。');}
     if(!response.headers.get('Content-Type')?.includes('application/json')){ $('#login').hidden=false;throw Error('请重新登录。'); }
-    const data=await response.json();if(!response.ok)throw Error(data.error||'操作失败，请重试。');return data;
+    const data=await response.json();if(!response.ok)throw Error(data.error||'操作失败，请重试。');$('#login').hidden=true;return data;
   }
   function render(){
     list.replaceChildren();

@@ -18,7 +18,16 @@ export function draftsClient(){
  function render(){const q=$('search').value.trim().toLowerCase(),filter=$('filter').value;$('items').replaceChildren();const articles=drafts.state().items.map(x=>({id:x.id,title:x.meta['post-title']||'未命名草稿',updatedAt:x.updatedAt,kind:['projects','game-jam','art'].includes(x.meta['post-category'])?'legacy':'article',source:x}));for(const x of [...articles,...projects.map(x=>({...x,kind:'project',updatedAt:new Date(x.updated*1000).toISOString()}))].filter(x=>x.title.toLowerCase().includes(q)&&(!filter||(filter==='articles'?x.kind==='article':x.kind!=='article'))).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)))){const card=document.createElement('article');card.className='hub-card';const h=document.createElement('h2');h.textContent=x.title;const p=document.createElement('p');p.textContent=(x.kind==='article'?'文章':'项目')+' · '+(x.updatedAt?new Date(x.updatedAt).toLocaleString('zh-CN'):'');const a=document.createElement('a');a.className='hub-button';a.textContent='继续编辑';a.href=x.kind==='project'?'/projects/new?id='+x.id:(x.kind==='legacy'?'/projects/article':'/write')+'?draft='+encodeURIComponent(x.id);const b=document.createElement('button');b.textContent='删除草稿';b.onclick=async()=>{if(!confirm('删除「'+x.title+'」草稿？已发布内容不会受影响。'))return;try{if(x.kind==='project'){await window.MXAdminApi('projects',{action:'trash',id:x.id,revision:x.revision});projects=projects.filter(r=>r.id!==x.id);}else drafts.remove(x.id);render();}catch(e){status(e.message);}};card.append(h,p,a,b);$('items').append(card);}if(!$('items').children.length)$('items').textContent='还没有符合条件的草稿。';}
  $('search').oninput=render;$('filter').onchange=render;
  $('backup').onclick=()=>{try{const blob=new Blob([drafts.backup()],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='mx-writing-drafts-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);status('已备份本机文章草稿；项目草稿保存在后台。');}catch(e){status(e.message);}};
- $('restore').onclick=()=>$('backup-file').click();$('backup-file').onchange=async()=>{try{const f=$('backup-file').files[0];if(!f)return;if(f.size>30*1024*1024)throw Error('备份文件过大。');drafts.restore(drafts.validateBackup(JSON.parse(await f.text())));render();status('已恢复，原有草稿保留。');}catch(e){status(e.message);}finally{$('backup-file').value='';}};
+ $('restore').onclick=()=>$('backup-file').click();$('backup-file').onchange=async()=>{try{const f=$('backup-file').files[0];if(!f)return;if(f.size>30*1024*1024)throw Error('备份文件过大。');drafts.restore(drafts.validateBackup(JSON.parse(await f.text())));render();status('已恢复，原有草稿保留。');reconcile();}catch(e){status(e.message);}finally{$('backup-file').value='';}};
+ async function reconcile(){
+  let removed=0,unverified=0;
+  for(const d of [...drafts.state().items]){
+   const documentId=d.meta.__record?.documentId||d.meta.__publishId;if(!documentId)continue;
+   try{const row=await window.MXAdminApi('documents',{action:'read',id:documentId});if(window.MXWriting.equalDraft(d,row)&&JSON.stringify(drafts.state().items.find(x=>x.id===d.id))===JSON.stringify(d)){drafts.remove(d.id);removed++;}}
+   catch{unverified++;}
+  }
+  if(removed){render();status('已清理 '+removed+' 篇与线上内容完全一致的草稿。'+(unverified?'未能核对的草稿已保留。':''));}
+ }
  async function loadProjects(){try{const r=await window.MXAdminApi('projects',{action:'list',state:'draft'});projects=r.projects;render();status(drafts.error()||'');}catch(e){status(e.message);}}
- $('refresh').onclick=loadProjects;render();if(drafts.error())status(drafts.error());loadProjects();
+ $('refresh').onclick=()=>loadProjects().then(reconcile);render();if(drafts.error())status(drafts.error());loadProjects().then(reconcile);
 }
