@@ -26,7 +26,7 @@
  let busy=false;const notice=make('div',null,'catalog-retry'),message=make('span'),retry=make('button','重试','quiet-link');notice.setAttribute('role','status');retry.type='button';notice.append(message,retry);retry.addEventListener('click',load);
  async function load(){if(busy)return;busy=true;retry.disabled=true;message.textContent='正在加载…';
  try{
-  const response=await fetch((window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY.origin)+'/documents',{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error();
+  const response=await fetch((window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY.origin)+'/documents',{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Object.assign(Error(),{status:response.status});
   const {documents}=await response.json();
   documents.sort((a,b)=>b.date.localeCompare(a.date)||a.id.localeCompare(b.id));
   const id=root?.dataset.backendId||new URLSearchParams(location.search).get('id'),current=documents.find(d=>d.id===id);
@@ -52,8 +52,8 @@
    for(const doc of documents.filter(x=>!['_posts','_cp'].includes(x.folder)).slice(0,3)){grid.append(homeCard(doc));}
   }
   notice.remove();
- }catch{
-  const target=browser||home||root;if(target){message.textContent='内容列表暂时未加载。';target.append(notice);}
+ }catch(error){
+  const target=browser||home||root;if(target){message.textContent='内容列表暂时未加载。'+window.MXRequestHint(error);target.append(notice);}
  }finally{busy=false;retry.disabled=false;}
  }
  load();

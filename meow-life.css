@@ -84,3 +84,6 @@ html[lang=en] .quick-guestbook :is(label,p,h2,button,a){overflow-wrap:anywhere;m
 html[lang=en] .translation-status{max-width:155px;white-space:normal}
 
 .quick-guestbook .mail-note a{display:block;margin-top:4px}
+
+/* Keep small-screen targets comfortable without changing the desktop composition. */
+@media(max-width:600px){.header-inner .brand{min-height:44px;display:inline-flex;align-items:center}.header-inner nav a{min-height:44px}.hero .meow-welcome{font-size:clamp(23px,5.8vw,32px)}.hero .meow-welcome>span{max-width:100%;text-wrap:balance}}

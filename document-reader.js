@@ -4,6 +4,8 @@
  const retry=form.querySelector("[data-document-retry]"),unlock=form.querySelector("button[type=submit]"),label=key.closest("label"),site=window.MX_SITE_ORIGIN||location.origin;
  // Translate only fixed unlock controls locally; private body text never enters translation.
  const labels={'访问密钥':'Access key','打开':'Open','重试':'Retry','正在打开…':'Opening…','请从文章列表或分享链接打开内容。':'Open an article from the list or a shared link.','内容已移除或暂不可用。':'This content is unavailable.','密钥不正确，请重试。':'Incorrect key. Try again.','这篇内容需要密钥。':'This content requires an access key.','暂时无法读取，请重试。':'Could not load. Please retry.'};
+
+ for(const [zh,en] of Object.entries({"当前网络已断开。": "You are offline.", "连接超时，请稍后重试。": "Connection timed out. Please try again.", "无法连接内容服务，请检查网络后重试。": "Cannot reach the content service. Check your connection and retry.", "内容服务暂不可用，请稍后重试。": "The content service is temporarily unavailable. Please try again."}))labels['暂时无法读取，请重试。'+zh]='Could not load. Please retry. '+en;
  const localize=()=>{const en=document.documentElement.lang==='en',walker=document.createTreeWalker(form,NodeFilter.SHOW_TEXT);while(walker.nextNode()){const node=walker.currentNode,value=node.textContent.trim(),zh=Object.keys(labels).find(k=>k===value||labels[k]===value);if(zh){const next=node.textContent.replace(value,en?labels[zh]:zh);if(next!==node.textContent)node.textContent=next;}}};
  new MutationObserver(localize).observe(form,{subtree:true,childList:true,characterData:true});new MutationObserver(localize).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});localize();
  const share=document.querySelector('[data-document-share]');let shareUrl='';
@@ -17,7 +19,7 @@
   try {
    const response=await fetch((window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY.origin)+'/documents/read',{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,...(secret?{key:secret}:{})}),signal:AbortSignal.any([current.signal,AbortSignal.timeout(20000)])});
    const data=await response.json();if(current.signal.aborted)return;
-   if(!response.ok){if(response.status===404){lock();label.hidden=true;unlock.hidden=true;status.textContent='内容已移除或暂不可用。';return;}if(response.status===403){lock();label.hidden=false;unlock.hidden=false;status.textContent=secret?'密钥不正确，请重试。':'这篇内容需要密钥。';if(data.title)document.querySelector('.reading-header h1').textContent=data.title;return;}throw Error(response.status===429?'请稍等一分钟再试。':'暂时无法读取，请重试。');}
+   if(!response.ok){if(response.status===404){lock();label.hidden=true;unlock.hidden=true;status.textContent='内容已移除或暂不可用。';return;}if(response.status===403){lock();label.hidden=false;unlock.hidden=false;status.textContent=secret?'密钥不正确，请重试。':'这篇内容需要密钥。';if(data.title)document.querySelector('.reading-header h1').textContent=data.title;return;}throw Object.assign(Error(),{status:response.status});}
    if(share){shareUrl=data.visibility==='public'?data.readingUrl||'':'';share.hidden=!shareUrl;}
    const doc=data.document,record=window.MXContent.parse(doc.text,doc.folder+'/'+doc.filename,'');
    document.querySelector('.reading-header h1').textContent=data.title;document.title=data.title+' · MX的摸鱼生活';
@@ -41,7 +43,7 @@
    key.value='';form.hidden=true;article.hidden=false;status.textContent='';
    const toc=document.querySelector('[data-article-toc]');if(toc){toc.hidden=true;toc.querySelector('ol').replaceChildren();if(data.visibility==='private'){toc.setAttribute('data-private-content','');toc.setAttribute('translate','no');}else{toc.removeAttribute('data-private-content');toc.removeAttribute('translate');}}
    article.dataset.readingContent='';delete article.dataset.readingReady;window.dispatchEvent(new Event('mx-content-ready'));
-  }catch(e){if(!current.signal.aborted){form.hidden=false;status.textContent='暂时无法读取，请重试。';if(retry)retry.hidden=false;}}
+  }catch(e){if(!current.signal.aborted){form.hidden=false;status.textContent='暂时无法读取，请重试。'+window.MXRequestHint(e);if(retry)retry.hidden=false;}}
   finally{if(controller===current){unlock.disabled=false;if(retry)retry.disabled=false;}}
  }
  form.addEventListener('submit',e=>{e.preventDefault();load(key.value.trim());});

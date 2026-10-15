@@ -272,5 +272,9 @@
   "重试": "Retry",
   "打开": "Open",
   "复制链接": "Copy link",
-  "复制失败，请重试": "Copy failed. Retry"
+  "复制失败，请重试": "Copy failed. Retry",
+  "内容列表暂时未加载。当前网络已断开。": "The content list could not load. You are offline.",
+  "内容列表暂时未加载。连接超时，请稍后重试。": "The content list could not load. Connection timed out. Please try again.",
+  "内容列表暂时未加载。无法连接内容服务，请检查网络后重试。": "The content list could not load. Cannot reach the content service. Check your connection and retry.",
+  "内容列表暂时未加载。内容服务暂不可用，请稍后重试。": "The content list could not load. The content service is temporarily unavailable. Please try again."
 }

@@ -1,4 +1,5 @@
 const {test,expect}=require('@playwright/test');
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{for(const name of ['timeout','any'])Object.defineProperty(AbortSignal,name,{configurable:true,value:undefined,writable:true});});});
 const {reveal}=require('../key-view.cjs');
 const admin='http://127.0.0.1:4175';
 for(const work of [false,true])test((work?'项目':'文章')+' 密钥持久保存、密码查看、自动隐藏及轮换确认',async({page,context})=>{

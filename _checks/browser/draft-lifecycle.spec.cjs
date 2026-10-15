@@ -1,4 +1,5 @@
 const {test,expect}=require('@playwright/test');
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{for(const name of ['timeout','any'])Object.defineProperty(AbortSignal,name,{configurable:true,value:undefined,writable:true});});});
 const admin='http://127.0.0.1:4175';
 const drafts=page=>page.evaluate(()=>window.MXDrafts.state().items);
 const overflow=async page=>expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
