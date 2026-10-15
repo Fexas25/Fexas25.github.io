@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "esbuild worker.mjs --bundle --minify --format=esm --platform=browser --outfile=dist/worker.mjs && esbuild projects/worker.mjs --bundle --minify --format=esm --platform=browser --outfile=dist/projects.mjs",
-    "test": "node --test public-pages.test.mjs guestbook-origin.test.mjs"
+    "test": "node --test public-pages.test.mjs guestbook-origin.test.mjs translation.test.mjs"
   },
   "dependencies": {
     "markdown-it": "^14.3.2"

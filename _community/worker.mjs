@@ -1,3 +1,4 @@
+import {translateText} from './translation.mjs';
 import {publicPage} from './public-pages.mjs';
 import {publicDocuments} from './documents.mjs';
 import {privateRequest} from './private.mjs';
@@ -53,13 +54,16 @@ export default {async fetch(request,env){
     if(cached)return reply({text:cached.text});
     if(!env.AI)return reply({error:'not configured'},503);
     const cap=Math.max(1,Math.min(1000,Number(env.DAILY_TRANSLATIONS)||200));
-    for(const [bucket,limit] of [[day+':'+visitor,80],[day+':all',cap]]){
-      const quota=await env.DB.prepare('INSERT INTO quotas(bucket,used) VALUES (?,1) ON CONFLICT(bucket) DO UPDATE SET used=used+1 WHERE used<?').bind(bucket,limit).run();
-      if(!quota.meta.changes)return reply({error:'daily limit'},429);
-    }
-    const translated=await env.AI.run('@cf/meta/m2m100-1.2b',{text:data.text,source_lang:'zh',target_lang:'en'});
-    if(typeof translated.translated_text!=='string'||!translated.translated_text.trim())return reply({error:'translation failed'},502);
-    await env.DB.prepare('INSERT OR REPLACE INTO translations(hash,text,created) VALUES (?,?,?)').bind(hash,translated.translated_text,now).run();
-    return reply({text:translated.translated_text});
-  }catch(error){return reply({error:['type','body','size'].includes(error.message)||error instanceof SyntaxError?'invalid request':'service unavailable'},['type','body','size'].includes(error.message)||error instanceof SyntaxError?400:503);}
+    const translated=await translateText(data.text,async text=>{
+      // Every model call remains within the existing per-visitor and daily limits.
+      for(const [bucket,limit] of [[day+':'+visitor,80],[day+':all',cap]]){
+        const quota=await env.DB.prepare('INSERT INTO quotas(bucket,used) VALUES (?,1) ON CONFLICT(bucket) DO UPDATE SET used=used+1 WHERE used<?').bind(bucket,limit).run();
+        if(!quota.meta.changes)throw Object.assign(Error('daily limit'),{status:429});
+      }
+      const result=await env.AI.run('@cf/meta/m2m100-1.2b',{text,source_lang:'zh',target_lang:'en'});
+      return result?.translated_text;
+    });
+    await env.DB.prepare('INSERT OR REPLACE INTO translations(hash,text,created) VALUES (?,?,?)').bind(hash,translated,now).run();
+    return reply({text:translated});
+  }catch(error){if(error.status===502||error.status===429)return reply({error:error.message},error.status);return reply({error:['type','body','size'].includes(error.message)||error instanceof SyntaxError?'invalid request':'service unavailable'},['type','body','size'].includes(error.message)||error instanceof SyntaxError?400:503);}
 }};

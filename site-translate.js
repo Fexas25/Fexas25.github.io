@@ -43,7 +43,7 @@
     for(const [pattern,format]of patterns){const match=text.match(pattern);if(match)return format(...match.slice(1));}
   }
   async function translate(){
-    if(!active||busy)return;busy=true;const version=generation, signal=controller.signal;let missing=false;
+    if(!active||busy)return;busy=true;retry.disabled=true;const version=generation, signal=controller.signal;let missing=false;
     try{
       for(const item of collect())if(localText(item.text)!==undefined)apply(item.node,item.text,localText(item.text));
       await ready;if(!active||version!==generation)return;
@@ -65,19 +65,19 @@
               if(signal.aborted||version!==generation)return;
               const timed=new AbortController(),abort=()=>timed.abort();signal.addEventListener('abort',abort,{once:true});const timeout=setTimeout(abort,15000);
               let data;
-              try {const response=await fetch(origin+'/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text}),signal:timed.signal});if(!response.ok)throw Error('unavailable');data=await response.json();}
+              try {const response=await fetch(origin+'/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text}),signal:timed.signal});if(!response.ok)throw Object.assign(Error('unavailable'),{status:response.status});data=await response.json();}
               finally {clearTimeout(timeout);signal.removeEventListener('abort',abort);}
               if(typeof data.text!=='string'||!data.text.trim())throw Error('invalid');translated.push(data.text);
             }
             if(signal.aborted||version!==generation)return;
             const value=translated.join(' ');remember(source,value);
             for(const item of items)apply(item.node,item.text,value);
-          }catch{missing=true;queue.length=0;if(version===generation)retryAfter=Date.now()+30000;}
+          }catch(error){missing=true;if(error.status!==502)queue.length=0;if(version===generation)retryAfter=Date.now()+30000;}
         }
       }
       await Promise.all(Array.from({length:Math.min(3,queue.length)},()=>run()));
     }catch{missing=true;if(version===generation)retryAfter=Date.now()+30000;}finally{
-      if(version===generation){busy=false;if(dirty){dirty=false;clearTimeout(debounce);debounce=setTimeout(translate,300);}}
+      if(version===generation){busy=false;retry.disabled=false;if(dirty){dirty=false;clearTimeout(debounce);debounce=setTimeout(translate,300);}}
       if(active&&version===generation)status(missing?'Translation unavailable · Some text is unchanged':'Auto-translated');
     }
   }
@@ -91,7 +91,7 @@
   function setLanguage(english){
     window.MXMeow?.reset();
     introLanguage(english);
-    active=english;generation++;controller?.abort();controller=new AbortController();busy=false;
+    active=english;generation++;controller?.abort();controller=new AbortController();busy=false;retry.disabled=false;
     try{sessionStorage.setItem('mx-language',english?'en':'zh');}catch{}
     document.documentElement.lang=english?'en':'zh-CN';
     document.querySelectorAll('[data-language]:not(.intro-languages *)').forEach(button=>{button.dataset.language=english?'zh':'en';button.textContent=english?'中文':'English';});
