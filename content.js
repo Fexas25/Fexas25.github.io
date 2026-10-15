@@ -74,8 +74,9 @@ function initReading(){document.querySelectorAll('[data-reading-content]').forEa
     const dialog = document.createElement('dialog');
     dialog.className = 'reading-viewer';
     if(article.closest('[data-private-content]')){dialog.dataset.privateViewer='';dialog.dataset.privateContent='';dialog.setAttribute('translate','no');}
+    dialog.dataset.fixedUiAttributes='';
     dialog.setAttribute('aria-label', '文章图片预览');
-    const toolbar = document.createElement('div'); toolbar.className = 'viewer-toolbar';
+    const toolbar = document.createElement('div'); toolbar.className = 'viewer-toolbar'; toolbar.dataset.fixedUi='';
     const zoom = document.createElement('button'); zoom.type = 'button'; zoom.textContent = '查看原尺寸'; zoom.setAttribute('aria-pressed','false');
     const close = document.createElement('button'); close.type = 'button'; close.textContent = '关闭图片 ×';
     const viewport = document.createElement('div'); viewport.className = 'viewer-viewport';
@@ -94,9 +95,10 @@ function initReading(){document.querySelectorAll('[data-reading-content]').forEa
       zoom.setAttribute('aria-pressed',String(expanded)); zoom.textContent = expanded ? '适应屏幕' : '查看原尺寸';
       viewport.classList.toggle('original-size',expanded);
     });
-    preview.addEventListener('error', () => { caption.textContent = '图片暂时无法加载，可以关闭后重试。'; });
+    preview.addEventListener('error', () => { caption.dataset.fixedUi=''; caption.textContent = '图片暂时无法加载，可以关闭后重试。'; });
     for (const img of images) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'article-image-open';
+      button.dataset.fixedUiAttributes='';
       button.setAttribute('aria-label', `放大图片：${img.alt || '正文配图'}`);
       button.setAttribute('aria-haspopup','dialog'); button.title = '点击放大图片';
       const element = img.parentElement.tagName === 'PICTURE' ? img.parentElement : img;
@@ -104,7 +106,7 @@ function initReading(){document.querySelectorAll('[data-reading-content]').forEa
       button.addEventListener('click', () => {
         opener = button; previousOverflow = document.body.style.overflow;
         viewport.classList.remove('original-size'); zoom.setAttribute('aria-pressed','false'); zoom.textContent = '查看原尺寸';
-        caption.textContent = img.alt || '正文配图'; preview.alt = img.alt;
+        delete caption.dataset.fixedUi; caption.textContent = img.alt || '';  preview.alt = img.alt;
         preview.src = img.currentSrc || img.src;
         dialog.showModal(); document.body.style.overflow = 'hidden'; close.focus();
         viewport.scrollTop = 0; viewport.scrollLeft = 0;
@@ -132,7 +134,7 @@ function initReading(){document.querySelectorAll('[data-reading-content]').forEa
   }
   article.querySelectorAll('pre').forEach((pre, index) => {
     const actions = document.createElement('div');
-    actions.className = 'code-actions';
+    actions.className = 'code-actions'; actions.dataset.fixedUi='';
     const status = document.createElement('span');
     status.setAttribute('role', 'status');
     const button = document.createElement('button');

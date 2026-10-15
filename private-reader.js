@@ -18,7 +18,7 @@
       // Do not let embedded remote resources automatically disclose that a private page was opened.
       for(const img of $('private-body').querySelectorAll('img')){
         if(!/^data:image\/(png|jpeg|webp|gif);base64,/i.test(img.getAttribute('src')||'')){
-          const note=document.createElement('span');note.textContent='[外部图片未自动加载]';img.replaceWith(note);
+          const note=document.createElement('span');note.dataset.fixedUi='';note.textContent='[外部图片未自动加载]';img.replaceWith(note);
         }
       }
       for(const a of $('private-body').querySelectorAll('a')){a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';}

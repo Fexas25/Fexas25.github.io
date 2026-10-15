@@ -9,7 +9,7 @@
   const fields = Object.fromEntries(['q','category','year','tag'].map(key => [key, form.elements.namedItem(key)]));
   const labels = {moments:'碎碎念',writing:'博客',works:'作品',pages:'其他页面'};
   const normalize = value => String(value || '').normalize('NFKC').toLocaleLowerCase();
-  let entries = [], limit = 20, timer, composing = false;
+  let entries = [], limit = 20, timer, composing = false, catalogFailed = false;
   // Map normalized matches back to original text (e.g. full-width letters and ligatures).
   function ranges(text, words) {
     let normalized = '', offsets = [], offset = 0;
@@ -78,6 +78,8 @@
       words.every(word => entry.searchText.includes(word)));
     results.replaceChildren();
     status.textContent = matches.length ? `找到 ${matches.length} 项，显示 ${Math.min(limit, matches.length)} 项` : '没有找到符合条件的内容，试试更短的关键词或清除筛选。';
+    if(catalogFailed)status.textContent+=' · 最新内容目录暂未加载，可重试';
+    retry.hidden=!catalogFailed;root.classList.toggle('catalog-incomplete',catalogFailed);
     let currentYear, list;
     for (const entry of matches.slice(0, limit)) {
       const year = entry.date.slice(0,4) || '其他记录';
@@ -145,7 +147,7 @@
       let data = await response.json();
       if (!Array.isArray(data)) throw Error('invalid index');
       data=data.filter(entry=>!entry.backendId);
-      let catalogFailed=false;
+      catalogFailed=false;
       const catalogOrigin=window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY?.origin;
       if(catalogOrigin){
         try {
@@ -171,7 +173,7 @@
         for (const value of new Set(values)) if(![...fields[key].options].some(o=>o.value===value))fields[key].add(new Option(value, value));
       }
       const shown=Number(new URLSearchParams(location.search).get('shown'));if(Number.isSafeInteger(shown)&&shown>20)limit=Math.min(shown,Math.max(20,entries.length));
-      render(false); if(catalogFailed){status.textContent+=' · 最新内容目录暂未加载，可重试';retry.hidden=false;} form.hidden = false; results.hidden = false; fallback.hidden = true;
+      render(false); form.hidden = false; results.hidden = false; fallback.hidden = true;
     } catch {
       status.textContent = '搜索暂时没加载好，请稍后重试。'; retry.hidden = false;
     } finally { clearTimeout(timeout); }

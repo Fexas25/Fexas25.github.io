@@ -117,3 +117,12 @@
 .catalog-retry{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.6rem;padding:1rem;min-height:4rem;color:var(--muted,#776f7b);font-size:.9rem}.catalog-retry button,[data-document-retry]{min-height:44px;padding:.5rem 1rem}.article-neighbors strong{overflow-wrap:anywhere}
 
 .reading-mail{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}.reading-mail [data-document-share]{pointer-events:auto;border:1px solid var(--line);border-radius:22px;background:#fffaf6f5;font:inherit;color:#92748c;cursor:pointer;min-height:44px;padding:8px 13px;font-size:12px}
+
+/* Clear mobile feedback, with soft keyboard focus instead of native black outlines. */
+.search-archive.catalog-incomplete [data-search-status]{color:var(--ink);padding:12px 14px;background:#fff3e7;border-radius:12px;line-height:1.7;overflow-wrap:anywhere}
+.search-retry{background:#e7f3f8;border-color:#a3c9d7;font-weight:600}
+.code-actions{flex-wrap:wrap;gap:8px}.code-actions [role=status]{overflow-wrap:anywhere;max-width:100%;color:var(--ink)}
+.reading-viewer:focus{outline:none}
+.viewer-toolbar button:focus-visible,.code-copy:focus-visible,#private-lock:focus-visible,[data-document-body]>button:focus-visible{outline:2px solid var(--purple);outline-offset:3px;border-radius:12px}
+.viewer-toolbar button:focus:not(:focus-visible),.code-copy:focus:not(:focus-visible),#private-lock:focus:not(:focus-visible),[data-document-body]>button:focus:not(:focus-visible){outline:none}
+[data-document-share],[data-document-body]>button,#private-lock{min-height:44px;white-space:normal;max-width:100%;overflow-wrap:anywhere}
