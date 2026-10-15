@@ -21,6 +21,12 @@ test('project packages enforce all file paths, keys, sessions, preview and rever
  data.state='published';r=await admin(data);data.revision=(await r.json()).revision;
  assert(!(await (await read('',previewCookie)).text()).includes('PRIVATE CONTENT'));
  assert.equal((await admin({action:'upload-file',id,upload,path:'new.js',base64:'eA=='})).status,409);
+ const englishGate=await read('?lang=en');const englishHtml=await englishGate.text();
+ assert.match(englishHtml,/<html lang="en">/);assert.match(englishHtml,/Unlock project/);assert.match(englishHtml,/_unlock\?lang=en/);assert(!englishHtml.includes('PRIVATE CONTENT'));assert(!englishHtml.includes(key));
+ const englishUnlock=await read('_unlock?lang=en','',{method:'POST',headers:{Origin:'https://runtime.example','Content-Type':'application/x-www-form-urlencoded','CF-Connecting-IP':'192.0.2.20'},body:new URLSearchParams({key}).toString()});
+ assert.equal(englishUnlock.status,303);assert.equal(englishUnlock.headers.get('Location'),'/p/demo/?lang=en');
+ const englishInvalid=await read('_unlock?lang=en','',{method:'POST',headers:{Origin:'https://runtime.example','Content-Type':'application/x-www-form-urlencoded','CF-Connecting-IP':'192.0.2.20'},body:'key=wrong'});
+ assert.equal(englishInvalid.status,403);assert.match(await englishInvalid.text(),/Incorrect key/);
  const catalog=await projectCatalog(env.DB);assert.equal(catalog.length,1);assert(!JSON.stringify(catalog).includes('private description'));assert(!JSON.stringify(catalog).includes(key));
  for(const path of ['', 'index.html','secret.js','image.png','%2e%2e%2fsecret.js'])for(const method of ['GET','HEAD']){r=await read(path,'',{method,headers:{Range:'bytes=0-4'}});assert(!(await r.text()).includes('PRIVATE'));}
  const unlock=k=>read('_unlock','',{method:'POST',headers:{Origin:'https://runtime.example','Content-Type':'application/x-www-form-urlencoded','CF-Connecting-IP':'192.0.2.1'},body:new URLSearchParams({key:k}).toString()});
@@ -66,4 +72,11 @@ test('lost save responses are retryable without changing versions or accepting c
  assert.equal((await admin(data)).status,409);
  const row=await(await admin({action:'read',id})).json();assert.equal(row.title,'New title');assert(!JSON.stringify(row).includes(key));
  await admin({action:'trash',id,revision:saved.revision});assert.equal((await admin(changed)).status,409);db.close();
+});
+
+test('project error pages use request-local language without changing stored content',async()=>{
+ const requests=await Promise.all(['en','zh','en'].map(lang=>runtime.fetch(new Request('https://runtime.example/missing?lang='+lang),{})));
+ const pages=await Promise.all(requests.map(r=>r.text()));assert.match(pages[0],/Project not found/);assert.match(pages[1],/找不到这个项目/);assert.match(pages[2],/Project not found/);
+ const env={DB:{prepare:()=>{throw Error('database unavailable');}},PROJECT_FILES:{}};
+ const failed=await runtime.fetch(new Request('https://runtime.example/p/test/?lang=en'),env);assert.equal(failed.status,503);assert.match(await failed.text(),/Please refresh and try again shortly/);
 });

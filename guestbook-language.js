@@ -1,5 +1,5 @@
 (() => {
-  // Fixed interface copy is local. Visitor messages, replies and typed text stay untouched.
+  // Fixed interface copy is local. Public message translation is handled separately; this module never changes authored text.
   const copy = {
     '给 Meow 的小纸条':'A little note for Meow','陪我聊聊？':'Come chat with me?','给 Meow 留言':'Leave Meow a message','Meow，想说两句？':'Meow, anything to share?',
     '留言板':'Guestbook','给 MX 留言。':'Leave MX a message.','留个脚印？':'Leave a little hello?',

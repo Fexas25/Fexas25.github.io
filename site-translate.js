@@ -14,11 +14,14 @@
   const chinese=text=>/[\u3400-\u9fff]/.test(text);
   const parent=node=>node.nodeType===2?node.ownerElement:node.parentElement;
   const connected=node=>Boolean(parent(node)?.isConnected);
+  // Only server-approved public message paragraphs opt in; never names, inputs or private content.
+  const publicMessage=el=>Boolean(el?.closest('[data-guestbook-list] [data-public-message]'))&&!el.closest('[data-private-content],input,textarea,[contenteditable]');
+  const excluded=el=>!el||(Boolean(el.closest(skip))&&!publicMessage(el));
   function collect(){
     for(const node of records.keys())if(!connected(node))records.delete(node);
     const nodes=[],walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
     while(walker.nextNode()){
-      const node=walker.currentNode;if(!node.parentElement||node.parentElement.closest(skip))continue;
+      const node=walker.currentNode;if(excluded(node.parentElement))continue;
       const text=node.textContent.trim();if(!chinese(text))continue;
       const previous=records.get(node);if(previous&&node.textContent===previous.output)continue;
       nodes.push({node,text});
@@ -105,13 +108,13 @@
     setLanguage(selected==='en');
   });
   new MutationObserver(changes=>{
-    if(!active||!changes.some(c=>!(c.target.nodeType===1?c.target:c.target.parentElement)?.closest(skip)))return;
+    if(!active||!changes.some(c=>!excluded(c.target.nodeType===1?c.target:c.target.parentElement)||Boolean((c.target.nodeType===1?c.target:c.target.parentElement)?.closest('[data-guestbook-list]'))))return;
     if(busy){dirty=true;return;}
     clearTimeout(debounce);debounce=setTimeout(translate,300);
   }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["aria-label","title","placeholder"]});
   try{if(sessionStorage.getItem('mx-language')==='en')selected='en';}catch{}
   const requested=new URLSearchParams(location.search).get('lang');if(['zh','en'].includes(requested)){selected=requested;try{sessionStorage.setItem('mx-language',selected);}catch{}}
-  document.addEventListener('click',event=>{const link=event.target.closest('a[href]');if(!link)return;const url=new URL(link.href,location.href);if(url.origin!==location.origin&&['https://fexas25.github.io','https://mx-community.liuwanting830.workers.dev'].includes(url.origin)){url.searchParams.set('lang',active?'en':'zh');link.href=url.href;}},true);
+  document.addEventListener('click',event=>{const link=event.target.closest('a[href]');if(!link)return;const url=new URL(link.href,location.href);if(url.origin!==location.origin&&['https://fexas25.github.io','https://mx-community.liuwanting830.workers.dev','https://mx-projects.liuwanting830.workers.dev'].includes(url.origin)){url.searchParams.set('lang',active?'en':'zh');link.href=url.href;}},true);
   selection();
   if(selected==='en')setLanguage(true);
 })();

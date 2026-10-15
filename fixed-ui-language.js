@@ -1,6 +1,7 @@
 /* Fixed interface text only: never translate article text, inputs or keys. */
 (() => {
  const labels={
+ '重试':'Retry','正在加载…':'Loading…','内容列表暂时未加载。':'The list could not load.',
  '收起来':'Lock again','打开作品 ↗':'Open project ↗','[外部图片未自动加载]':'[External image not loaded automatically]',
  '文章图片预览':'Article image preview','查看原尺寸':'View original size','适应屏幕':'Fit to screen','关闭图片 ×':'Close image ×',
  '图片暂时无法加载，可以关闭后重试。':'Image unavailable. Close and try again.','点击放大图片':'Enlarge image',
@@ -18,6 +19,7 @@
  const patterns=[[/^导入完成，新增 (\d+) 条记录。同一天的原签文已保留。$/,n=>`Imported ${n} new records. Existing draws were kept.`],[/^显示 (\d+) 项$/,n=>`Showing ${n} items`],[/^· 已筛选 (\d+) 项$/,n=>`· ${n} filtered items`],
  [/^找到 (\d+) 项，显示 (\d+) 项$/, (n,m)=>`Found ${n} items, showing ${m}`],
  [/^复制第 (\d+) 段代码$/,n=>`Copy code block ${n}`],[/^放大图片：(.+)$/,alt=>`Enlarge image: ${alt}`]];
+ for(const [zh,en] of Object.entries({'当前网络已断开。':'You are offline.','连接超时，请稍后重试。':'Connection timed out. Please try again.','无法连接内容服务，请检查网络后重试。':'Cannot reach the content service. Check your connection and retry.','内容服务暂不可用，请稍后重试。':'The content service is temporarily unavailable. Please try again.'}))labels['内容列表暂时未加载。'+zh]='The content list could not load. '+en;
  const records=new WeakMap();
  function english(value){
   const suffix=' · 最新内容目录暂未加载，可重试';
@@ -33,7 +35,7 @@
   records.set(node,{source,output});if(current!==output)node.textContent=output;
  }
  function update(){
-  for(const root of document.querySelectorAll('[data-fixed-ui],#backup-status,[data-result-status],[data-filter-summary],[data-search-status],.search-retry,.search-more')){
+  for(const root of document.querySelectorAll('[data-fixed-ui],.catalog-retry,#backup-status,[data-result-status],[data-filter-summary],[data-search-status],.search-retry,.search-more')){
    root.setAttribute('translate','no');
    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);while(walker.nextNode())convert(walker.currentNode);
    for(const el of [root,...root.querySelectorAll('[aria-label],[title]')])for(const name of ['aria-label','title']){const node=el.getAttributeNode(name);if(node)convert(node);}
