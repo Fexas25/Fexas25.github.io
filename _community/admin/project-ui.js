@@ -20,7 +20,7 @@ window.MXProjectInit=function(){
    const current={title:$('title').value,description:$('description').value,category:$('category').value,kind:$('kind').value,externalUrl:$('external-url').value,visibility:$('visibility').value,state:row?.state||'draft',version,entry:$('entry').value};
    const differences=Object.entries(labels).filter(([k])=>String(current[k]||'')!==String(latest[k]||'')).map(([k,label])=>label+'：\n线上：'+(latest[k]||'（空）')+'\n本页：'+(current[k]||'（空）')).join('\n\n');
    if(!confirm('线上版本已更新，本页修改和项目包仍保留。\n\n'+(differences||'内容字段一致，版本或密钥设置已有更新。')+'\n\n继续使用本页内容？确认后仍需点击保存，不会立即覆盖线上版本。')){status('已取消核对。本页修改保留，尚未更新线上版本。');return;}
-   row=latest;conflict=false;syncState();fields();status('已核对。本页修改保留，请确认访问权限和项目包后再次保存。');
+   row=latest;conflict=false;keyView.update();syncState();fields();status('已核对。本页修改保留，请确认访问权限和项目包后再次保存。');
   }catch(e){status(e.message+' 本页修改保留，可再次核对。');}finally{lock(false);if(conflict)showConflict($('status').textContent);}
  }
  function clearShownKey(){$('share-key').value='';$('key-label').hidden=true;}
