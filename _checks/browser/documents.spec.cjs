@@ -11,7 +11,7 @@ test('后台独立文章编辑、密钥切换、图片和新建入口',async({pa
  await page.route('**/admin-write*',r=>r.fulfill({contentType:'text/html',body:writing('test',true)}));
  await page.route('**/api/documents',r=>{const d=r.request().postDataJSON();if(d.action==='read')return r.fulfill({json:saved});writes.push(d);saved={...saved,...d,revision:'v'+(writes.length+1)};return r.fulfill({json:saved});});
  await page.goto('/admin-write?id='+id);await expect(page.locator('#markdown-input')).toHaveValue(/原有正文/);
- await page.locator('#post-visibility').selectOption('private');await page.locator('#markdown-input').fill('只有密钥才能看');await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');expect(writes[0].key).toHaveLength(43);expect(writes[0].visibility).toBe('private');await expect(page.locator('#share-key')).toHaveValue('');
+ await page.locator('#post-visibility').selectOption('private');await page.locator('#markdown-input').fill('只有密钥才能看');page.once('dialog',d=>d.accept());await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');expect(writes[0].key).toHaveLength(43);expect(writes[0].visibility).toBe('private');await expect(page.locator('#share-key')).toHaveValue('');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.locator('#post-visibility').selectOption('public');await page.locator('#publish').click();await expect.poll(()=>writes.length).toBe(2);expect(writes[1].document.text).not.toContain('private: true');
  await page.reload();await expect(page.locator('#markdown-input')).toHaveValue(/只有密钥才能看/);

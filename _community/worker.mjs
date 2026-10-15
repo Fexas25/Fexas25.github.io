@@ -22,7 +22,8 @@ export default {async fetch(request,env){
   const now=Math.floor(Date.now()/1000);
   try{
     if(path==='/documents'||path==='/documents/read')return await publicDocuments(request,env,{body,reply,path,now});
-    if(['/private/manage','/private/read'].includes(path)){
+    if(path==='/private/manage')return reply({error:'管理入口已停用，请使用管理后台。'},410);
+    if(path==='/private/read'){
       if(request.headers.get('Origin')!==origin)return reply({error:'origin required'},403);
       return await privateRequest(request,env,{body,reply,path,now});
     }

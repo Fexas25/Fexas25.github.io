@@ -169,7 +169,7 @@ for(const fail of [false,true])test('Markdown 慢读取锁定发布和重复导�
 test('项目提示区分发布、保存和生成密钥，普通保存不误报换密钥',async({page})=>{
  await page.goto(admin+'/projects/new');await page.locator('#title').fill('提示检查');await page.locator('#slug').fill('message-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');
  await page.locator('#publish-project').click();await expect(page.locator('#status')).toHaveText('已发布。');await page.locator('#title').fill('普通修改');await page.locator('#publish-project').click();await expect(page.locator('#status')).toHaveText('已保存。');
- await page.locator('#visibility').selectOption('private');await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('新密钥已保存');const key=await reveal(page);await noStoredKey(page,key);
+ await page.locator('#visibility').selectOption('private');page.once('dialog',d=>d.accept());await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('新密钥已保存');const key=await reveal(page);await noStoredKey(page,key);
  await page.locator('#title').fill('密钥不变');await page.locator('#publish-project').click();await expect(page.locator('#status')).toHaveText('已保存。');expect(await reveal(page)).toBe(key);
  await page.locator('#rotate').check();page.once('dialog',d=>d.accept());await page.locator('#publish-project').click();await expect(page.locator('#status')).toContainText('新密钥已保存');expect(await reveal(page)).not.toBe(key);await overflow(page);
 });
