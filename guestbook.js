@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       for(const message of data.messages){const article=document.createElement('article');article.className='guestbook-message';const heading=document.createElement('header'),name=document.createElement('strong'),time=document.createElement('time'),text=document.createElement('p');heading.className='guestbook-message-meta';name.textContent=message.name;const date=new Date(message.created*1000);time.textContent=date.toLocaleDateString();if(!Number.isNaN(date.getTime()))time.dateTime=date.toISOString();text.textContent=message.message;heading.append(name,time);article.append(heading,text);
         if(typeof message.reply==='string'&&message.reply.trim()){
           const response=document.createElement('section'),by=document.createElement('strong'),answer=document.createElement('p');
-          response.className='guestbook-reply';response.setAttribute('aria-label','MX 的回复');by.textContent='MX 回复';answer.textContent=message.reply;response.append(by,answer);article.append(response);
+          response.className='guestbook-reply';response.setAttribute('aria-label','MX 的回复');by.textContent='MX 回复';by.setAttribute('data-mail-ui','');answer.textContent=message.reply;response.append(by,answer);article.append(response);
         }
         list.append(article);}
       cursor=data.next||'';more.hidden=!cursor;more.textContent='更多留言';listStatus.textContent=list.children.length?'':'还没有公开留言。';

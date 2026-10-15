@@ -1,0 +1,32 @@
+const {test,expect}=require('@playwright/test');
+test('留言英文界面离线翻译、提交反馈与返回入口，不改访客原文',async({page})=>{
+ await page.addInitScript(()=>sessionStorage.setItem('mx-language','en'));
+ await page.route('**/translation-cache.json',r=>r.abort());await page.route('**/translate',r=>r.abort());
+ await page.route('**/community-config.js*',r=>r.fulfill({contentType:'text/javascript',body:'window.MX_COMMUNITY={origin:location.origin,siteKey:"test"}'}));
+ await page.route('https://challenges.cloudflare.com/**',r=>r.fulfill({contentType:'text/javascript',body:'window.turnstile={render:(s,o)=>{window.challenge=o;o.callback("test");return 1},remove:()=>{}};window.mxQuickGuestbookChallenge();'}));
+ let fail=true,postStatus=503;
+ await page.route('**/messages?*',r=>fail?r.fulfill({status:503,json:{}}):r.fulfill({json:{messages:[{name:'昵称',message:'这是访客原文',reply:'更多留言',created:1792022400}],next:''}}));
+ await page.route('**/messages',r=>r.fulfill({status:postStatus,json:{pending:true}}));
+ await page.goto('/guestbook/#guestbook-messages');await expect(page.locator('#guestbook-messages')).toHaveText('Messages from everyone');
+ await expect(page.locator('#guestbook-list-status')).toHaveText('Could not load messages. Please try again.');await expect(page.locator('#guestbook-more')).toHaveText('Reload messages');
+ fail=false;await page.locator('#guestbook-more').click();await expect(page.locator('.guestbook-reply strong')).toHaveText('MX replies');await expect(page.locator('.guestbook-reply')).toHaveAttribute('aria-label',"MX's reply");await expect(page.locator('.guestbook-message-meta strong')).toHaveText('昵称');await expect(page.locator('.guestbook-reply p')).toHaveText('更多留言');
+ await page.locator('[data-guestbook-write]').click();const dialog=page.locator('#quick-guestbook');
+ await expect(dialog.locator('[type=submit]')).toHaveText('Send your message');await expect(dialog.locator('[data-mail-return-label]')).toHaveText('Read the guestbook');
+ await page.evaluate(()=>window.challenge['error-callback']());await expect(page.locator('#quick-guestbook-status')).toHaveText('Verification is unavailable. Please retry.');await expect(dialog.locator('.mail-retry')).toHaveText('Reload verification');await dialog.locator('.mail-retry').click();
+ await dialog.locator('[name=name]').fill('访客');await dialog.locator('[name=message]').fill('保留我写的话');await dialog.locator('[type=submit]').click();
+ await expect(page.locator('#quick-guestbook-status')).toHaveText('Could not send. Your text is safe; verify again to retry.');await expect(dialog.locator('[name=message]')).toHaveValue('保留我写的话');
+ postStatus=429;await dialog.locator('[type=submit]').click();await expect(page.locator('#quick-guestbook-status')).toHaveText('Take a little break, then try again.');
+ postStatus=201;await dialog.locator('[type=submit]').click();await expect(page.locator('#quick-guestbook-status')).toHaveText('Got it! Your message will appear after review. Meow!');
+ const back=dialog.locator('.mail-return');await expect(back).toContainText('Back to the guestbook');await expect(back).toBeFocused();expect((await back.boundingBox()).height).toBeGreaterThanOrEqual(44);
+ expect(await dialog.evaluate(el=>el.scrollWidth-el.clientWidth)).toBeLessThanOrEqual(1);
+ await dialog.screenshot({path:test.info().outputPath('guestbook-sent-en.png')});
+ await back.click();await expect(dialog).toBeHidden();await expect(page.locator('#guestbook-messages')).toBeFocused();expect(await page.locator('#guestbook-messages').evaluate(el=>getComputedStyle(el).outlineStyle)).toBe('none');expect(await page.evaluate(()=>document.body.style.overflow)).toBe('');
+ await page.evaluate(()=>document.documentElement.lang='zh-CN');await expect(page.locator('#guestbook-messages')).toHaveText('大家的留言');await expect(page.locator('.guestbook-reply strong')).toHaveText('MX 回复');
+ await page.locator('[data-guestbook-write]').click();await expect(dialog.locator('[data-mail-return-label]')).toHaveText('返回留言板');await dialog.locator('[name=message]').fill('继续写');await expect(dialog.locator('[data-mail-return-label]')).toHaveText('看看大家的留言');await expect(dialog.locator('[name=message]')).toHaveValue('继续写');
+});
+test('个人页与文章留言入口也能直接切换英文',async({page})=>{
+ await page.addInitScript(()=>sessionStorage.setItem('mx-language','en'));
+ await page.route('**/translation-cache.json',r=>r.abort());await page.route('**/translate',r=>r.abort());
+ await page.goto('/about/');await expect(page.locator('.invitation-note small')).toHaveText('A little note for Meow');await expect(page.locator('.invitation-note strong')).toHaveText('Come chat with me?');
+ await page.goto('/document/');await expect(page.locator('.reading-mail [data-mail-open]')).toHaveText('Leave Meow a message');await expect(page.locator('.reading-end [data-mail-open]')).toHaveText('Meow, anything to share?');
+});

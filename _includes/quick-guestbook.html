@@ -15,5 +15,5 @@
     <p id="quick-guestbook-status" role="status" aria-live="polite"></p>
     <button type="button" class="mail-retry" hidden>重新加载验证</button>
   </form>
-  <p class="mail-note">无需登录，审核后公开。<a href="{{ '/guestbook/' | relative_url }}">看看大家的留言 →</a></p>
+  <div class="mail-note"><p>无需登录，审核后公开。</p><a class="mail-option mail-option-fish mail-return" href="{{ '/guestbook/#guestbook-messages' | relative_url }}">{% include studio-mark.html kind="fish" %}<span data-mail-return-label>看看大家的留言</span><span aria-hidden="true">→</span></a></div>
 </dialog>

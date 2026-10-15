@@ -5,6 +5,9 @@
   const form = dialog.querySelector('form'), submit = form.querySelector('[type=submit]');
   const status = document.getElementById('quick-guestbook-status'), retry = dialog.querySelector('.mail-retry');
   const choices=dialog.querySelector('.mail-choices'),note=dialog.querySelector('.mail-note');
+  const returnLink=dialog.querySelector('.mail-return'),returnLabel=dialog.querySelector('[data-mail-return-label]');let returnToBoard=false;
+  returnLink.addEventListener('click',event=>{if(location.pathname.replace(/index\.html$/,'')!=='/guestbook/')return;event.preventDefault();returnToBoard=true;dialog.close();});
+  form.addEventListener('input',()=>{if(dialog.classList.contains('mail-delivered')){dialog.classList.remove('mail-delivered');status.textContent='';returnLabel.textContent='看看大家的留言';verify();}});
   function write(){choices.hidden=true;form.hidden=false;note.hidden=false;fitKeyboard();verify();form.elements.name.focus({preventScroll:true});}
   dialog.querySelector('[data-mail-write]').addEventListener('click',write);
   const challenge = document.getElementById('quick-guestbook-challenge');
@@ -62,9 +65,9 @@
     const heading = document.querySelector('[data-reading-content]') && document.querySelector('#article-top h1');
     const documentId=document.querySelector('[data-backend-id]')?.dataset.backendId||new URLSearchParams(location.search).get('id')||location.hash.slice(1);
     const source=/^[a-f0-9-]{36}$/.test(documentId||'')?config.origin+'/read/'+documentId:location.origin+location.pathname;
-    prefix = heading ? `关于《${heading.textContent.trim().slice(0,100)}》\n${source}\n\n` : '';
+    prefix = heading ? `${document.documentElement.lang==='en'?'About':'关于'}《${heading.textContent.trim().slice(0,100)}》\n${source}\n\n` : '';
     const context = document.getElementById('quick-guestbook-context');
-    context.hidden = !heading; context.textContent = heading ? `关于《${heading.textContent.trim()}》` : '';
+    context.hidden = !heading;context.replaceChildren();if(heading){const label=document.createElement('span');label.textContent='关于：';context.append(label,document.createTextNode(' '+heading.textContent.trim()));}
     form.elements.message.maxLength = Math.max(1,1000-prefix.length);
     const choosing=link.hasAttribute('data-mail-choice');
     choices.hidden=!choosing;form.hidden=choosing;note.hidden=choosing;
@@ -78,7 +81,7 @@
   dialog.addEventListener('close', () => {
     document.body.style.overflow = overflow || '';dialog.classList.remove('mail-keyboard');
     if (widget !== null && !busy) { window.turnstile?.remove(widget); widget = null; expire(); }
-    opener?.focus({preventScroll:true});
+    if(returnToBoard){returnToBoard=false;const board=document.getElementById('guestbook-messages');history.replaceState(history.state,'','#guestbook-messages');board?.focus({preventScroll:true});board?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}else opener?.focus({preventScroll:true});
   });
   retry.addEventListener('click', () => {
     if (widget !== null) { window.turnstile?.remove(widget); widget = null; }
@@ -94,13 +97,13 @@
       const response = await fetch(config.origin+'/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(20000)});
       if (!response.ok) throw Error(response.status===429?'先歇一会儿，稍后再投递吧。':'提交失败，内容已保留，请重新验证后重试。');
       form.reset(); status.textContent = '收到啦，审核后会出现喵！';
-      dialog.classList.remove('mail-delivered'); void dialog.offsetWidth; dialog.classList.add('mail-delivered');
+      dialog.classList.remove('mail-delivered'); void dialog.offsetWidth; dialog.classList.add('mail-delivered');returnLabel.textContent='返回留言板';returnLink.focus({preventScroll:true});returnLink.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
     } catch(error) {
-      status.textContent = error.name==='TimeoutError' || error instanceof TypeError ? '网络中断，尚不能确认投递结果。内容已保留，请稍后检查，避免重复留言。' : error.message;
+      status.textContent = error.name==='TimeoutError' || error.name==='AbortError' || error instanceof TypeError ? '网络中断，尚不能确认投递结果。内容已保留，请稍后检查，避免重复留言。' : error.message;
     } finally {
       busy = false; expire(); form.elements.name.readOnly = form.elements.message.readOnly = false;
       if (widget !== null) { window.turnstile?.remove(widget); widget = null; }
-      if (dialog.open && !form.hidden) verify();
+      if (dialog.open && !form.hidden && !dialog.classList.contains('mail-delivered')) verify();
     }
   });
 })();
