@@ -51,3 +51,21 @@ test('分享页原始 HTML 已有正文和预览，手机可读并保留语言�
  await page.locator('[data-mail-close]').click();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
 });
+
+test('游戏开发栏目包含后台游戏及旧记录，保留原链接和私密边界',async({page})=>{
+ await config(page);
+ const items=[
+ {...entry(id,'原有游戏记录','2026-10-12'),folder:'_gamejam'},
+ {...entry(older,'BinaryLiftVR 游戏项目','2026-10-21'),folder:'_projects',type:'game',slug:'binarylift-vr',url:'https://mx-projects.liuwanting830.workers.dev/p/binarylift-vr/'},
+ {...entry(newer,'需要密钥的游戏项目','2026-10-20'),folder:'_projects',type:'game',visibility:'private',slug:'private-game',url:'https://mx-projects.liuwanting830.workers.dev/p/private-game/',content:'不应展示的私密介绍'},
+ {...entry('44444444-4444-4444-8444-444444444444','其他 AI 项目','2026-10-19'),folder:'_projects',type:'ai'},
+ {...entry('55555555-5555-4555-8555-555555555555','其他创意项目','2026-10-18'),folder:'_projects',type:'creative'}];
+ let fail=true;await page.route('**/documents',r=>r.fulfill({status:fail?503:200,json:{documents:items}}));
+ await page.goto('/game-jam/');await expect(page.locator('.catalog-retry')).toBeVisible();fail=false;await page.locator('.catalog-retry button').click();
+ await expect(page.locator('[data-backend-entry]')).toHaveCount(3);await expect(page.locator('.small-count')).toHaveText('3 篇');
+ await expect(page.locator('[data-project-slug=binarylift-vr] .entry-link')).toHaveAttribute('href',items[1].url);
+ await expect(page.locator('[data-project-slug=private-game]')).toContainText('需要密钥');await expect(page.locator('[data-browser]')).not.toContainText('不应展示的私密介绍');await expect(page.locator('[data-browser]')).not.toContainText('其他 AI 项目');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.reload();await expect(page.locator('[data-backend-entry]')).toHaveCount(3);
+ await page.goto('/projects/');await expect(page.locator('[data-backend-entry]')).toHaveCount(5);
+});

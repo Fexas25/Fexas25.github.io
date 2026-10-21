@@ -34,7 +34,7 @@
   if(related){const list=related.querySelector('ul');list.replaceChildren();if(current)for(const doc of documents.filter(d=>d.id!==id&&d.tags.some(t=>current.tags.includes(t))).slice(0,3)){const li=make('li'),link=make('a');link.href=new URL(doc.url,site).href;link.append(make('span',doc.title+(doc.visibility==='private'?' · 需要密钥':'')),make('time',doc.date));li.append(link);list.append(li);}related.hidden=!list.children.length;}
   if(browser){
    const pathname=location.pathname.replace(/index\.html$/,''),folders=pathname==='/blog/'?['_posts']:pathname==='/competitive-programming/'?['_cp']:pathname==='/game-jam/'?['_gamejam']:pathname==='/art/'?['_art']:['_projects','_gamejam','_art'];
-   const selected=documents.filter(d=>folders.includes(d.folder)),work=!folders.includes('_posts')&&!folders.includes('_cp');
+   const selected=documents.filter(d=>folders.includes(d.folder)||(pathname==='/game-jam/'&&d.folder==='_projects'&&d.type==='game')),work=!folders.includes('_posts')&&!folders.includes('_cp');
    browser.querySelectorAll('[data-backend-entry],[data-month-marker]').forEach(e=>e.remove());
    const grid=browser.querySelector('.portfolio-grid');
    for(const doc of selected){const node=card(doc,work);if(grid)grid.append(node);else browser.querySelector('[data-no-results]').before(node);}
