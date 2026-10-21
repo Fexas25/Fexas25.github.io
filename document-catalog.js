@@ -7,7 +7,7 @@
  document.querySelectorAll('[data-backend-entry],[data-month-marker],#moments .moment,#blog .blog-row').forEach(e=>e.remove());
  const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text)e.textContent=text;if(cls)e.className=cls;return e;};
  function card(doc,work=false){
-  const a=make('article',null,work?'portfolio-card':'entry-card');a.dataset.backendEntry='';if(doc.slug)a.dataset.projectSlug=doc.slug;a.dataset.entry='';a.dataset.year=doc.date.slice(0,4);a.dataset.tags=JSON.stringify(doc.tags);a.dataset.search=doc.title;a.dataset.category=work?(doc.folder==='_gamejam'?'game':doc.type):doc.topic;
+  const a=make('article',null,work?'portfolio-card':'entry-card');a.dataset.backendEntry='';if(doc.slug)a.dataset.projectSlug=doc.slug;a.dataset.entry='';a.dataset.year=doc.date.slice(0,4);a.dataset.tags=JSON.stringify(doc.tags);a.dataset.search=doc.title;a.dataset.category=work?doc.type:doc.topic;
   const copy=work?make('div',null,'portfolio-copy'):a;
   const meta=make('div',null,'entry-meta');meta.append(make('time',doc.date.replaceAll('-','.')));if(doc.visibility==='private')meta.append(make('span','需要密钥'));
   const link=make('a',null,'entry-link');link.href=new URL(doc.url,site).href;link.append(make('h2',doc.title));if(doc.visibility!=='private'&&doc.content)link.append(make('p',doc.content.slice(0,110)));copy.append(meta,link);
@@ -28,6 +28,7 @@
  try{
   const response=await fetch((window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY.origin)+'/documents',{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Object.assign(Error(),{status:response.status});
   const {documents}=await response.json();
+  for(const doc of documents)doc.type=doc.folder==='_gamejam'?'game':doc.folder==='_art'?'creative':['game','ai','creative'].includes(doc.type)?doc.type:'creative';
   documents.sort((a,b)=>b.date.localeCompare(a.date)||a.id.localeCompare(b.id));
   const id=root?.dataset.backendId||new URLSearchParams(location.search).get('id'),current=documents.find(d=>d.id===id);
   if(neighbors){neighbors.replaceChildren();if(current){const group=documents.filter(d=>d.folder===current.folder),i=group.findIndex(d=>d.id===id);for(const [doc,label] of [[group[i+1],'← 上一篇'],[group[i-1],'下一篇 →']]){if(!doc)continue;const link=make('a');link.href=new URL(doc.url,site).href;link.append(make('span',label),make('strong',doc.title+(doc.visibility==='private'?' · 需要密钥':'')));neighbors.append(link);}}neighbors.hidden=!neighbors.children.length;}

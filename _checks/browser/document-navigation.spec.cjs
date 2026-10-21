@@ -69,3 +69,17 @@ test('游戏开发栏目包含后台游戏及旧记录，保留原链接和私�
  await page.reload();await expect(page.locator('[data-backend-entry]')).toHaveCount(3);
  await page.goto('/projects/');await expect(page.locator('[data-backend-entry]')).toHaveCount(5);
 });
+
+
+test('旧作品按栏目统一筛选和图标，绘画不混入其他创作',async({page})=>{
+ await config(page);
+ const items=[{...entry(id,'旧游戏','2026-10-21'),folder:'_gamejam',type:'ai'}, {...entry(older,'旧绘画','2026-10-20'),folder:'_art',type:'game'}, {...entry(newer,'一般创作','2026-10-19'),folder:'_projects',type:'creative'}];
+ await page.route('**/documents',r=>r.fulfill({json:{documents:items}}));
+ await page.goto('/projects/');
+ const game=page.locator('[data-backend-entry]').filter({hasText:'旧游戏'}),art=page.locator('[data-backend-entry]').filter({hasText:'旧绘画'});
+ await expect(game).toHaveAttribute('data-category','game');await expect(game.locator('.portfolio-art')).toHaveClass(/art-game/);await expect(game.locator('.portfolio-art')).toHaveText('＋');
+ await expect(art).toHaveAttribute('data-category','creative');await expect(art.locator('.portfolio-art')).toHaveClass(/art-creative/);await expect(art.locator('.portfolio-art')).toHaveText('✿');
+ await page.goto('/art/');await expect(page.locator('[data-backend-entry]')).toHaveCount(1);await expect(page.locator('[data-backend-entry]')).toContainText('旧绘画');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ await page.goto('/');await expect(page.locator('.new-work-game')).toHaveCount(1);await expect(page.locator('.new-work-creative')).toHaveCount(2);
+});

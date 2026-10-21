@@ -17,3 +17,16 @@ test('旧页只迁移草稿，导出不改原数据，后台离线于主站仍�
 test('后台保存失败保留输入，另页重登，重试成功',async({page})=>{
  await page.goto(admin+'/write');await page.locator('#post-title').fill('重试文章 '+test.info().project.name);await page.locator('#markdown-input').fill('网络异常也保留正文');let denied=true;await page.route('**/api/documents',r=>denied?r.fulfill({status:401,json:{error:'expired'}}):r.continue());await page.locator('#publish').click();await expect(page.locator('#session-help')).toBeVisible();await expect(page.locator('#session-help a')).toHaveAttribute('target','_blank');await expect(page.locator('#markdown-input')).toHaveValue('网络异常也保留正文');denied=false;await page.locator('#publish').click();await expect(page.locator('#status')).toContainText('已保存到网站');await expect(page.locator('#session-help')).toBeHidden();
 });
+
+
+test('旧作品分类随栏目固定，打开不改草稿或密钥，普通项目仍可选分类',async({page})=>{
+ for(const [category,type] of [['game-jam','game'],['art','creative'],['projects','ai']]){
+ const draft={version:1,active:'legacy',items:[{id:'legacy',body:'正文保持',meta:{'post-title':'旧作品','post-category':category,'post-visibility':'private','work-type':'ai'},updatedAt:'2026-10-01T10:00:00Z'}]};
+ await page.goto(admin+'/drafts');await page.evaluate(({key,draft})=>localStorage.setItem(key,JSON.stringify(draft)),{key,draft});
+ let saves=0;page.on('request',r=>{if(r.url().endsWith('/api/documents')&&r.postDataJSON()?.action==='save')saves++;});
+ await page.goto(admin+'/projects/article?draft=legacy');await expect(page.locator('#work-type')).toHaveValue(type);
+ if(category==='projects')await expect(page.locator('#work-type')).toBeEnabled();else await expect(page.locator('#work-type')).toBeDisabled();
+ expect(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key)).toEqual(draft);expect(saves).toBe(0);await expect(page.locator('#markdown-input')).toHaveValue('正文保持');await expect(page.locator('#post-visibility')).toHaveValue('private');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+ }
+});
