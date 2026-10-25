@@ -41,7 +41,6 @@
    for(const doc of selected){const node=card(doc,work);if(grid)grid.append(node);else browser.querySelector('[data-no-results]').before(node);}
    const count=browser.querySelector('.small-count');if(count)count.textContent=selected.length+' 篇';
    if(selected.length)browser.querySelectorAll('.empty-note:not([data-no-results])').forEach(e=>e.remove());
-   if(selected.some(x=>x.type==='ai'))browser.querySelectorAll('.upcoming[data-category=ai]').forEach(e=>e.remove());
    window.dispatchEvent(new Event('mx-documents-ready'));
   }
   if(home){

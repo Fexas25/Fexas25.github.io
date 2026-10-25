@@ -81,7 +81,6 @@
         <div class="section-heading"><div><h2 id="works-title"><span class="section-symbol" aria-hidden="true">{% include studio-mark.html kind="fish" %}</span>作品</h2></div><a class="quiet-link" href="projects/">所有作品 →</a></div>
         <div class="works-grid">
           <article class="work-card" data-kind="game"><button class="work-cover fortune-cover" data-draw type="button" aria-label="每日占卜：抽取今日签" aria-haspopup="dialog" aria-controls="fortune-dialog"><span class="mini-slip"><small>今日签</small><strong>大吉</strong><span>宜 · 开心</span></span><span class="cover-caption">每天一点小幸运</span></button><div class="work-info"><h3>每日占卜</h3><p>每日一签，保留签到记录。</p><a class="quiet-link" href="daily-checkin/">签到记录 →</a></div></article>
-          {% assign ai_works = site.projects | where: 'type', 'ai' %}{% if ai_works.size == 0 %}<article class="work-card upcoming" data-kind="ai"><div class="work-cover workflow-cover" aria-hidden="true"><span class="workflow-node">想法</span><span class="workflow-line">→</span><span class="workflow-node main-node">AI</span><span class="workflow-line">→</span><span class="workflow-node">作品</span></div><div class="work-info"><h3>AI 工作流 <span class="coming-label">筹备中</span></h3><p></p></div></article>{% endif %}
 
           {% assign published_works = site.projects | concat: site.gamejam | concat: site.art | sort: 'date' | reverse %}{% for post in published_works limit: 3 %}{% include home-work-card.html %}{% endfor %}
         </div>
