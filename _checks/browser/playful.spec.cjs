@@ -26,14 +26,23 @@ test('内页点击小图案会清理，输入区不触发，减少动态效果�
   const ornaments = page.locator('.studio-ornaments');
   await expect(ornaments.locator('svg')).toHaveCount(3);
   await ornaments.scrollIntoViewIfNeeded();
+  // Record brief effects before clicking: a busy runner may sample after cleanup.
+  await page.evaluate(() => {
+    window.sparkWasAdded = false;
+    new MutationObserver(records => {
+      if (records.some(record => [...record.addedNodes].some(node => node.nodeType === 1 && node.matches('.studio-click-spark')))) window.sparkWasAdded = true;
+    }).observe(document.querySelector('.studio-click-effects'), {childList:true});
+  });
   const box = await ornaments.boundingBox();
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await expect(page.locator('.studio-click-spark')).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() => window.sparkWasAdded)).toBe(true);
   await expect(page.locator('.studio-click-spark')).toHaveCount(0);
   await page.emulateMedia({ reducedMotion:'reduce' });
+  await page.evaluate(() => { window.sparkWasAdded = false; });
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await expect(page.locator('.studio-click-spark')).toHaveCount(0);
   await expect(page.locator('.is-drifting')).toHaveCount(0);
+  expect(await page.evaluate(() => window.sparkWasAdded)).toBe(false);
   await page.goto('/guestbook/');
   await page.locator('[data-guestbook-write]').click();
   await page.emulateMedia({ reducedMotion:'no-preference' });
