@@ -23,8 +23,14 @@
   const title=make('h3'),link=make('a',doc.title);link.href=url;title.append(link);info.append(meta,title);if(!locked&&doc.content)info.append(make('p',doc.content.slice(0,90)));
   const enter=make('a',locked?'输入密钥 →':'打开作品 →','quiet-link');enter.href=url;info.append(enter);card.append(cover,info);return card;
  }
- let busy=false;const notice=make('div',null,'catalog-retry'),message=make('span'),retry=make('button','重试','quiet-link');notice.setAttribute('role','status');retry.type='button';notice.append(message,retry);retry.addEventListener('click',load);
- async function load(){if(busy)return;busy=true;retry.disabled=true;message.textContent='正在加载…';
+ const targets=browser?[browser]:home?[home,document.querySelector('#blog'),document.querySelector('#works')]:[root];
+ const notices=targets.filter(Boolean).map(target=>{
+  const notice=make('div',null,'catalog-retry'),message=make('span'),retry=make('button','重试','quiet-link');
+  notice.setAttribute('role','status');retry.type='button';notice.append(message,retry);retry.addEventListener('click',load);
+  return {target,notice,message,retry};
+ });
+ let busy=false;
+ async function load(){if(busy)return;busy=true;for(const {message,retry} of notices){retry.disabled=true;message.textContent='正在加载…';}
  try{
   const response=await fetch((window.MX_DOCUMENTS_ORIGIN||window.MX_COMMUNITY.origin)+'/documents',{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Object.assign(Error(),{status:response.status});
   const {documents}=await response.json();
@@ -51,10 +57,10 @@
    const grid=document.querySelector('.works-grid');grid.querySelectorAll('[data-backend-entry]').forEach(e=>e.remove());
    for(const doc of documents.filter(x=>!['_posts','_cp'].includes(x.folder)).slice(0,3)){grid.append(homeCard(doc));}
   }
-  notice.remove();
+  for(const {notice} of notices)notice.remove();
  }catch(error){
-  const target=browser||home||root;if(target){message.textContent='内容列表暂时未加载。'+window.MXRequestHint(error);target.append(notice);}
- }finally{busy=false;retry.disabled=false;}
+  for(const {target,notice,message} of notices){message.textContent='内容列表暂时未加载。'+window.MXRequestHint(error);target.append(notice);}
+ }finally{busy=false;for(const {retry} of notices)retry.disabled=false;}
  }
  load();
 })();

@@ -83,3 +83,22 @@ test('旧作品按栏目统一筛选和图标，绘画不混入其他创作',asy
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
  await page.goto('/');await expect(page.locator('.new-work-game')).toHaveCount(1);await expect(page.locator('.new-work-creative')).toHaveCount(2);
 });
+
+for(const language of ['zh','en'])test('首页各栏目同步重试且不重复请求 '+language,async({page})=>{
+ await page.addInitScript(()=>sessionStorage.setItem('mx-studio-intro-seen-v2','1'));
+ await config(page);let calls=0,release;
+ const pending=new Promise(resolve=>{release=resolve;});
+ const work={...entry(older,'测试作品','2026-10-11'),folder:'_projects',type:'ai',visibility:'private',content:''};
+ await page.route('**/documents',async r=>{calls++;if(calls===1)return r.fulfill({status:503,json:{error:'offline'}});await pending;return r.fulfill({json:{documents:[documents[0],work]}});});
+ await page.goto('/?lang='+language);
+ const notices=page.locator('.catalog-retry');await expect(notices).toHaveCount(3);
+ const retry=page.locator('#works .catalog-retry button');
+ await expect(retry).toHaveText(language==='en'?'Retry':'重试');
+ await retry.click();await expect.poll(()=>calls).toBe(2);
+ await expect(page.locator('.catalog-retry button:disabled')).toHaveCount(3);
+ await page.locator('#moments .catalog-retry button').evaluate(button=>button.click());
+ expect(calls).toBe(2);release();
+ await expect(notices).toHaveCount(0);await expect(page.locator('.works-grid [data-backend-entry]')).toHaveCount(1);
+ await expect(page.locator('#moments .moment')).toHaveCount(1);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+});

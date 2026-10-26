@@ -90,3 +90,5 @@ html[lang=en] .translation-status{max-width:155px;white-space:normal}
 
 /* A clear next step after posting, using the existing fish and paper palette. */
 .quick-guestbook .mail-note{display:grid;gap:10px;margin-top:16px}.mail-note p{margin:0}.quick-guestbook .mail-return{display:flex;width:100%;min-height:52px;padding:9px 14px;font-size:16px;gap:10px;text-align:center;overflow-wrap:anywhere}.mail-return .studio-mark{width:36px;height:30px;flex:none}.mail-return [data-mail-return-label]{min-width:0}.mail-delivered .mail-return{border-color:#91bac5;background:linear-gradient(135deg,#effafa,#d9edef);color:#446e7a;box-shadow:0 4px 0 #c6dfe4}.mail-delivered #quick-guestbook-status{padding:10px 12px;border-radius:12px;background:#f9edf1;color:#85556c;font-size:14px}#guestbook-messages:focus{outline:none}
+
+.catalog-retry{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.6rem;padding:1rem;min-height:4rem;color:var(--muted,#776f7b);font-size:.9rem}.catalog-retry button{min-height:44px;padding:.5rem 1rem}

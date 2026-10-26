@@ -1,3 +1,4 @@
+const {randomUUID}=require('node:crypto');
 const {reveal}=require('../key-view.cjs');
 const {test,expect}=require('@playwright/test');
 const admin='http://127.0.0.1:4175';
@@ -93,7 +94,7 @@ for(const type of ['article','project'])for(const committed of [false,true])test
  const isArticle=type==='article',api=isArticle?'documents':'projects',save=isArticle?'#publish':'#publish-project';
  await page.goto(admin+(isArticle?'/write':'/projects/new'));
  if(isArticle){await page.locator('#post-title').fill('取消换密钥');await page.locator('#markdown-input').fill('保留正文');await page.locator('#post-visibility').selectOption('private');}
- else{await page.locator('#title').fill('取消换密钥');await page.locator('#slug').fill('cancel-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');}
+ else{await page.locator('#title').fill('取消换密钥');await page.locator('#slug').fill('cancel-'+test.info().project.name+'-'+randomUUID());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');await page.locator('#visibility').selectOption('private');}
  await page.locator(save).click();await reveal(page);const old=await reveal(page);const id=new URL(page.url()).searchParams.get('id');let pending,once=false,sent=[];
  await page.route('**/api/'+api,async r=>{const d=r.request().postDataJSON();if(d.action==='save'){sent.push(d);if(!once){once=true;pending=d.key;if(committed)await r.fetch();return r.abort('failed');}}await r.continue();});
  await page.locator('#rotate').check();page.once('dialog',d=>d.accept());await page.locator(save).click();await expect(page.locator(save)).toBeEnabled();expect(pending).toHaveLength(43);await page.locator('#rotate').uncheck();await page.locator(save).click();await expect(page.locator('#status')).toContainText(isArticle?'已保存到网站':'已保存');expect(sent.at(-1).key).toBeUndefined();
