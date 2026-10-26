@@ -1,10 +1,11 @@
 const {test,expect}=require('@playwright/test');
 const {reveal}=require('../key-view.cjs');
+const {randomUUID}=require('node:crypto');
 for(const project of [false,true])for(const initialPrivate of [false,true])test(`核对同步密钥入口且不保存 ${project?'项目':'文章'} ${initialPrivate?'转公开':'转私密'}`,async({page})=>{
  await page.goto('http://127.0.0.1:4175'+(project?'/projects/new':'/write'));
  const title=project?'#title':'#post-title',visibility=project?'#visibility':'#post-visibility',save=project?'#publish-project':'#publish';
  await page.locator(title).fill('线上原标题');
- if(project){await page.locator('#slug').fill('sync-'+test.info().project.name+'-'+Date.now());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');}else await page.locator('#markdown-input').fill('线上正文');
+ if(project){await page.locator('#slug').fill('sync-'+test.info().project.name+'-'+randomUUID());await page.locator('#kind').selectOption('link');await page.locator('#external-url').fill('https://example.com');}else await page.locator('#markdown-input').fill('线上正文');
  if(initialPrivate)await page.locator(visibility).selectOption('private');
  await page.locator(save).click();await expect(page.locator('#status')).toContainText(project?'已发布':'已保存到网站');
  const id=new URL(page.url()).searchParams.get('id'),originalKey=initialPrivate?await reveal(page):'A'.repeat(43);
